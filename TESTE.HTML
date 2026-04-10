@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Logístico | CD MATRIZ PANUTRIR</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+
+    .logo-nav-filtered {
+      max-height: 40px;
+      object-fit: contain;
+    }
+
+    .logo-main-filtered {
+      width: 14rem;
+      filter: drop-shadow(0 10px 20px rgba(0,0,0,0.08)) contrast(105%);
+      object-fit: contain;
+    }
+
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.9);
+      z-index: 100;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      color: white;
+      flex-direction: column;
+    }
+
+    .status-pilha { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-quebra { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .status-doacao { background-color: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+
+    .status-vencido { background-color: #000000; color: #ffffff; } 
+    .status-urgente { background-color: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; } 
+    .status-critico { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; } 
+    .status-atencao { background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a; } 
+    .status-seguro { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+
+    .filter-btn.active {
+      background-color: #0f172a !important;
+      color: white !important;
+      border-color: #0f172a !important;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+    }
+  </style>
+</head>
+<body class="text-slate-900 min-h-screen">
+
+  <div id="loader" class="loading-overlay">
+    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+    <p class="font-bold uppercase tracking-widest text-sm">Sincronizando Dados Panutrir...</p>
+  </div>
+
+  <nav class="bg-slate-900 text-white px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-2xl border-b border-white/10">
+    <div class="flex items-center gap-6">
+      <img src="assets/logo.png" alt="PANUTRIR" class="logo-nav-filtered" onerror="this.style.display='none'; document.getElementById('altNavLogo').classList.remove('hidden')">
+      <span id="altNavLogo" class="hidden font-black text-2xl tracking-tighter italic">PANUTRIR</span>
+      <div class="h-8 w-[1px] bg-slate-700"></div>
+      <div>
+        <h1 class="text-sm font-black uppercase tracking-tighter leading-none">Gestão de Inventário</h1>
+        <p class="text-[10px] text-blue-400 font-bold uppercase mt-1">CD Panutrir - Dashboard Unificado</p>
+      </div>
+    </div>
+    <label for="fileUpload" class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-xs font-black transition-all uppercase shadow-lg flex items-center gap-2">
+      Importar Planilha
+    </label>
+    <input type="file" id="fileUpload" accept=".csv, .xlsx, .xls" class="hidden" />
+  </nav>
+
+  <div id="emptyView" class="flex flex-col items-center justify-center h-[80vh] text-center px-4">
+    <img src="assets/logo.png" alt="PANUTRIR" class="logo-main-filtered mb-12 mx-auto" onerror="this.style.display='none';">
+    <h2 class="text-4xl font-black text-slate-800 uppercase italic">Aguardando Base de Dados</h2>
+    <p class="text-slate-500 mt-4 text-lg font-medium max-w-2xl">
+      Para realizar a análise, utilize o relatório exportado via sistema <strong>Inflow</strong>. No módulo de estoque, acesse o menu de opções e selecione a funcionalidade <strong>"Exportar por etiquetas"</strong>.
+    </p>
+  </div>
+
+  <main id="mainContent" class="p-6 max-w-[1700px] mx-auto hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <p class="text-[11px] font-bold text-slate-400 uppercase">Estoque Total (Un)</p>
+        <h2 id="kpiTotal" class="text-3xl font-black text-slate-800 tracking-tighter">0</h2>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border-l-8 border-orange-500 shadow-sm">
+        <p class="text-[11px] font-bold text-orange-600 uppercase">% Estoque Data Curta</p>
+        <h2 id="kpiDataCurtaPerc" class="text-3xl font-black text-orange-700 tracking-tighter">0%</h2>
+        <span id="kpiDataCurtaInfo" class="text-[9px] text-slate-400 font-bold uppercase italic">Validade ≤ 25 dias</span>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border-l-8 border-green-500 shadow-sm">
+        <p class="text-[11px] font-bold text-green-600 uppercase">Pilhas</p>
+        <h2 id="kpiPilhas" class="text-3xl font-black text-green-700 tracking-tighter">0</h2>
+        <span class="text-[9px] text-slate-400 font-bold uppercase italic">Etiquetas com qtd ≥ lastro</span>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border-l-8 border-amber-500 shadow-sm">
+        <p class="text-[11px] font-bold text-amber-600 uppercase">Quebras</p>
+        <h2 id="kpiQuebras" class="text-3xl font-black text-amber-700 tracking-tighter">0</h2>
+        <span class="text-[9px] text-slate-400 font-bold uppercase italic">Etiquetas com qtd &lt; lastro</span>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border-l-8 border-indigo-500 shadow-sm">
+        <p class="text-[11px] font-bold text-indigo-600 uppercase">Pilhas p/ Doação</p>
+        <h2 id="kpiDoacao" class="text-3xl font-black text-indigo-700 tracking-tighter">0</h2>
+        <span id="kpiDoacaoInfo" class="text-[9px] text-slate-400 font-bold uppercase italic">Cod. 2279 · Base 190 un</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-black text-slate-400 uppercase mb-6 text-center">Status de Validades</h3>
+        <div class="h-80"><canvas id="chartValidade"></canvas></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-black text-slate-400 uppercase mb-6 text-center">% Data Curta por Marca</h3>
+        <div class="h-80"><canvas id="chartMarcaDataCurta"></canvas></div>
+      </div>
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-black text-slate-400 uppercase mb-6 text-center">Top 5 SKUs por Volume</h3>
+        <div class="h-80"><canvas id="chartTopSku"></canvas></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-6">
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-wrap gap-3">
+          <button class="filter-btn active px-5 py-2 bg-white text-slate-700 text-[11px] font-black rounded-lg border border-slate-300 uppercase" data-quick="TODOS">Ver Tudo</button>
+          <button class="filter-btn px-5 py-2 bg-white text-orange-700 text-[11px] font-black rounded-lg border border-orange-200 uppercase" data-quick="DATA_CURTA">Data Curta</button>
+          <button class="filter-btn px-5 py-2 bg-white text-green-700 text-[11px] font-black rounded-lg border border-green-200 uppercase" data-quick="PILHA">Pilhas</button>
+          <button class="filter-btn px-5 py-2 bg-white text-amber-700 text-[11px] font-black rounded-lg border border-amber-200 uppercase" data-quick="QUEBRA">Quebras</button>
+          <button class="filter-btn px-5 py-2 bg-white text-indigo-700 text-[11px] font-black rounded-lg border border-indigo-200 uppercase" data-quick="DOACAO">Doações</button>
+          
+          <div class="flex gap-3 ml-auto">
+            <button onclick="exportarResumoPilhas()" class="px-6 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white text-[11px] font-black uppercase transition-all shadow-lg">
+              Baixar Pilhas (Resumo SKU)
+            </button>
+            <button onclick="exportarListaQuebras()" class="px-6 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-black uppercase transition-all shadow-lg">
+              Baixar Quebras (Caixas/Un)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div>
+            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Buscar</label>
+            <input id="searchInput" type="text" placeholder="Produto, lote, etiqueta..." class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Marca</label>
+            <select id="filterMarca" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="TODOS">Todas</option>
+              <option value="PANUTRIR">Panutrir</option>
+              <option value="UNISABOR">Unisabor / US</option>
+              <option value="MUFFATO">Muffato</option>
+              <option value="DEL GRANO">Del Grano</option>
+              <option value="NOSSA PADARIA">Nossa Padaria</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Operação</label>
+            <select id="filterOperation" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="TODOS">Todas</option>
+              <option value="EXPEDICAO">Expedição</option>
+              <option value="DOACAO">Doação</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Tipo</label>
+            <select id="filterType" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="TODOS">Todos</option>
+              <option value="PILHA">Pilha</option>
+              <option value="QUEBRA">Quebra</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Validade</label>
+            <select id="filterValidity" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="TODOS">Todas</option>
+              <option value="VENCIDO">Vencido</option>
+              <option value="URGENTE">Urgente</option>
+              <option value="CRITICO">Crítico</option>
+              <option value="ATENCAO">Atenção</option>
+              <option value="SEGURO">Seguro</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase text-slate-400 mb-2">Ordenar por</label>
+            <select id="sortBy" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="validadeAsc">Validade (menor prazo)</option>
+              <option value="validadeDesc">Validade (maior prazo)</option>
+              <option value="qtdDesc">Maior quantidade</option>
+              <option value="produtoAsc">Produto (A-Z)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <p id="summaryInfo" class="text-xs text-slate-500 font-semibold">Nenhum dado carregado.</p>
+          <button id="clearFilters" class="px-4 py-2 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-xs font-black uppercase text-slate-700">Limpar Filtros</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+      <div class="overflow-auto">
+        <table class="w-full text-left text-sm min-w-[1200px]">
+          <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-black uppercase text-[10px]">
+            <tr>
+              <th class="px-6 py-4 text-center">Operação</th>
+              <th class="px-6 py-4 text-center">Tipo</th>
+              <th class="px-6 py-4">SKU / Produto</th>
+              <th class="px-6 py-4 text-center">Código</th>
+              <th class="px-6 py-4 text-center">Qtd / Lastro</th>
+              <th class="px-6 py-4 text-center">Data / Etiqueta</th>
+              <th class="px-6 py-4 text-center">Status Validade</th>
+              <th class="px-6 py-4 text-right">Validade</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const DONATION_CODE = '2279';
+    const DONATION_PILE_BASE = 190;
+
+    const lastroSkuDB = {
+      "669": 228, "162272": 228, "162775": 228, "85841": 190, "162800": 228,
+      "162802": 136, "85181": 152, "162767": 190, "162801": 228, "135231": 190,
+      "6": 190, "81581": 285, "11": 285, "81591": 285, "81571": 228,
+      "655": 228, "16": 285, "1224": 228, "135241": 228, "2": 228,
+      "81661": 228, "135211": 136, "162275": 170, "162923": 170, "162920": 170, 
+      "162921": 170, "162922": 170, "82051": 136, "135221": 152,
+      "69251": 152, "162276": 190, "86151": 190, "5": 228, "121811": 190,
+      "121821": 285, "121861": 228, "121801": 136, "121581": 152, "121871": 128,
+      "162358": 190, "162396": 171, "145521": 171, "121831": 152, "145511": 171,
+      "121841": 152, "162783": 171, "162784": 171, "141951": 380, "141441": 380,
+      "2279": 190
+    };
+
+    let db = [];
+    let charts = {};
+    let currentQuickFilter = 'TODOS';
+
+    const fileUpload = document.getElementById('fileUpload');
+    const loader = document.getElementById('loader');
+    const emptyView = document.getElementById('emptyView');
+    const mainContent = document.getElementById('mainContent');
+    const tableBody = document.getElementById('tableBody');
+
+    fileUpload.addEventListener('change', handleFileUpload);
+
+    document.querySelectorAll('[data-quick]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentQuickFilter = btn.dataset.quick;
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applyFilters();
+      });
+    });
+
+    ['searchInput', 'filterMarca', 'filterOperation', 'filterType', 'filterValidity', 'sortBy'].forEach(id => {
+      document.getElementById(id).addEventListener('input', applyFilters);
+      document.getElementById(id).addEventListener('change', applyFilters);
+    });
+
+    document.getElementById('clearFilters').addEventListener('click', () => {
+      currentQuickFilter = 'TODOS';
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-quick="TODOS"]').classList.add('active');
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterMarca').value = 'TODOS';
+      document.getElementById('filterOperation').value = 'TODOS';
+      document.getElementById('filterType').value = 'TODOS';
+      document.getElementById('filterValidity').value = 'TODOS';
+      document.getElementById('sortBy').value = 'validadeAsc';
+      applyFilters();
+    });
+
+    function showLoader(show) { loader.style.display = show ? 'flex' : 'none'; }
+    function normalizeText(value) { return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase(); }
+    function normalizeKey(value) { return normalizeText(value).replace(/[^A-Z0-9]+/g, '_').replace(/^_+|_+$/g, ''); }
+    function parseNumber(value) {
+      if (typeof value === 'number') return value;
+      let str = String(value ?? '').trim().replace(/\s/g, '');
+      if (str.includes('.') && str.includes(',')) str = str.replace(/\./g, '').replace(',', '.');
+      else str = str.replace(',', '.');
+      return isNaN(Number(str)) ? 0 : Number(str);
+    }
+
+    function excelSerialToDate(serial) {
+      const dateInfo = new Date(Math.floor(serial - 25569) * 86400 * 1000);
+      dateInfo.setHours(0,0,0,0);
+      return isNaN(dateInfo) ? null : dateInfo;
+    }
+
+    function parseFlexibleDate(value) {
+      if (!value && value !== 0) return null;
+      if (value instanceof Date && !isNaN(value)) { const d = new Date(value); d.setHours(0,0,0,0); return d; }
+      if (typeof value === 'number') return excelSerialToDate(value);
+      const str = String(value).trim();
+      if (/^\d+(\.\d+)?$/.test(str)) return excelSerialToDate(Number(str));
+      const pure = str.split(' ')[0];
+      if (pure.includes('/')) {
+        const p = pure.split('/');
+        if (p.length === 3) { const d = new Date(Number(p[2]), Number(p[1]) - 1, Number(p[0])); d.setHours(0,0,0,0); return isNaN(d) ? null : d; }
+      }
+      return null;
+    }
+
+    function getField(row, aliases) {
+      for (const a of aliases) { if (row[a] !== undefined && row[a] !== null && String(row[a]).trim() !== '') return row[a]; }
+      return '';
+    }
+
+    function getLastro(cod, productName) {
+      const sCod = String(cod).trim();
+      if (lastroSkuDB[sCod]) return lastroSkuDB[sCod];
+      const p = normalizeText(productName);
+      if (p.includes('HAMBURGUER GOURMET') && p.includes('AVENIDA')) return 170;
+      if (p.includes('HAMBURGUER GOURMET')) return 136;
+      return 190;
+    }
+
+    function getMarca(pName) {
+      const p = normalizeText(pName);
+      if (p.includes('MUFFATO')) return 'MUFFATO';
+      if (p.includes('DEL GRANO')) return 'DEL GRANO';
+      if (p.includes('UNISABOR') || /\bUS\b/.test(p)) return 'UNISABOR';
+      if (p.includes('NOSSA PADARIA')) return 'NOSSA PADARIA';
+      return 'PANUTRIR';
+    }
+
+    function getValidityStatus(diff) {
+      if (diff < 0) return 'VENCIDO';
+      if (diff <= 19) return 'URGENTE';
+      if (diff <= 22) return 'CRITICO';
+      if (diff <= 25) return 'ATENCAO';
+      return 'SEGURO';
+    }
+
+    function getValidityBadgeClass(status) {
+      return { VENCIDO: 'status-vencido', URGENTE: 'status-urgente', CRITICO: 'status-critico', ATENCAO: 'status-atencao', SEGURO: 'status-seguro' }[status] || 'status-seguro';
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      showLoader(true);
+      const reader = new FileReader();
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (ext === 'csv') {
+        reader.onload = (evt) => { processData(Papa.parse(evt.target.result, { header: true, skipEmptyLines: true }).data || []); };
+        reader.readAsText(file, 'UTF-8');
+      } else {
+        reader.onload = (evt) => {
+          const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array', cellDates: true });
+          processData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' }));
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    }
+
+    function processData(rows) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      db = [];
+      rows.forEach((row, i) => {
+        const n = {}; Object.keys(row || {}).forEach(k => n[normalizeKey(k)] = row[k]);
+        const cod = String(getField(n, ['COD', 'CODIGO', 'SKU'])).trim();
+        const produto = String(getField(n, ['PRODUTO', 'DESCRICAO', 'ITEM'])).trim();
+        const qtd = Math.round(parseNumber(getField(n, ['QTD_TOTAL', 'QTD', 'ESTOQUE'])));
+        const validade = parseFlexibleDate(getField(n, ['VALIDADE', 'DT_VALIDADE']));
+        if (!produto || !validade || !qtd) return;
+        const lastro = getLastro(cod, produto);
+        const diff = Math.ceil((validade - today) / 86400000);
+        db.push({
+          id: i, cod, produto: produto.toUpperCase(), qtd, validade, diff,
+          lote: String(getField(n, ['LOTE'])).trim(), etiqueta: String(getField(n, ['ETIQUETA'])).trim(),
+          lastro, tipo: qtd >= lastro ? 'PILHA' : 'QUEBRA', marca: getMarca(produto),
+          operacao: cod === DONATION_CODE ? 'DOACAO' : 'EXPEDICAO',
+          isDataCurta: diff <= 25, validadeStatus: getValidityStatus(diff)
+        });
+      });
+      showLoader(false);
+      emptyView.classList.add('hidden');
+      mainContent.classList.remove('hidden');
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const search = normalizeText(document.getElementById('searchInput').value);
+      const fMarca = document.getElementById('filterMarca').value;
+      const fOp = document.getElementById('filterOperation').value;
+      const fTipo = document.getElementById('filterType').value;
+      const fVal = document.getElementById('filterValidity').value;
+
+      let filtered = db.filter(item => {
+        if (search && !normalizeText(`${item.produto} ${item.cod} ${item.lote} ${item.etiqueta}`).includes(search)) return false;
+        if (fMarca !== 'TODOS' && item.marca !== fMarca) return false;
+        if (fOp !== 'TODOS' && item.operacao !== fOp) return false;
+        if (fTipo !== 'TODOS' && item.tipo !== fTipo) return false;
+        if (fVal !== 'TODOS' && item.validadeStatus !== fVal) return false;
+        if (currentQuickFilter === 'DATA_CURTA') return item.isDataCurta;
+        if (currentQuickFilter === 'PILHA') return item.tipo === 'PILHA';
+        if (currentQuickFilter === 'QUEBRA') return item.tipo === 'QUEBRA';
+        if (currentQuickFilter === 'DOACAO') return item.operacao === 'DOACAO';
+        return true;
+      });
+
+      const sortBy = document.getElementById('sortBy').value;
+      filtered.sort((a, b) => {
+        if (sortBy === 'validadeDesc') return b.diff - a.diff;
+        if (sortBy === 'qtdDesc') return b.qtd - a.qtd;
+        if (sortBy === 'produtoAsc') return a.produto.localeCompare(b.produto);
+        return a.diff - b.diff;
+      });
+
+      updateKPIs(filtered);
+      updateCharts(filtered);
+      renderTable(filtered);
+      updateSummary(filtered);
+    }
+
+    function computeStats(list) {
+      const s = { total: 0, shortQty: 0, pilhas: 0, quebras: 0, doacaoQty: 0, valMap: { VENCIDO:0, URGENTE:0, CRITICO:0, ATENCAO:0, SEGURO:0 }, volMap: {}, brandTotal: {}, brandShort: {} };
+      list.forEach(i => {
+        s.total += i.qtd;
+        if (i.isDataCurta) s.shortQty += i.qtd;
+        if (i.operacao === 'DOACAO') { s.doacaoQty += i.qtd; }
+        else { if (i.tipo === 'PILHA') { s.pilhas++; } else { s.quebras++; } }
+        s.valMap[i.validadeStatus] += i.qtd;
+        s.volMap[i.produto] = (s.volMap[i.produto] || 0) + i.qtd;
+        s.brandTotal[i.marca] = (s.brandTotal[i.marca] || 0) + i.qtd;
+        if (i.isDataCurta) s.brandShort[i.marca] = (s.brandShort[i.marca] || 0) + i.qtd;
+      });
+      return s;
+    }
+
+    function updateKPIs(list) {
+      const s = computeStats(list);
+      document.getElementById('kpiTotal').innerText = s.total.toLocaleString('pt-BR');
+      document.getElementById('kpiDataCurtaPerc').innerText = s.total > 0 ? ((s.shortQty/s.total)*100).toFixed(1) + '%' : '0%';
+      document.getElementById('kpiPilhas').innerText = s.pilhas.toLocaleString('pt-BR');
+      document.getElementById('kpiQuebras').innerText = s.quebras.toLocaleString('pt-BR');
+      document.getElementById('kpiDoacao').innerText = Math.floor(s.doacaoQty / DONATION_PILE_BASE).toLocaleString('pt-BR');
+      document.getElementById('kpiDataCurtaInfo').innerText = `${s.shortQty.toLocaleString('pt-BR')} un em data curta`;
+      document.getElementById('kpiDoacaoInfo').innerText = `${s.doacaoQty.toLocaleString('pt-BR')} un no cod. ${DONATION_CODE}`;
+    }
+
+    function updateCharts(list) {
+      const s = computeStats(list);
+      createOrUpdateChart('chartValidade', 'doughnut', {
+        labels: ['Vencido', 'Urgente', 'Crítico', 'Atenção', 'Seguro'],
+        datasets: [{ data: [s.valMap.VENCIDO, s.valMap.URGENTE, s.valMap.CRITICO, s.valMap.ATENCAO, s.valMap.SEGURO], backgroundColor: ['#000', '#ef4444', '#9333ea', '#facc15', '#22c55e'] }]
+      });
+
+      const brands = ['PANUTRIR', 'UNISABOR', 'MUFFATO', 'DEL GRANO', 'NOSSA PADARIA'];
+      const colorMap = { 'PANUTRIR': '#334155', 'UNISABOR': '#2563eb', 'MUFFATO': '#059669', 'DEL GRANO': '#4f46e5', 'NOSSA PADARIA': '#d97706' };
+      const brandPercs = brands.map(b => ({
+        label: b,
+        val: s.brandTotal[b] > 0 ? ((s.brandShort[b] || 0) / s.brandTotal[b] * 100) : 0
+      })).sort((a, b) => b.val - a.val);
+
+      createOrUpdateChart('chartMarcaDataCurta', 'bar', {
+        labels: brandPercs.map(x => x.label),
+        datasets: [{ 
+          label: '% em Data Curta', 
+          data: brandPercs.map(x => x.val), 
+          backgroundColor: brandPercs.map(x => colorMap[x.label]),
+          borderRadius: 6 
+        }]
+      });
+
+      const top = Object.entries(s.volMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      createOrUpdateChart('chartTopSku', 'bar', {
+        labels: top.map(x => x[0]),
+        datasets: [{ 
+          label: 'Volume (Un)', 
+          data: top.map(x => x[1]), 
+          backgroundColor: '#1e293b', 
+          borderRadius: 8 
+        }]
+      }, false);
+    }
+
+    function createOrUpdateChart(id, type, data, horizontal = false) {
+      if (charts[id]) charts[id].destroy();
+      charts[id] = new Chart(document.getElementById(id), {
+        type, data, options: {
+          indexAxis: horizontal ? 'y' : 'x', 
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { 
+              display: type === 'doughnut',
+              position: 'bottom', 
+              labels: { boxWidth: 10, font: { size: 9, weight: 'bold' } } 
+            },
+            tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label || ''}: ${Number(ctx.raw).toFixed(1)}${id.includes('Marca') ? '%' : ''}` } }
+          },
+          scales: type === 'bar' ? { 
+            x: { 
+                grid: { display: false }, 
+                ticks: { 
+                    font: { size: 8, weight: 'bold' },
+                    maxRotation: 45,
+                    minRotation: 45
+                } 
+            }, 
+            y: { 
+                beginAtZero: true, 
+                ticks: { font: { size: 9 }, callback: (v) => v + (id.includes('Marca') ? '%' : '') } 
+            } 
+          } : {}
+        }
+      });
+    }
+
+    function renderTable(list) {
+      tableBody.innerHTML = list.length ? '' : '<tr><td colspan="8" class="px-6 py-10 text-center text-slate-400 font-bold uppercase text-xs">Nenhum registro encontrado.</td></tr>';
+      list.slice(0, 150).forEach(item => {
+        const dtStr = item.validade ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}` : '-';
+        
+        tableBody.innerHTML += `
+          <tr class="hover:bg-slate-50 transition-all">
+            <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-md text-[9px] font-black ${item.operacao==='DOACAO'?'status-doacao':'bg-slate-100 text-slate-700'}">${item.operacao==='DOACAO'?'DOAÇÃO':'EXPEDIÇÃO'}</span></td>
+            <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-md text-[9px] font-black ${item.tipo==='PILHA'?'status-pilha':'status-quebra'}">${item.tipo}</span></td>
+            <td class="px-6 py-4 font-bold text-slate-700 text-xs">${item.produto}</td>
+            <td class="px-6 py-4 text-center font-mono font-bold text-slate-600">${item.cod || '-'}</td>
+            <td class="px-6 py-4 text-center font-mono font-bold text-blue-600">${item.qtd.toLocaleString('pt-BR')} <span class="text-[10px] text-slate-400 font-normal">/ ${item.lastro}</span></td>
+            <td class="px-6 py-4 text-center text-slate-500 text-[10px] font-black uppercase">${dtStr} / ${item.etiqueta || '-'}</td>
+            <td class="px-6 py-4 text-center"><span class="px-3 py-1 rounded-md text-[9px] font-black uppercase ${getValidityBadgeClass(item.validadeStatus)}">${item.validadeStatus}</span></td>
+            <td class="px-6 py-4 text-right font-black ${item.isDataCurta?'text-orange-600':'text-slate-800'}">${item.diff} d</td>
+          </tr>`;
+      });
+    }
+
+    function updateSummary(list) {
+      document.getElementById('summaryInfo').innerText = `Exibindo ${list.length.toLocaleString('pt-BR')} registros · ${list.reduce((a,b)=>a+b.qtd,0).toLocaleString('pt-BR')} un no filtro atual`;
+    }
+
+    // --- FUNÇÕES DE EXPORTAÇÃO ADICIONADAS ---
+
+    function exportarResumoPilhas() {
+      const resumo = {};
+      
+      db.forEach(i => {
+        if(!resumo[i.produto]) {
+          resumo[i.produto] = { 
+            "PRODUTO": i.produto, 
+            "PILHAS COMPLETAS": 0, 
+            "QTD QUEBRAS (ETIQUETAS)": 0 
+          };
+        }
+        
+        const lastroRef = lastroSkuDB[i.cod] || 190;
+        
+        if (i.qtd >= lastroRef) {
+          resumo[i.produto]["PILHAS COMPLETAS"] += Math.floor(i.qtd / lastroRef);
+        } else {
+          resumo[i.produto]["QTD QUEBRAS (ETIQUETAS)"] += 1;
+        }
+      });
+
+      const dataFinal = Object.values(resumo).filter(x => x["PILHAS COMPLETAS"] > 0 || x["QTD QUEBRAS (ETIQUETAS)"] > 0);
+      gerarExcel(dataFinal, "Resumo_Pilhas_Por_SKU");
+    }
+
+    function exportarListaQuebras() {
+      const listaQuebras = db.filter(i => i.qtd < (lastroSkuDB[i.cod] || 190)).map(i => {
+        const divisor = i.produto.includes('HAMBURGUER GOURMET') ? 17 : 19;
+        const lastroRef = lastroSkuDB[i.cod] || 190;
+        const unPorCaixa = Math.round(lastroRef / divisor);
+        
+        return {
+          "DATA/ETIQUETA": `${i.validade ? i.validade.toLocaleDateString('pt-BR').substring(0,5) : ''} - ${i.etiqueta || ''}`,
+          "PRODUTO": i.produto,
+          "CAIXAS": Math.floor(i.qtd / unPorCaixa),
+          "UNIDADES": i.qtd % unPorCaixa,
+          "TOTAL": i.qtd
+        };
+      });
+
+      gerarExcel(listaQuebras, "Lista_Quebras_Detalhada");
+    }
+
+    function gerarExcel(dados, nomeArquivo) {
+      if(dados.length === 0) return alert("Nenhum dado encontrado para exportar.");
+      const ws = XLSX.utils.json_to_sheet(dados);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Dados");
+      XLSX.writeFile(wb, `${nomeArquivo}.xlsx`);
+    }
+  </script>
+</body>
+</html>
