@@ -1,895 +1,138 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestão de Estoque | CD MATRIZ PANUTRIR</title>
+import { useState, useMemo, useCallback, useRef } from 'react';
+import * as XLSX from 'xlsx';
+import { processData, normalizeText, calcularGradesOcupadas } from '@/lib/stockUtils';
+import type { StockItem } from '@/lib/stockUtils';
+import { exportarResumoPilhas, exportarListaQuebras, exportarDataCurta, exportarRelatorioTransferencia } from '@/lib/exportUtils';
+import KpiCards from '@/components/KpiCards';
+import StockCharts from '@/components/StockCharts';
+import StockTable from '@/components/StockTable';
+import FilterPanel from '@/components/FilterPanel';
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+export default function Index() {
+  const [db, setDb] = useState<StockItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  // Filters
+  const [quickFilter, setQuickFilter] = useState('TODOS');
+  const [search, setSearch] = useState('');
+  const [marca, setMarca] = useState('TODOS');
+  const [operacao, setOperacao] = useState('TODOS');
+  const [tipo, setTipo] = useState('TODOS');
+  const [validade, setValidade] = useState('TODOS');
+  const [sortBy, setSortBy] = useState('validadeAsc');
+  const [groupBy, setGroupBy] = useState('ETIQUETA');
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      background: #ECECF1;
-      background-image:
-        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(120,120,200,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 85% 100%, rgba(52, 199, 89, 0.05) 0%, transparent 55%);
-      background-attachment: fixed;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      letter-spacing: -0.022em;
-      color: #1C1C1E;
-      min-height: 100vh;
-    }
-
-    /* ── NAV ── */
-    .nav-bar {
-      background: rgba(242, 242, 247, 0.50);
-      backdrop-filter: saturate(180%) blur(28px);
-      -webkit-backdrop-filter: saturate(180%) blur(28px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.30);
-      box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.03);
-    }
-
-    /* ── GLASS CARDS ── */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.62);
-      backdrop-filter: blur(24px) saturate(160%);
-      -webkit-backdrop-filter: blur(24px) saturate(160%);
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.04),
-        0 8px 32px rgba(0,0,0,0.04),
-        inset 0 1px 0 rgba(255,255,255,0.8);
-      transition: box-shadow 0.25s ease, transform 0.2s ease;
-    }
-    .glass-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07), 0 12px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8); }
-
-    /* ── KPI CARDS ── */
-    .kpi-card {
-      background: rgba(255,255,255,0.70);
-      backdrop-filter: blur(20px) saturate(150%);
-      -webkit-backdrop-filter: blur(20px) saturate(150%);
-      border: 1px solid rgba(255,255,255,0.60);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9);
-      border-radius: 2rem;
-      padding: 1.5rem;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .kpi-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
-    }
-
-    /* ── ACCENT DOTS ON KPI ── */
-    .kpi-dot {
-      position: absolute;
-      bottom: -12px; right: -12px;
-      width: 60px; height: 60px;
-      border-radius: 50%;
-      opacity: 0.08;
-    }
-
-    /* ── LOADING ── */
-    .loading-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(242, 242, 247, 0.55);
-      z-index: 200;
-      backdrop-filter: blur(32px) saturate(150%);
-      -webkit-backdrop-filter: blur(32px) saturate(150%);
-      align-items: center; justify-content: center; flex-direction: column;
-    }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 2.5px solid rgba(0,0,0,0.08);
-      border-top-color: #1C1C1E;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── BADGE STATUS ── */
-    .status-pilha  { background: #E2FBE7; color: #1D8A3F; }
-    .status-quebra { background: #FFF4E5; color: #B25E09; }
-    .status-doacao { background: #EEEEFF; color: #5856D6; }
-    .status-vencido { background: #1C1C1E; color: #FFFFFF; }
-    .status-urgente { background: #FF3B30; color: #FFFFFF; }
-    .status-critico { background: #AF52DE; color: #FFFFFF; }
-    .status-atencao { background: #FFCC00; color: #4A3A00; }
-    .status-seguro  { background: #34C759; color: #FFFFFF; }
-
-    /* ── FILTER QUICK BUTTONS ── */
-    .filter-btn {
-      transition: all 0.18s ease;
-      border: 1px solid rgba(0,0,0,0.07);
-      font-weight: 700;
-      letter-spacing: 0.02em;
-    }
-    .filter-btn:active { transform: scale(0.97); }
-    .filter-btn.active {
-      background: #1C1C1E !important;
-      color: #FFFFFF !important;
-      border-color: transparent !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-    }
-
-    /* ── DOWNLOAD BUTTONS ── */
-    .dl-btn {
-      transition: all 0.18s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.08);
-      font-weight: 800;
-      letter-spacing: 0.03em;
-    }
-    .dl-btn:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.14), 0 6px 18px rgba(0,0,0,0.10); }
-    .dl-btn:active { transform: scale(0.97) translateY(0); }
-
-    /* ── INPUTS & SELECTS ── */
-    .ios-input {
-      appearance: none;
-      background: rgba(0,0,0,0.05);
-      border: none;
-      border-radius: 9999px;
-      padding: 0.65rem 2.5rem 0.65rem 1.25rem;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #1C1C1E;
-      outline: none;
-      width: 100%;
-      transition: background 0.15s ease, box-shadow 0.15s ease;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23aaa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.9rem center;
-      background-size: 0.75rem;
-    }
-    .ios-input:focus { background-color: rgba(0,0,0,0.08); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
-    .ios-input.highlight { background: rgba(0,0,0,0.12); font-weight: 800; }
-
-    /* ── TABLE ── */
-    .table-row { transition: background 0.12s ease; }
-    .table-row:hover { background: rgba(0,0,0,0.018); }
-
-    /* ── CHART CARD TITLE ── */
-    .chart-title-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-
-    /* ── SCROLLBAR ── */
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
-
-    /* ── LOGO ── */
-    .logo-nav { height: 40px; object-fit: contain; }
-    .logo-main { width: 11rem; opacity: 0.15; }
-
-    /* ── SECTION DIVIDER ── */
-    .section-sep { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent); margin: 0.5rem 0; }
-
-    /* ── EMPTY STATE ── */
-    .upload-btn {
-      background: #1C1C1E;
-      color: #fff;
-      border-radius: 9999px;
-      padding: 1rem 2.5rem;
-      font-size: 0.85rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.22);
-      transition: all 0.18s ease;
-      display: inline-block;
-      cursor: pointer;
-    }
-    .upload-btn:hover { background: #3a3a3c; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.28); }
-    .upload-btn:active { transform: scale(0.98); }
-
-    /* no italic, no underline anywhere */
-    * { font-style: normal !important; text-decoration: none !important; }
-  </style>
-</head>
-<body>
-
-  <!-- LOADER -->
-  <div id="loader" class="loading-overlay">
-    <div class="spinner mb-4"></div>
-    <p class="text-xs font-semibold text-gray-500 tracking-tight">Sincronizando dados…</p>
-  </div>
-
-  <!-- NAV -->
-  <nav class="nav-bar px-8 py-3.5 flex justify-between items-center sticky top-0 z-50">
-    <div class="flex items-center gap-5">
-      <img src="assets/logo.png" alt="PANUTRIR" class="logo-nav"
-           onerror="this.style.display='none'; document.getElementById('altNavLogo').classList.remove('hidden')">
-      <span id="altNavLogo" class="hidden font-black text-[1.15rem] tracking-tighter text-black">PANUTRIR</span>
-      <div class="h-5 w-px bg-black/10 mx-1"></div>
-      <div>
-        <h1 class="text-[11px] font-black tracking-tight text-black leading-tight">Gestão de Estoque</h1>
-        <p class="text-[9px] text-gray-400 font-semibold tracking-wide uppercase">CD Matriz Panutrir</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      <input type="file" id="fileUpload" accept=".csv, .xlsx, .xls" class="hidden" />
-    </div>
-  </nav>
-
-  <!-- EMPTY VIEW -->
-  <div id="emptyView" class="flex flex-col items-center justify-center h-[85vh] text-center px-4">
-    <img src="assets/logo.png" alt="PANUTRIR" class="logo-main mb-10 mx-auto grayscale">
-    <h2 class="text-[2rem] font-black text-black tracking-tighter leading-none mb-3">Aguardando base de dados Inflow.</h2>
-    <p class="text-gray-400 text-sm max-w-xs font-medium leading-relaxed">
-      Importe o relatório de etiquetas gerado pelo sistema Inflow para começar.
-    </p>
-    <div class="mt-10">
-      <label for="fileUpload" class="upload-btn">Importar Dados</label>
-    </div>
-  </div>
-
-  <!-- MAIN DASHBOARD -->
-  <main id="mainContent" class="px-8 pt-8 pb-16 max-w-[1760px] mx-auto hidden">
-
-    <!-- KPI ROW -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5 mb-7">
-
-      <!-- Estoque Total -->
-      <div class="kpi-card border-l-[3px] border-l-black">
-        <div class="kpi-dot bg-black"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Estoque Total</p>
-        <h2 id="kpiTotal" class="text-[2.5rem] font-black text-black tracking-tighter leading-none">0</h2>
-        <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Unidades no CD</span>
-      </div>
-
-      <!-- % Data Curta -->
-      <div class="kpi-card border-l-[3px] border-l-[#FF9500]">
-        <div class="kpi-dot bg-[#FF9500]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">% Data Curta</p>
-        <h2 id="kpiDataCurtaPerc" class="text-[2.5rem] font-black text-[#FF9500] tracking-tighter leading-none">0%</h2>
-        <span id="kpiDataCurtaInfo" class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Vencimento próximo</span>
-      </div>
-
-      <!-- Pilhas -->
-      <div class="kpi-card border-l-[3px] border-l-[#34C759]">
-        <div class="kpi-dot bg-[#34C759]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Pilhas</p>
-        <h2 id="kpiPilhas" class="text-[2.5rem] font-black text-[#34C759] tracking-tighter leading-none">0</h2>
-        <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Quantidade de pilhas</span>
-      </div>
-
-      <!-- Quebras -->
-      <div class="kpi-card border-l-[3px] border-l-[#FFCC00]">
-        <div class="kpi-dot bg-[#FFCC00]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Quebras</p>
-        <h2 id="kpiQuebras" class="text-[2.5rem] font-black text-[#B25E09] tracking-tighter leading-none">0</h2>
-        <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Qtd de quebras</span>
-      </div>
-
-      <!-- Doação -->
-      <div class="kpi-card border-l-[3px] border-l-[#5856D6]">
-        <div class="kpi-dot bg-[#5856D6]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Doação</p>
-        <h2 id="kpiDoacao" class="text-[2.5rem] font-black text-[#5856D6] tracking-tighter leading-none">0</h2>
-        <span id="kpiDoacaoInfo" class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Pilhas de doação</span>
-      </div>
-
-    </div>
-
-    <!-- CHARTS ROW -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-7">
-      <div class="glass-card p-7 rounded-[2.5rem]">
-        <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot bg-[#FF3B30]"></span>Saúde do Estoque
-        </h3>
-        <div class="h-64"><canvas id="chartValidade"></canvas></div>
-      </div>
-      <div class="glass-card p-7 rounded-[2.5rem]">
-        <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot bg-[#007AFF]"></span>Ranking de Datas Curtas
-        </h3>
-        <div class="h-64"><canvas id="chartMarcaDataCurta"></canvas></div>
-      </div>
-      <div class="glass-card p-7 rounded-[2.5rem]">
-        <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot bg-black"></span>Top 5 Volume (SKU)
-        </h3>
-        <div class="h-64"><canvas id="chartTopSku"></canvas></div>
-      </div>
-    </div>
-
-    <!-- FILTER PANEL -->
-    <div class="glass-card rounded-[2.5rem] p-7 mb-7">
-      <div class="flex flex-col gap-6">
-
-        <!-- Quick filters + download buttons -->
-        <div class="flex flex-wrap gap-2 items-center">
-          <button class="filter-btn px-5 py-2 bg-white/60 text-gray-700 text-[10px] rounded-full active" data-quick="TODOS">TODOS</button>
-          <button class="filter-btn px-5 py-2 bg-white/60 text-[#FF9500] text-[10px] rounded-full" data-quick="DATA_CURTA">DATA CURTA</button>
-          <button class="filter-btn px-5 py-2 bg-white/60 text-[#34C759] text-[10px] rounded-full" data-quick="PILHA">PILHAS</button>
-          <button class="filter-btn px-5 py-2 bg-white/60 text-[#B25E09] text-[10px] rounded-full" data-quick="QUEBRA">QUEBRAS</button>
-
-          <div class="flex gap-2 ml-auto flex-wrap">
-            <button onclick="exportarDataCurta()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#FF9500] text-white text-[10px]">DATAS CURTAS</button>
-            <button onclick="exportarResumoPilhas()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#34C759] text-white text-[10px]">PILHAS</button>
-            <button onclick="exportarListaQuebras()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#1C1C1E] text-white text-[10px]">QUEBRAS</button>
-            <button onclick="exportarRelatorioTransferencia()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#007AFF] text-white text-[10px]">RELATÓRIO</button>
-          </div>
-        </div>
-
-        <div class="section-sep"></div>
-
-        <!-- Field filters -->
-        <div class="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-7 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Buscar</label>
-            <input id="searchInput" type="text" placeholder="Produto ou código…" class="ios-input" />
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Marca</label>
-            <select id="filterMarca" class="ios-input">
-              <option value="TODOS">Todas as marcas</option>
-              <option value="PANUTRIR">Panutrir</option>
-              <option value="UNISABOR">Unisabor / US</option>
-              <option value="MUFFATO">Muffato</option>
-              <option value="DEL GRANO">Del Grano</option>
-              <option value="NOSSA PADARIA">Nossa Padaria</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Operação</label>
-            <select id="filterOperation" class="ios-input">
-              <option value="TODOS">Todas</option>
-              <option value="EXPEDICAO">Expedição</option>
-              <option value="DOACAO">Doação</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Estado</label>
-            <select id="filterType" class="ios-input">
-              <option value="TODOS">Todos</option>
-              <option value="PILHA">Pilha</option>
-              <option value="QUEBRA">Quebra</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Validade</label>
-            <select id="filterValidity" class="ios-input">
-              <option value="TODOS">Todas</option>
-              <option value="VENCIDO">Vencido</option>
-              <option value="URGENTE">Urgente</option>
-              <option value="CRITICO">Crítico</option>
-              <option value="ATENCAO">Atenção</option>
-              <option value="SEGURO">Seguro</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Ordem</label>
-            <select id="sortBy" class="ios-input">
-              <option value="validadeAsc">Vencimento Próximo</option>
-              <option value="validadeDesc">Vencimento Longe</option>
-              <option value="qtdDesc">Maior Volume</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Visualização</label>
-            <select id="groupByVal" class="ios-input highlight">
-              <option value="ETIQUETA">Por Etiqueta</option>
-              <option value="DATA">Por Data (Agrupado)</option>
-            </select>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- TABLE -->
-    <div class="glass-card rounded-[2.5rem] overflow-hidden">
-      <div class="overflow-auto">
-        <table class="w-full text-left text-xs min-w-[1220px]">
-          <thead>
-            <tr class="border-b border-black/5">
-              <th class="px-8 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Operação</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Tipo</th>
-              <th class="px-6 py-4 text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">SKU / Produto</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Código</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Qtd / Lastro</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Vencimento</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Status</th>
-              <th class="px-8 py-4 text-right text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Dias</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody" class="divide-y divide-gray-100/60 text-gray-700 font-medium"></tbody>
-        </table>
-      </div>
-    </div>
-
-  </main>
-
-  <script>
-    const DONATION_CODE = '2279';
-    const DONATION_PILE_BASE = 190;
-    const lastroSkuDB = {
-      "669": 228, "162272": 228, "162775": 228, "85841": 190, "162800": 228,
-      "162802": 136, "85181": 152, "162767": 190, "162801": 228, "135231": 190,
-      "6": 190, "81581": 285, "11": 285, "81591": 285, "81571": 228,
-      "655": 228, "16": 285, "1224": 228, "135241": 228, "2": 228,
-      "81661": 228, "135211": 136, "162275": 170, "162923": 170, "162920": 170,
-      "162921": 170, "162922": 170, "82051": 136, "135221": 152,
-      "69251": 152, "162276": 190, "86151": 190, "5": 228, "121811": 190,
-      "121821": 285, "121861": 228, "121801": 136, "121581": 152, "121871": 128,
-      "162358": 190, "162396": 171, "145521": 171, "121831": 152, "145511": 171,
-      "121841": 152, "162783": 171, "162784": 171, "141951": 380, "141441": 380,
-      "2279": 190
+  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLoading(true);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const wb = XLSX.read(new Uint8Array(evt.target!.result as ArrayBuffer), { type: 'array', cellDates: true });
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+      setDb(processData(rows as Record<string, unknown>[]));
+      setLoading(false);
     };
+    reader.readAsArrayBuffer(file);
+  }, []);
 
-    let db = [];
-    let charts = {};
-    let currentQuickFilter = 'TODOS';
+  const filtered = useMemo(() => {
+    const s = normalizeText(search);
+    let result = db.filter(item => {
+      if (s && !normalizeText(`${item.produto} ${item.cod}`).includes(s)) return false;
+      if (marca !== 'TODOS' && item.marca !== marca) return false;
+      if (operacao !== 'TODOS' && item.operacao !== operacao) return false;
+      if (tipo !== 'TODOS' && item.tipo !== tipo) return false;
+      if (validade !== 'TODOS' && item.validadeStatus !== validade) return false;
+      if (quickFilter === 'DATA_CURTA') return item.isDataCurta;
+      if (quickFilter === 'PILHA') return item.tipo === 'PILHA';
+      if (quickFilter === 'QUEBRA') return item.tipo === 'QUEBRA';
+      return true;
+    });
+    return result;
+  }, [db, search, marca, operacao, tipo, validade, quickFilter]);
 
-    const fileUpload = document.getElementById('fileUpload');
-    const loader    = document.getElementById('loader');
-    const emptyView = document.getElementById('emptyView');
-    const mainContent = document.getElementById('mainContent');
-    const tableBody = document.getElementById('tableBody');
-
-    fileUpload.addEventListener('change', handleFileUpload);
-
-    document.querySelectorAll('[data-quick]').forEach(btn => btn.addEventListener('click', () => {
-      currentQuickFilter = btn.dataset.quick;
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      applyFilters();
-    }));
-
-    ['searchInput','filterMarca','filterOperation','filterType','filterValidity','sortBy','groupByVal']
-      .forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
-
-    /* ── UTILS ── */
-    function showLoader(v) { loader.style.display = v ? 'flex' : 'none'; }
-    function normalizeText(v) { return String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toUpperCase(); }
-    function normalizeKey(v) { return normalizeText(v).replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
-    function parseNumber(v) {
-      if (typeof v === 'number') return v;
-      let s = String(v ?? '').trim().replace(/\s/g,'');
-      if (s.includes('.') && s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
-      else s = s.replace(',','.');
-      return isNaN(Number(s)) ? 0 : Number(s);
-    }
-    function parseFlexibleDate(v) {
-      if (!v && v !== 0) return null;
-      if (v instanceof Date && !isNaN(v)) { const d = new Date(v); d.setHours(0,0,0,0); return d; }
-      if (typeof v === 'number') return new Date(Math.floor(v - 25569) * 86400 * 1000);
-      const s = String(v).trim();
-      if (s.includes('/')) {
-        const p = s.split('/');
-        if (p.length === 3) return new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
-      }
-      return null;
-    }
-    function getField(row, aliases) {
-      for (const a of aliases) { if (row[a] !== undefined && row[a] !== null && String(row[a]).trim() !== '') return row[a]; }
-      return '';
-    }
-    function getLastro(cod, name) {
-      const s = String(cod).trim();
-      if (lastroSkuDB[s]) return lastroSkuDB[s];
-      return normalizeText(name).includes('HAMBURGUER GOURMET') ? 136 : 190;
-    }
-    function getMarca(n) {
-      const p = normalizeText(n);
-      if (p.includes('MUFFATO')) return 'MUFFATO';
-      if (p.includes('DEL GRANO')) return 'DEL GRANO';
-      if (p.includes('UNISABOR') || /\bUS\b/.test(p)) return 'UNISABOR';
-      if (p.includes('NOSSA PADARIA')) return 'NOSSA PADARIA';
-      return 'PANUTRIR';
-    }
-    function getValidityStatus(diff) {
-      if (diff < 0) return 'VENCIDO';
-      if (diff <= 19) return 'URGENTE';
-      if (diff <= 22) return 'CRITICO';
-      if (diff <= 25) return 'ATENCAO';
-      return 'SEGURO';
-    }
-    function getValidityBadgeClass(s) {
-      return ({ VENCIDO:'status-vencido', URGENTE:'status-urgente', CRITICO:'status-critico', ATENCAO:'status-atencao', SEGURO:'status-seguro' })[s] || 'status-seguro';
-    }
-    function getCodigoExcelValue(cod) {
-      const c = String(cod ?? '').trim();
-      return /^\d+$/.test(c) ? Number(c) : c;
-    }
-    function autoFitWorksheetColumns(ws, min=10, max=60) {
-      ws.columns.forEach(col => {
-        let mx = 0;
-        col.eachCell({ includeEmpty: true }, cell => {
-          const v = cell.value; let t = '';
-          if (!v) t = '';
-          else if (typeof v === 'object' && v.text) t = v.text;
-          else if (typeof v === 'object' && v.richText) t = v.richText.map(x=>x.text).join('');
-          else if (typeof v === 'object' && v.formula) t = v.result !== undefined ? String(v.result) : String(v.formula);
-          else t = String(v);
-          mx = Math.max(mx, t.length);
-        });
-        col.width = Math.min(max, Math.max(min, mx + 2));
-      });
-    }
-
-    /* ── FILE UPLOAD ── */
-    function handleFileUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      showLoader(true);
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        const wb = XLSX.read(new Uint8Array(evt.target.result), { type:'array', cellDates:true });
-        processData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' }));
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function processData(rows) {
-      const today = new Date(); today.setHours(0,0,0,0);
-      db = [];
-      rows.forEach((row, i) => {
-        const n = {}; Object.keys(row || {}).forEach(k => n[normalizeKey(k)] = row[k]);
-        const cod     = String(getField(n, ['COD','CODIGO','SKU'])).trim();
-        const produto = String(getField(n, ['PRODUTO','DESCRICAO','ITEM'])).trim();
-        const qtd     = Math.round(parseNumber(getField(n, ['QTD_TOTAL','QTD','ESTOQUE'])));
-        const validade= parseFlexibleDate(getField(n, ['VALIDADE','DT_VALIDADE']));
-        if (!produto || !validade || !qtd) return;
-        const lastro = getLastro(cod, produto);
-        const diff   = Math.ceil((validade - today) / 86400000);
-        db.push({
-          id: i, cod, produto: produto.toUpperCase(), qtd, validade, diff,
-          lote: String(getField(n,['LOTE'])).trim(),
-          etiqueta: String(getField(n,['ETIQUETA'])).trim(),
-          lastro,
-          tipo: qtd >= lastro ? 'PILHA' : 'QUEBRA',
-          marca: getMarca(produto),
-          operacao: cod === DONATION_CODE ? 'DOACAO' : 'EXPEDICAO',
-          isDataCurta: diff <= 25,
-          validadeStatus: getValidityStatus(diff)
-        });
-      });
-      showLoader(false);
-      emptyView.classList.add('hidden');
-      mainContent.classList.remove('hidden');
-      applyFilters();
-    }
-
-    /* ── FILTERS ── */
-    function applyFilters() {
-      const search   = normalizeText(document.getElementById('searchInput').value);
-      const fMarca   = document.getElementById('filterMarca').value;
-      const fOp      = document.getElementById('filterOperation').value;
-      const fTipo    = document.getElementById('filterType').value;
-      const fVal     = document.getElementById('filterValidity').value;
-      const groupByVal = document.getElementById('groupByVal').value;
-
-      let filtered = db.filter(item => {
-        if (search && !normalizeText(`${item.produto} ${item.cod}`).includes(search)) return false;
-        if (fMarca !== 'TODOS' && item.marca !== fMarca) return false;
-        if (fOp    !== 'TODOS' && item.operacao !== fOp) return false;
-        if (fTipo  !== 'TODOS' && item.tipo !== fTipo) return false;
-        if (fVal   !== 'TODOS' && item.validadeStatus !== fVal) return false;
-        if (currentQuickFilter === 'DATA_CURTA') return item.isDataCurta;
-        if (currentQuickFilter === 'PILHA')  return item.tipo === 'PILHA';
-        if (currentQuickFilter === 'QUEBRA') return item.tipo === 'QUEBRA';
-        return true;
-      });
-
-      updateKPIs(filtered);
-      updateCharts(filtered);
-
-      let tableData = filtered;
-      if (groupByVal === 'DATA') {
-        const grouped = {};
-        filtered.forEach(i => {
-          const key = i.cod + '_' + i.diff;
-          if (!grouped[key]) grouped[key] = { ...i, qtd: 0 };
-          grouped[key].qtd += i.qtd;
-        });
-        tableData = Object.values(grouped);
-      }
-      const sortBy = document.getElementById('sortBy').value;
-      tableData.sort((a,b) => sortBy==='validadeDesc' ? b.diff-a.diff : (sortBy==='qtdDesc' ? b.qtd-a.qtd : a.diff-b.diff));
-      renderTable(tableData);
-    }
-
-    /* ── KPIs ── */
-    function updateKPIs(list) {
-      const s = { total:0, shortQty:0, pilhas:0, quebras:0, doacaoQty:0 };
-      list.forEach(i => {
-        s.total += i.qtd;
-        if (i.isDataCurta) s.shortQty += i.qtd;
-        if (i.operacao === 'DOACAO') s.doacaoQty += i.qtd;
-        else { if (i.tipo === 'PILHA') s.pilhas++; else s.quebras++; }
-      });
-      document.getElementById('kpiTotal').innerText = Math.round(s.total).toLocaleString('pt-BR');
-      document.getElementById('kpiDataCurtaPerc').innerText = s.total > 0 ? ((s.shortQty/s.total)*100).toFixed(1)+'%' : '0%';
-      document.getElementById('kpiPilhas').innerText = Math.round(s.pilhas).toLocaleString('pt-BR');
-      document.getElementById('kpiQuebras').innerText = Math.round(s.quebras).toLocaleString('pt-BR');
-      document.getElementById('kpiDoacao').innerText = Math.floor(s.doacaoQty / DONATION_PILE_BASE).toLocaleString('pt-BR');
-      document.getElementById('kpiDataCurtaInfo').innerText = `${Math.round(s.shortQty).toLocaleString('pt-BR')} un críticas`;
-    }
-
-    /* ── CHARTS ── */
-    function updateCharts(list) {
-      const s = { valMap:{ VENCIDO:0, URGENTE:0, CRITICO:0, ATENCAO:0, SEGURO:0 }, volMap:{}, brandTotal:{}, brandShort:{} };
-      list.forEach(i => {
-        s.valMap[i.validadeStatus] += i.qtd;
-        s.volMap[i.produto] = (s.volMap[i.produto] || 0) + i.qtd;
-        s.brandTotal[i.marca] = (s.brandTotal[i.marca] || 0) + i.qtd;
-        if (i.isDataCurta) s.brandShort[i.marca] = (s.brandShort[i.marca] || 0) + i.qtd;
-      });
-
-      createOrUpdateChart('chartValidade', 'doughnut', {
-        labels: ['Vencido','Urgente','Crítico','Atenção','Seguro'],
-        datasets: [{
-          data: [s.valMap.VENCIDO, s.valMap.URGENTE, s.valMap.CRITICO, s.valMap.ATENCAO, s.valMap.SEGURO].map(v => Math.round(v)),
-          backgroundColor: ['#1C1C1E','#FF3B30','#AF52DE','#FFCC00','#34C759'],
-          borderWidth: 0, cutout: '80%', hoverOffset: 4
-        }]
-      });
-
-      const brands = ['PANUTRIR','UNISABOR','MUFFATO','DEL GRANO','NOSSA PADARIA'];
-      const brandPercs = brands.map(b => ({
-        label: b,
-        val: s.brandTotal[b] > 0 ? ((s.brandShort[b]||0) / s.brandTotal[b] * 100) : 0
-      })).sort((a,b) => b.val - a.val);
-
-      createOrUpdateChart('chartMarcaDataCurta', 'bar', {
-        labels: brandPercs.map(x => x.label),
-        datasets: [{ label: '% Crítico', data: brandPercs.map(x => Math.round(x.val)), backgroundColor: '#007AFF', borderRadius: 12, borderSkipped: false }]
-      });
-
-      const top = Object.entries(s.volMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
-      createOrUpdateChart('chartTopSku', 'bar', {
-        labels: top.map(x => x[0]),
-        datasets: [{ label: 'Volume', data: top.map(x => Math.round(x[1])), backgroundColor: '#1C1C1E', borderRadius: 12, borderSkipped: false }]
-      });
-    }
-
-    function createOrUpdateChart(id, type, data) {
-      if (charts[id]) charts[id].destroy();
-      charts[id] = new Chart(document.getElementById(id), {
-        type, data,
-        options: {
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: type === 'doughnut',
-              position: 'bottom',
-              labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 9, weight: '700', family: 'Inter' }, padding: 14 }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(255,255,255,0.96)',
-              titleColor: '#1C1C1E', bodyColor: '#555',
-              borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1,
-              padding: 12, cornerRadius: 14, displayColors: false,
-              titleFont: { size: 11, weight: '800', family: 'Inter' },
-              bodyFont: { size: 10, weight: '600', family: 'Inter' },
-              callbacks: {
-                label: (ctx) => id === 'chartMarcaDataCurta'
-                  ? `${ctx.label}  ${ctx.parsed.y}%`
-                  : `${ctx.label}: ${(ctx.parsed.y || ctx.parsed).toLocaleString('pt-BR')}`
-              }
-            }
-          },
-          scales: type === 'bar' ? {
-            x: { grid:{ display:false }, ticks:{ font:{ size:8, weight:'700', family:'Inter' }, color:'#999' }, border:{ display:false } },
-            y: { display: false }
-          } : {}
-        }
-      });
-    }
-
-    /* ── TABLE RENDER ── */
-    function renderTable(list) {
-      tableBody.innerHTML = '';
-      list.slice(0, 100).forEach(item => {
-        const dtStr = item.validade
-          ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}`
-          : '-';
-        tableBody.innerHTML += `
-          <tr class="table-row">
-            <td class="px-8 py-4 text-center">
-              <span class="px-3 py-1 rounded-full text-[8px] font-black ${item.operacao==='DOACAO'?'status-doacao':'bg-black/5 text-gray-500'}">
-                ${item.operacao==='DOACAO'?'DOAÇÃO':'EXPEDIÇÃO'}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 rounded-full text-[8px] font-black ${item.tipo==='PILHA'?'status-pilha':'status-quebra'}">
-                ${item.tipo}
-              </span>
-            </td>
-            <td class="px-6 py-4 font-bold text-black text-[11px] leading-snug">${item.produto}</td>
-            <td class="px-6 py-4 text-center font-mono font-semibold text-gray-400 text-[10px]">${item.cod || '-'}</td>
-            <td class="px-6 py-4 text-center font-mono font-black text-black text-[11px]">
-              ${Math.round(item.qtd).toLocaleString('pt-BR')}
-              <span class="text-[8px] text-gray-300 font-semibold"> / ${item.lastro}</span>
-            </td>
-            <td class="px-6 py-4 text-center text-gray-400 text-[10px] font-bold">${dtStr}</td>
-            <td class="px-6 py-4 text-center">
-              <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase ${getValidityBadgeClass(item.validadeStatus)}">
-                ${item.validadeStatus}
-              </span>
-            </td>
-            <td class="px-8 py-4 text-right font-black text-[11px] ${item.isDataCurta?'text-[#FF3B30]':'text-black'}">
-              ${item.diff}d
-            </td>
-          </tr>`;
-      });
-    }
-
-    /* ── EXPORT: PILHAS ── */
-    async function exportarResumoPilhas() {
-      if (db.length === 0) return alert("Sem dados.");
-      const agrupado = {};
-      db.forEach(i => {
-        if (i.qtd === i.lastro) {
-          if (!agrupado[i.cod]) agrupado[i.cod] = { "Codigo": i.cod, "Nome do produto": i.produto, "Qtd Pilhas": 0 };
-          agrupado[i.cod]["Qtd Pilhas"] += 1;
-        }
-      });
-      const final = Object.values(agrupado);
-      if (final.length === 0) return alert("Nenhuma etiqueta de pilha fechada encontrada.");
-
-      const workbook = new ExcelJS.Workbook();
-      const ws = workbook.addWorksheet('Pilhas');
-      ws.columns = [
-        { header:'Codigo', key:'Codigo', width:10 },
-        { header:'Nome do produto', key:'Nome do produto', width:40 },
-        { header:'Qtd Pilhas', key:'Qtd Pilhas', width:12 }
-      ];
-      final.forEach(item => ws.addRow(item));
-      autoFitWorksheetColumns(ws);
-      const buf = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), 'Relatorio_Pilhas.xlsx');
-    }
-
-    /* ── EXPORT: QUEBRAS ── */
-    async function exportarListaQuebras() {
-      if (db.length === 0) return alert("Sem dados.");
-
-      const listaQuebras = db.filter(i => i.qtd < i.lastro);
-      if (listaQuebras.length === 0) return alert("Nenhuma quebra encontrada.");
-
-      const minDiff = Math.min(...listaQuebras.map(i => i.diff));
-
-      const rows = listaQuebras.map(i => {
-        const divisorCaixas    = i.produto.includes('HAMBURGUER') ? 17 : 19;
-        const unidadesPorCaixa = i.lastro / divisorCaixas;
-        const caixasInteiras   = Math.floor(i.qtd / unidadesPorCaixa);
-        const unidadesRestantes= Math.round(i.qtd % unidadesPorCaixa);
-        const isFantasma = i.qtd < 30 && i.diff === minDiff;
-
-        return {
-          "ETIQUETA": i.etiqueta || i.cod || "-",
-          "DATA":     i.validade ? i.validade.toLocaleDateString('pt-BR') : "-",
-          "NOME":     i.produto,
-          "CX":       caixasInteiras,
-          "UNDS":     unidadesRestantes,
-          "TOTAL":    Math.round(i.qtd),
-          "OBS":      isFantasma ? "ETIQUETA FANTASMA?" : ""
-        };
-      });
-
-      rows.sort((a,b) => {
-        if (a.OBS && !b.OBS) return -1;
-        if (!a.OBS && b.OBS) return 1;
-        return 0;
-      });
-
-      const workbook = new ExcelJS.Workbook();
-      const ws = workbook.addWorksheet('Quebras');
-      ws.columns = [
-        { header:'ETIQUETA', key:'ETIQUETA', width:16 },
-        { header:'DATA',     key:'DATA',     width:12 },
-        { header:'NOME',     key:'NOME',     width:40 },
-        { header:'CX',       key:'CX',       width:10 },
-        { header:'UNDS',     key:'UNDS',     width:10 },
-        { header:'TOTAL',    key:'TOTAL',    width:10 },
-        { header:'OBS',      key:'OBS',      width:22 }
-      ];
-
-      ws.getRow(1).eachCell(cell => {
-        cell.font = { bold:true, color:{ argb:'FFFFFFFF' } };
-        cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1C1C1E' } };
-        cell.alignment = { horizontal:'center' };
-      });
-
-      rows.forEach(item => {
-        const row = ws.addRow(item);
-        if (item.OBS === 'ETIQUETA FANTASMA?') {
-          row.eachCell(cell => {
-            cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFF0CC' } };
-            cell.font = { bold:true, color:{ argb:'FF8B5E00' } };
-          });
-        }
-      });
-
-      autoFitWorksheetColumns(ws);
-      const buf = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), 'Relatorio_Quebras.xlsx');
-    }
-
-    /* ── EXPORT: DATAS CURTAS ── */
-    async function exportarDataCurta() {
-      const raw = db.filter(i => i.isDataCurta && i.cod !== DONATION_CODE && i.qtd >= 10);
-      if (raw.length === 0) return alert("Sem dados.");
-      const agrupado = {};
-      raw.forEach(i => {
+  const tableData = useMemo(() => {
+    let data = filtered;
+    if (groupBy === 'DATA') {
+      const grouped: Record<string, StockItem> = {};
+      filtered.forEach(i => {
         const key = i.cod + '_' + i.diff;
-        if (!agrupado[key]) agrupado[key] = { COD:i.cod, PRODUTO:i.produto, QTD_TOTAL:0, VALIDADE:i.validade ? i.validade.toLocaleDateString('pt-BR') : '', PRAZO:i.diff };
-        agrupado[key].QTD_TOTAL += i.qtd;
+        if (!grouped[key]) grouped[key] = { ...i, qtd: 0, gradesOcupadas: 0 };
+        grouped[key].qtd += i.qtd;
       });
-      const workbook = new ExcelJS.Workbook();
-      const ws = workbook.addWorksheet('Datas Curtas');
-      ws.columns = [
-        {header:'COD',key:'COD',width:10},{header:'PRODUTO',key:'PRODUTO',width:40},
-        {header:'QTD',key:'QTD_TOTAL',width:10},{header:'VALIDADE',key:'VALIDADE',width:15},
-        {header:'DIAS',key:'PRAZO',width:10},{header:'STATUS',key:'STATUS',width:20}
-      ];
-      const itens = Object.values(agrupado).filter(it => it.QTD_TOTAL >= 10).sort((a,b)=>a.PRAZO-b.PRAZO);
-      if (itens.length === 0) return alert("Sem dados.");
-      itens.forEach(item => {
-        let st = "ATENÇÃO", col = "FFFFCC00";
-        if (item.PRAZO <= 19) { st = "URGENTE"; col = "FFED7D31"; }
-        else if (item.PRAZO <= 22) { st = "CRÍTICO"; col = "FFFF0000"; }
-        const r = ws.addRow({...item, STATUS: st});
-        r.eachCell(c => {
-          c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:col } };
-          c.font = { bold:true, color:{ argb: col==='FFFFCC00' ? 'FF000000':'FFFFFFFF' } };
-        });
-      });
-      const buf = await workbook.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), 'Datas_Curtas.xlsx');
+      data = Object.values(grouped).map(item => ({
+        ...item,
+        gradesOcupadas: calcularGradesOcupadas(item)
+      }));
     }
+    const sorted = [...data];
+    sorted.sort((a, b) => {
+      if (sortBy === 'validadeDesc') return b.diff - a.diff;
+      if (sortBy === 'qtdDesc') return b.qtd - a.qtd;
+      if (sortBy === 'gradesDesc') return b.gradesOcupadas - a.gradesOcupadas;
+      return a.diff - b.diff;
+    });
+    return sorted;
+  }, [filtered, groupBy, sortBy]);
 
-    /* ── EXPORT: RELATÓRIO TRANSFERÊNCIA ── */
-    async function exportarRelatorioTransferencia() {
-      const res = {};
-      db.forEach(i => {
-        if (!res[i.cod]) res[i.cod] = { A: getCodigoExcelValue(i.cod), B: i.produto, C: 0 };
-        res[i.cod].C += i.qtd;
-      });
-      const wb = new ExcelJS.Workbook();
-      const ws = wb.addWorksheet('Estoque');
-      ws.columns = [
-        {header:'COD',key:'A',width:10},{header:'Produto',key:'B',width:40},
-        {header:'ESTOQUE',key:'C',width:12},{header:'T1',key:'D',width:10},
-        {header:'T2',key:'E',width:10},{header:'T3',key:'F',width:10},
-        {header:'T4',key:'G',width:10},{header:'T5',key:'H',width:10},
-        {header:'TOTAL',key:'I',width:12}
-      ];
-      ws.getColumn('A').numFmt = '0';
-      Object.values(res).forEach((it, idx) => {
-        const r = ws.addRow({...it, D:0, E:0, F:0, G:0, H:0});
-        r.getCell('I').value = { formula:`C${idx+2}+D${idx+2}+E${idx+2}+F${idx+2}+G${idx+2}+H${idx+2}` };
-      });
-      const buf = await wb.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), 'Relatorio_Completo.xlsx');
-    }
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center flex-col z-[200]" style={{ background: 'rgba(242,242,247,0.55)', backdropFilter: 'blur(32px)' }}>
+        <div className="w-9 h-9 border-[2.5px] rounded-full animate-spin mb-4" style={{ borderColor: 'rgba(0,0,0,0.08)', borderTopColor: '#1C1C1E' }} />
+        <p className="text-xs font-semibold" style={{ color: '#8E8E93' }}>Sincronizando dados…</p>
+      </div>
+    );
+  }
 
-    function gerarExcel(d, n) {
-      const ws = XLSX.utils.json_to_sheet(d);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Dados");
-      XLSX.writeFile(wb, `${n}.xlsx`);
-    }
-  </script>
-</body>
-</html>
+  return (
+    <>
+      <input type="file" ref={fileRef} accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFile} />
+      
+      {/* NAV */}
+      <nav className="nav-bar px-8 py-3.5 flex justify-between items-center sticky top-0 z-50">
+        <div className="flex items-center gap-5">
+          <span className="font-black text-[1.15rem] tracking-tighter" style={{ color: '#1C1C1E' }}>PANUTRIR</span>
+          <div className="h-5 w-px bg-foreground/10 mx-1" />
+          <div>
+            <h1 className="text-[11px] font-black tracking-tight leading-tight" style={{ color: '#1C1C1E' }}>Gestão de Estoque</h1>
+            <p className="text-[9px] font-semibold tracking-wide uppercase" style={{ color: '#AEAEB2' }}>CD Matriz Panutrir</p>
+          </div>
+        </div>
+      </nav>
+
+      {db.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-[85vh] text-center px-4">
+          <h2 className="text-[2rem] font-black tracking-tighter leading-none mb-3" style={{ color: '#1C1C1E' }}>Aguardando base de dados Inflow.</h2>
+          <p className="text-sm max-w-xs font-medium leading-relaxed" style={{ color: '#AEAEB2' }}>
+            Importe o relatório de etiquetas gerado pelo sistema Inflow para começar.
+          </p>
+          <div className="mt-10">
+            <button onClick={() => fileRef.current?.click()} className="upload-btn">Importar Dados</button>
+          </div>
+        </div>
+      ) : (
+        <main className="px-8 pt-8 pb-16 max-w-[1760px] mx-auto">
+          <KpiCards data={filtered} />
+          <StockCharts data={filtered} />
+          <FilterPanel
+            quickFilter={quickFilter} setQuickFilter={setQuickFilter}
+            search={search} setSearch={setSearch}
+            marca={marca} setMarca={setMarca}
+            operacao={operacao} setOperacao={setOperacao}
+            tipo={tipo} setTipo={setTipo}
+            validade={validade} setValidade={setValidade}
+            sortBy={sortBy} setSortBy={setSortBy}
+            groupBy={groupBy} setGroupBy={setGroupBy}
+            onExportDataCurta={() => exportarDataCurta(db)}
+            onExportPilhas={() => exportarResumoPilhas(db)}
+            onExportQuebras={() => exportarListaQuebras(db)}
+            onExportRelatorio={() => exportarRelatorioTransferencia(db)}
+          />
+          <StockTable data={tableData} />
+        </main>
+      )}
+    </>
+  );
+}
