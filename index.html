@@ -384,7 +384,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0v12m0-12l-8 8-4-4-6 6"></path></svg>
                 </div>
             </div>
-            <p class="text-[10px] mt-2 text-gray-500 font-bold tracking-wide">Variação líquida de estoque vs. dia anterior</p>
+            <p class="text-[10px] mt-2 text-gray-500 font-bold tracking-wide">Variação líquida de estoque vs. base anterior</p>
         </div>
 
         <div class="kpi-card border-l-[3px] border-l-[#FF3B30]">
@@ -490,7 +490,7 @@
 
     <div id="comparacao-section" class="glass-card p-7 rounded-[2.5rem] mb-7 hidden">
       <h3 class="text-[11px] font-black text-black mb-5 flex items-center gap-2.5 tracking-widest uppercase">
-        <span class="chart-title-dot bg-[#34C759]"></span>Comparação com dia anterior
+        <span class="chart-title-dot bg-[#34C759]"></span>Comparação com base anterior
         <span id="comparacao-data-label" class="text-[9px] text-gray-400 font-bold ml-auto tracking-wide normal-case"></span>
       </h3>
       <div id="comparacao-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
@@ -772,9 +772,13 @@
         currentImportLabel = `${dia}/${mes}/${ano} às ${hr}:${mn} (Autogerado)`;
       }
 
+      // CORREÇÃO DO BADGE MOBILE
+      const labelParts = currentImportLabel.split(' às ');
       document.getElementById('nav-date-badge').innerHTML = `
-        <span class="px-2.5 py-1 rounded-full bg-white/60 border border-black/10 text-[9px] font-black tracking-widest text-gray-700 uppercase ml-2 flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#34C759] shadow-[0_0_4px_rgba(52,199,89,0.8)]"></span> BASE: ${currentImportLabel}
+        <span class="px-2 sm:px-2.5 py-1 rounded-full bg-white/60 border border-black/10 text-[8px] sm:text-[9px] font-black tracking-widest text-gray-700 uppercase ml-1 sm:ml-2 flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#34C759] shadow-[0_0_4px_rgba(52,199,89,0.8)] shrink-0"></span> 
+          <span class="sm:hidden">BASE: ${labelParts[0].slice(0,5)}</span>
+          <span class="hidden sm:inline">BASE: ${currentImportLabel}</span>
         </span>
       `;
 
@@ -823,14 +827,13 @@
       applyFilters();
 
       renderNotificacoes();
+      renderTendenciaKpisGlobais();
       renderComparacao();
-      renderTendenciaKpisGlobais(); // NOVA FUNÇÃO AQUI
       renderTendencia();
       verificarAlertaUrgente();
     }
 
     function applyFilters() {
-      // Usa qualquer uma das duas barras (estão sincronizadas)
       const search = normalizeText(document.getElementById('topSearchInput').value); 
       const fMarca   = document.getElementById('filterMarca').value;
       const fOp      = document.getElementById('filterOperation').value;
@@ -1015,7 +1018,7 @@
     }
 
     function renderTable(list) {
-      const searchTerm = normalizeText(document.getElementById('topSearchInput').value); // Usa a busca principal para o Highlight
+      const searchTerm = normalizeText(document.getElementById('topSearchInput').value); 
       tableBody.innerHTML = '';
       list.slice(0, 100).forEach(item => {
         const dtStr = item.validade
@@ -1138,22 +1141,37 @@
       }).join('');
     }
 
-    // ── LÓGICA DOS NOVOS KPIs TOP 24H ──
+    // ── LÓGICA DE COMPARAÇÃO "ATUAL VS ANTERIOR" ──
+    function getComparisonData() {
+        const hist = getHistorico();
+        if (hist.length < 2) return null;
+        const sorted = [...hist].sort((a,b) => a.data.localeCompare(b.data));
+        
+        // Acha a posição da base ATUALMENTE importada/selecionada
+        const idxAtual = sorted.findIndex(h => h.data === currentImportDateStr);
+        
+        // Só consegue comparar se existir algo ANTES da base atual no tempo
+        if (idxAtual <= 0) return null; 
+        
+        return { atual: sorted[idxAtual], anterior: sorted[idxAtual - 1] };
+    }
+
     function renderTendenciaKpisGlobais() {
-      const hist = getHistorico();
+      const comp = getComparisonData();
       const saldoVolEl = document.getElementById('kpi-saldo-volume');
       const saldoArrEl = document.getElementById('kpi-saldo-arrow');
       const alertasEl = document.getElementById('kpi-novos-alertas');
       const alertasArrEl = document.getElementById('kpi-alertas-arrow');
 
-      if (hist.length < 2) {
+      if (!comp) {
           saldoVolEl.innerText = '--';
           alertasEl.innerText = '--';
+          saldoArrEl.classList.add('hidden');
+          alertasArrEl.classList.add('hidden');
           return;
       }
 
-      const atual = hist[hist.length - 1];
-      const anterior = hist[hist.length - 2];
+      const { atual, anterior } = comp;
 
       // KPI: Saldo de Volume
       const diffVol = atual.total - anterior.total;
@@ -1175,12 +1193,10 @@
     }
 
     function renderComparacao() {
-      const hist = getHistorico();
-      if (hist.length < 2) { document.getElementById('comparacao-section').classList.add('hidden'); return; }
+      const comp = getComparisonData();
+      if (!comp) { document.getElementById('comparacao-section').classList.add('hidden'); return; }
       
-      const sorted = [...hist].sort((a,b) => a.data.localeCompare(b.data));
-      const atual  = sorted[sorted.length - 1];
-      const anterior = sorted[sorted.length - 2];
+      const { atual, anterior } = comp;
 
       const campos = [
         { label: 'Estoque Total', key: 'total', suffix: ' un', higherBetter: true },
@@ -1190,7 +1206,7 @@
       ];
 
       const pAnt = anterior.data.split('-');
-      document.getElementById('comparacao-data-label').textContent = `vs Dia ${pAnt[2]}/${pAnt[1]}`;
+      document.getElementById('comparacao-data-label').textContent = `vs base ${pAnt[2]}/${pAnt[1]}`;
 
       document.getElementById('comparacao-grid').innerHTML = campos.map(c => {
         const va = atual[c.key];
