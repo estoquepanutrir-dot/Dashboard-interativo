@@ -31,9 +31,9 @@
       min-height: 100vh;
     }
     .nav-bar {
-      background: rgba(242, 242, 247, 0.50);
-      backdrop-filter: saturate(180%) blur(28px);
-      -webkit-backdrop-filter: saturate(180%) blur(28px);
+      background: rgba(242, 242, 247, 0.35);
+      backdrop-filter: saturate(140%) blur(12px);
+      -webkit-backdrop-filter: saturate(140%) blur(12px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.30);
       box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.03);
     }
@@ -796,6 +796,11 @@
         { header:'Nome do produto', key:'Nome do produto', width:40 },
         { header:'Qtd Pilhas', key:'Qtd Pilhas', width:12 }
       ];
+      ws.getRow(1).eachCell(cell => {
+        cell.font = { bold:true, color:{ argb:'FF1C1C1E' } };
+        cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFD9D9D9' } };
+        cell.alignment = { horizontal:'center' };
+      });
       final.forEach(item => ws.addRow(item));
       autoFitWorksheetColumns(ws);
       const buf = await workbook.xlsx.writeBuffer();
@@ -847,8 +852,8 @@
       ];
 
       ws.getRow(1).eachCell(cell => {
-        cell.font = { bold:true, color:{ argb:'FFFFFFFF' } };
-        cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FF1C1C1E' } };
+        cell.font = { bold:true, color:{ argb:'FF1C1C1E' } };
+        cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFD9D9D9' } };
         cell.alignment = { horizontal:'center' };
       });
 
@@ -883,17 +888,24 @@
         {header:'QTD',key:'QTD_TOTAL',width:10},{header:'VALIDADE',key:'VALIDADE',width:15},
         {header:'DIAS',key:'PRAZO',width:10},{header:'STATUS',key:'STATUS',width:20}
       ];
+      ws.getRow(1).eachCell(cell => { cell.font = { bold:true, color:{ argb:'FF1C1C1E' } }; cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFD9D9D9' } }; cell.alignment = { horizontal:'center' }; });
       const itens = Object.values(agrupado).filter(it => it.QTD_TOTAL >= 10).sort((a,b)=>a.PRAZO-b.PRAZO);
       if (itens.length === 0) return alert("Sem dados.");
       itens.forEach(item => {
-        let st = "ATENÇÃO", col = "FFFFCC00";
-        if (item.PRAZO <= 19) { st = "URGENTE"; col = "FFED7D31"; }
-        else if (item.PRAZO <= 22) { st = "CRÍTICO"; col = "FFFF0000"; }
+        let st, col;
+        if (item.PRAZO <= 19) { st = "URGENTE";  col = "FFED7D31"; }
+        else if (item.PRAZO <= 21) { st = "CRÍTICO";  col = "FFFF0000"; }
+        else if (item.PRAZO <= 23) { st = "ATENÇÃO";  col = "FFFFCC00"; }
+        else                       { st = "NORMAL";   col = null; }
         const r = ws.addRow({...item, STATUS: st});
-        r.eachCell(c => {
-          c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:col } };
-          c.font = { bold:true, color:{ argb: col==='FFFFCC00' ? 'FF000000':'FFFFFFFF' } };
-        });
+        if (col) {
+          r.eachCell(c => {
+            c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:col } };
+            c.font = { bold:true, color:{ argb: col==='FFFFCC00' ? 'FF000000':'FFFFFFFF' } };
+          });
+        } else {
+          r.eachCell(c => { c.font = { bold:true }; });
+        }
       });
       const buf = await workbook.xlsx.writeBuffer();
       saveAs(new Blob([buf]), 'Datas_Curtas.xlsx');
@@ -914,10 +926,11 @@
         {header:'T4',key:'G',width:10},{header:'T5',key:'H',width:10},
         {header:'TOTAL',key:'I',width:12}
       ];
+      ws.getRow(1).eachCell(cell => { cell.font = { bold:true, color:{ argb:'FF1C1C1E' } }; cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFD9D9D9' } }; cell.alignment = { horizontal:'center' }; });
       ws.getColumn('A').numFmt = '0';
       Object.values(res).forEach((it, idx) => {
-        const r = ws.addRow({...it, D:0, E:0, F:0, G:0, H:0});
-        r.getCell('I').value = { formula:`C${idx+2}+D${idx+2}+E${idx+2}+F${idx+2}+G${idx+2}+H${idx+2}` };
+        const r = ws.addRow({...it, D:null, E:null, F:null, G:null, H:null});
+        r.getCell('I').value = { formula:`SUM(C${idx+2},IFERROR(D${idx+2},0),IFERROR(E${idx+2},0),IFERROR(F${idx+2},0),IFERROR(G${idx+2},0),IFERROR(H${idx+2},0))` };
       });
       const buf = await wb.xlsx.writeBuffer();
       saveAs(new Blob([buf]), 'Relatorio_Completo.xlsx');
