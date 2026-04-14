@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestão de Estoque | CD MATRIZ PANUTRIR</title>
+  <link rel="manifest" id="pwaManifest" />
+  <meta name="theme-color" content="#ECECF1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Panutrir CD" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -127,6 +131,8 @@
       outline: none;
       width: 100%;
       transition: background 0.15s ease, box-shadow 0.15s ease;
+    }
+    select.ios-input {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23aaa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 0.9rem center;
@@ -134,6 +140,7 @@
     }
     .ios-input:focus { background-color: rgba(0,0,0,0.08); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
     .ios-input.highlight { background: rgba(0,0,0,0.12); font-weight: 800; }
+    
     .table-row { transition: background 0.12s ease; }
     .table-row:hover { background: rgba(0,0,0,0.018); }
     .chart-title-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
@@ -160,44 +167,159 @@
     .upload-btn:hover { background: #3a3a3c; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.28); }
     .upload-btn:active { transform: scale(0.98); }
     * { font-style: normal !important; text-decoration: none !important; }
-    .grade-tooltip {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
+    
+    /* ── NOTIFICAÇÕES ──────────────────────────────── */
+    #notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #FF3B30; color: #fff;
+      font-size: 9px; font-weight: 900;
+      border-radius: 99px; min-width: 17px; height: 17px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px; line-height: 1;
+      display: none;
     }
-    .grade-tooltip .grade-tooltip-content {
-      visibility: hidden;
-      width: max-content;
-      background-color: #1C1C1E;
-      color: #fff;
-      text-align: left;
-      border-radius: 8px;
-      padding: 4px 12px;
-      position: absolute;
-      z-index: 100;
-      bottom: 105%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 11px;
-      opacity: 0;
-      transition: opacity 0.15s;
-      box-shadow:0 1.5px 8px rgba(0,0,0,0.18);
-      white-space: nowrap;
+    #notif-btn { position: relative; cursor: pointer; }
+    #notif-drawer {
+      position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
+      background: rgba(248,248,252,0.97);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      box-shadow: -8px 0 40px rgba(0,0,0,0.10);
+      z-index: 300; transition: right 0.32s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column;
     }
-    .grade-tooltip:hover .grade-tooltip-content {
-      visibility: visible;
-      opacity: 1;
+    #notif-drawer.open { right: 0; }
+    #notif-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.12);
+      z-index: 299; display: none; backdrop-filter: blur(2px);
     }
+    #notif-overlay.open { display: block; }
+    .notif-item {
+      background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 1.25rem; padding: 0.9rem 1.1rem; margin-bottom: 0.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+    .notif-item.vencido { border-left: 3px solid #1C1C1E; }
+    .notif-item.urgente { border-left: 3px solid #FF3B30; }
+    .notif-item.critico { border-left: 3px solid #AF52DE; }
+
+    /* ── HISTÓRICO / COMPARAÇÃO ───────────────────── */
+    #historico-drawer {
+      position: fixed; top: 0; left: -460px; width: 440px; height: 100vh;
+      background: rgba(248,248,252,0.97);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border-right: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 8px 0 40px rgba(0,0,0,0.10);
+      z-index: 300; transition: left 0.32s cubic-bezier(0.4,0,0.2,1);
+      display: flex; flex-direction: column;
+    }
+    #historico-drawer.open { left: 0; }
+    .kpi-delta-up   { font-size: 9px; font-weight: 900; color: #34C759; margin-left: 4px; }
+    .kpi-delta-down { font-size: 9px; font-weight: 900; color: #FF3B30; margin-left: 4px; }
+    .kpi-delta-eq   { font-size: 9px; font-weight: 900; color: #aaa;    margin-left: 4px; }
+
+    /* ── ALERTA VENCIDOS ──────────────────────────── */
+    #alerta-modal {
+      position: fixed; inset: 0; z-index: 400;
+      display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+    }
+    #alerta-modal.open { display: flex; }
+    #alerta-box {
+      background: #fff; border-radius: 2rem; padding: 2rem;
+      max-width: 480px; width: 90%; max-height: 80vh;
+      overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.22);
+      border-top: 4px solid #FF3B30;
+    }
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)}
+      60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
+    }
+    .shake { animation: shake 0.45s ease; }
+
+    /* ── BUSCA HIGHLIGHT OTIMIZADO ──────────────────────────── */
+    mark.hl {
+      background: #FFCC00; 
+      color: #1C1C1E;
+      border-radius: 3px; 
+      padding: 0.1em 0.25em;
+      font-weight: 900;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    /* ── TENDÊNCIA ────────────────────────────────── */
+    #tendencia-section { display: none; }
+
+    /* ── HISTÓRICO ITEMS ──────────────────────────── */
+    .hist-item {
+      background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 1rem; padding: 0.75rem 1rem; margin-bottom: 0.4rem;
+      cursor: pointer; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .hist-item:hover { background: rgba(255,255,255,0.95); }
+    .hist-item.active-hist { border: 1.5px solid #007AFF; }
   </style>
 </head>
 <body>
-  <!-- LOADER -->
+  <div id="alerta-modal">
+    <div id="alerta-box">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+        <div style="width:36px;height:36px;border-radius:50%;background:#FF3B30;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div>
+          <h2 style="font-size:14px;font-weight:900;color:#1C1C1E;margin:0;letter-spacing:-0.02em;">Atenção: produtos críticos</h2>
+          <p style="font-size:10px;color:#999;font-weight:600;margin:0;">Itens vencidos ou urgentes detectados nesta importação</p>
+        </div>
+      </div>
+      <div id="alerta-lista" style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem;"></div>
+      <button onclick="fecharAlerta()" style="width:100%;padding:0.75rem;background:#1C1C1E;color:#fff;border:none;border-radius:99px;font-size:12px;font-weight:900;cursor:pointer;letter-spacing:0.04em;">
+        ENTENDI
+      </button>
+    </div>
+  </div>
+
+  <div id="notif-overlay" onclick="toggleNotif()"></div>
+  <div id="notif-drawer">
+    <div style="padding:1.5rem 1.5rem 0.75rem;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <h2 style="font-size:13px;font-weight:900;margin:0;letter-spacing:-0.01em;">Alertas de Validade</h2>
+        <p id="notif-subtitle" style="font-size:10px;color:#999;font-weight:600;margin:0;"></p>
+      </div>
+      <button onclick="toggleNotif()" style="background:rgba(0,0,0,0.06);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="notif-list" style="flex:1;overflow-y:auto;padding:1rem 1.25rem;"></div>
+  </div>
+
+  <div id="hist-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.12);z-index:299;display:none;backdrop-filter:blur(2px);" onclick="toggleHistorico()"></div>
+  <div id="historico-drawer">
+    <div style="padding:1.5rem 1.5rem 0.75rem;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <div>
+        <h2 style="font-size:13px;font-weight:900;margin:0;letter-spacing:-0.01em;">Histórico de Importações</h2>
+        <p style="font-size:10px;color:#999;font-weight:600;margin:0;">Últimos 7 dias salvos (1 snapshot por dia)</p>
+      </div>
+      <button onclick="toggleHistorico()" style="background:rgba(0,0,0,0.06);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="historico-list" style="flex:1;overflow-y:auto;padding:1rem 1.25rem;"></div>
+    <div style="padding:1rem 1.25rem;border-top:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
+      <button onclick="limparHistorico()" style="width:100%;padding:0.6rem;background:transparent;border:1px solid rgba(0,0,0,0.1);border-radius:99px;font-size:10px;font-weight:900;cursor:pointer;color:#FF3B30;letter-spacing:0.04em;">
+        LIMPAR HISTÓRICO
+      </button>
+    </div>
+  </div>
+
   <div id="loader" class="loading-overlay">
     <div class="spinner mb-4"></div>
     <p class="text-xs font-semibold text-gray-500 tracking-tight">Sincronizando dados…</p>
   </div>
 
-  <!-- NAV -->
   <nav class="nav-bar px-8 py-3.5 flex justify-between items-center sticky top-0 z-50">
     <div class="flex items-center gap-5">
       <img src="assets/logo.png" alt="PANUTRIR" class="logo-nav"
@@ -208,13 +330,22 @@
         <h1 class="text-[11px] font-black tracking-tight text-black leading-tight">Gestão de Estoque</h1>
         <p class="text-[9px] text-gray-400 font-semibold tracking-wide uppercase">CD Matriz Panutrir</p>
       </div>
+      <div id="nav-date-badge"></div>
     </div>
     <div class="flex items-center gap-2">
+      <button id="hist-btn" onclick="toggleHistorico()" title="Histórico de importações"
+        style="display:none;position:relative;background:rgba(0,0,0,0.05);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
+      <button id="notif-btn" onclick="toggleNotif()" title="Alertas de validade"
+        style="display:none;position:relative;background:rgba(0,0,0,0.05);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span id="notif-badge"></span>
+      </button>
       <input type="file" id="fileUpload" accept=".csv, .xlsx, .xls" class="hidden" />
     </div>
   </nav>
 
-  <!-- EMPTY VIEW -->
   <div id="emptyView" class="flex flex-col items-center justify-center h-[85vh] text-center px-4">
     <img src="assets/logo.png" alt="PANUTRIR" class="logo-main mb-10 mx-auto grayscale">
     <h2 class="text-[2rem] font-black text-black tracking-tighter leading-none mb-3">Aguardando base de dados Inflow.</h2>
@@ -226,14 +357,56 @@
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD -->
   <main id="mainContent" class="px-8 pt-8 pb-16 max-w-[1760px] mx-auto hidden">
 
-    <!-- KPI ROW -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-5 mb-7">
-      <!-- xl:grid-cols-6 -->
+    <div class="glass-card rounded-[2rem] p-3 mb-7 flex items-center gap-3 shadow-sm transition-all focus-within:ring-2 focus-within:ring-blue-500/20">
+      <div class="bg-[#1C1C1E] p-2.5 rounded-xl text-white flex-shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </div>
+      <input id="topSearchInput" type="text" placeholder="Pesquisa Global: Procure por nome do produto, lote ou código da etiqueta..." class="w-full bg-transparent border-none outline-none text-sm font-semibold text-gray-800 placeholder-gray-400 h-10 px-2" />
+      <button onclick="document.getElementById('topSearchInput').value=''; document.getElementById('searchInput').value=''; applyFilters();" class="text-gray-400 hover:text-gray-600 px-3 hidden" id="clearSearchBtn">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
 
-      <!-- Estoque Total -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
+        <div class="kpi-card border-l-[3px] border-l-[#007AFF]">
+            <div class="kpi-dot bg-[#007AFF]"></div>
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Saldo de Movimentação (24h)</p>
+                    <div class="flex items-baseline gap-2">
+                        <h3 id="kpi-saldo-volume" class="text-[2.5rem] font-black text-black tracking-tighter leading-none">--</h3>
+                        <span id="kpi-saldo-arrow" class="text-[10px] font-black uppercase tracking-wider hidden"></span>
+                    </div>
+                </div>
+                <div class="p-3 rounded-2xl bg-blue-50 text-[#007AFF]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0v12m0-12l-8 8-4-4-6 6"></path></svg>
+                </div>
+            </div>
+            <p class="text-[10px] mt-2 text-gray-500 font-bold tracking-wide">Variação líquida de estoque vs. dia anterior</p>
+        </div>
+
+        <div class="kpi-card border-l-[3px] border-l-[#FF3B30]">
+            <div class="kpi-dot bg-[#FF3B30]"></div>
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Crescimento de Risco (24h)</p>
+                    <div class="flex items-baseline gap-2">
+                        <h3 id="kpi-novos-alertas" class="text-[2.5rem] font-black text-black tracking-tighter leading-none">--</h3>
+                        <span id="kpi-alertas-arrow" class="text-[10px] font-black uppercase tracking-wider hidden"></span>
+                    </div>
+                </div>
+                <div class="p-3 rounded-2xl bg-red-50 text-[#FF3B30]">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+            </div>
+            <p class="text-[10px] mt-2 text-gray-500 font-bold tracking-wide">Variação de itens entrando na zona Urgente/Vencido</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-5 mb-7">
+
       <div class="kpi-card border-l-[3px] border-l-black">
         <div class="kpi-dot bg-black"></div>
         <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Estoque Total</p>
@@ -241,7 +414,6 @@
         <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Unidades no CD</span>
       </div>
 
-      <!-- % Data Curta -->
       <div class="kpi-card border-l-[3px] border-l-[#FF9500]">
         <div class="kpi-dot bg-[#FF9500]"></div>
         <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">% Data Curta</p>
@@ -249,7 +421,6 @@
         <span id="kpiDataCurtaInfo" class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Vencimento próximo</span>
       </div>
 
-      <!-- Pilhas -->
       <div class="kpi-card border-l-[3px] border-l-[#34C759]">
         <div class="kpi-dot bg-[#34C759]"></div>
         <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Pilhas</p>
@@ -257,7 +428,6 @@
         <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Quantidade de pilhas</span>
       </div>
 
-      <!-- Quebras -->
       <div class="kpi-card border-l-[3px] border-l-[#FFCC00]">
         <div class="kpi-dot bg-[#FFCC00]"></div>
         <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Quebras</p>
@@ -265,7 +435,6 @@
         <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Qtd de quebras</span>
       </div>
 
-      <!-- Doação -->
       <div class="kpi-card border-l-[3px] border-l-[#5856D6]">
         <div class="kpi-dot bg-[#5856D6]"></div>
         <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Doação</p>
@@ -273,17 +442,14 @@
         <span id="kpiDoacaoInfo" class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Pilhas de doação</span>
       </div>
 
-      <!-- Grades Ocupadas -->
       <div class="kpi-card border-l-[3px] border-l-[#1778F2]">
         <div class="kpi-dot bg-[#1778F2]"></div>
         <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Grades Ocupadas</p>
         <h2 id="kpiGradesOcupadas" class="text-[2.5rem] font-black text-[#1778F2] tracking-tighter leading-none">0</h2>
         <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Total grades ocupadas</span>
       </div>
-      <!-- Removido KPI de Contagem de Grades -->
     </div>
 
-    <!-- KPI URGÊNCIA DE ETIQUETAS -->
     <div id="kpiUrgenciaEtiquetasSection" class="glass-card rounded-[2.5rem] p-7 mb-7 hidden">
       <h3 class="text-[11px] font-black text-black mb-5 flex items-center gap-2.5 tracking-widest uppercase">
         <span class="chart-title-dot bg-[#FF3B30]"></span>Urgência de Etiquetas
@@ -293,7 +459,6 @@
       </div>
     </div>
 
-    <!-- CHARTS ROW -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-7">
       <div class="glass-card p-7 rounded-[2.5rem]">
         <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
@@ -315,11 +480,25 @@
       </div>
     </div>
 
-    <!-- FILTER PANEL -->
+    <div id="tendencia-section" class="glass-card p-7 rounded-[2.5rem] mb-7">
+      <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
+        <span class="chart-title-dot bg-[#5856D6]"></span>Tendência de Datas Curtas (%)
+        <span class="text-[9px] text-gray-400 font-bold ml-auto tracking-wide normal-case">últimos dias importados</span>
+      </h3>
+      <div class="h-48"><canvas id="chartTendencia"></canvas></div>
+    </div>
+
+    <div id="comparacao-section" class="glass-card p-7 rounded-[2.5rem] mb-7 hidden">
+      <h3 class="text-[11px] font-black text-black mb-5 flex items-center gap-2.5 tracking-widest uppercase">
+        <span class="chart-title-dot bg-[#34C759]"></span>Comparação com dia anterior
+        <span id="comparacao-data-label" class="text-[9px] text-gray-400 font-bold ml-auto tracking-wide normal-case"></span>
+      </h3>
+      <div id="comparacao-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+    </div>
+
     <div class="glass-card rounded-[2.5rem] p-7 mb-7">
       <div class="flex flex-col gap-6">
 
-        <!-- Quick filters + download buttons -->
         <div class="flex flex-wrap gap-2 items-center">
           <button class="filter-btn px-5 py-2 bg-white/60 text-gray-700 text-[10px] rounded-full active" data-quick="TODOS">TODOS</button>
           <button class="filter-btn px-5 py-2 bg-white/60 text-[#FF9500] text-[10px] rounded-full" data-quick="DATA_CURTA">DATA CURTA</button>
@@ -337,11 +516,13 @@
           </div>
         </div>
         <div class="section-sep"></div>
-        <!-- Field filters -->
         <div class="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-7 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Buscar</label>
-            <input id="searchInput" type="text" placeholder="Produto ou código…" class="ios-input" />
+            <div class="relative w-full">
+               <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+               <input id="searchInput" type="text" placeholder="Filtro rápido..." class="ios-input !pl-9" />
+            </div>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Marca</label>
@@ -401,7 +582,6 @@
       </div>
     </div>
 
-    <!-- TABLE -->
     <div class="glass-card rounded-[2.5rem] overflow-hidden">
       <div class="overflow-auto">
         <table class="w-full text-left text-xs min-w-[1320px]">
@@ -424,7 +604,9 @@
   </main>
 
   <script>
-    // Nova função de cálculo de grades ocupadas considerando grades de uma unidade e somando ao total
+    let currentImportDateStr = '';
+    let currentImportLabel = '';
+
     function calcularGradesOcupadas(db) {
       let total = 0;
       let gradesDeUmaUnidade = 0;
@@ -433,29 +615,19 @@
           total += 19;
         } else if (i.tipo === 'QUEBRA') {
           const grades = Math.ceil(i.qtd / (i.lastro || 1));
-          if (grades === 1) {
-            gradesDeUmaUnidade += 1;
-          }
+          if (grades === 1) gradesDeUmaUnidade += 1;
           total += grades;
         }
       });
-      // As grades de uma unidade já estão incluídas no total acima, nenhuma ação adicional necessária além de somar normalmente.
       return total;
     }
 
-    // Retorna o número de grades ocupadas por um item específico conforme regra
     function gradesDoItem(item) {
-      if (item.tipo === "PILHA") {
-        return 19;
-      } else if (item.tipo === "QUEBRA") {
-        return Math.ceil(item.qtd / (item.lastro || 1));
-      }
+      if (item.tipo === "PILHA") return 19;
+      if (item.tipo === "QUEBRA") return Math.ceil(item.qtd / (item.lastro || 1));
       return 0;
     }
 
-    // Removido: função de contar grades únicas
-
-    // --- CONTINUA O JS ANTERIOR: todas as funções e helpers ---
     const DONATION_CODE = '2279';
     const DONATION_PILE_BASE = 190;
     const lastroSkuDB = {
@@ -491,7 +663,24 @@
       applyFilters();
     }));
 
-    ['searchInput','filterMarca','filterOperation','filterType','filterValidity','sortBy','groupByVal']
+    // ── EVENTOS DA BARRA DE PESQUISA SINCRONIZADA ──
+    const topSearchInput = document.getElementById('topSearchInput');
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+    topSearchInput.addEventListener('input', function() {
+      searchInput.value = this.value;
+      clearSearchBtn.style.display = this.value.length > 0 ? 'block' : 'none';
+      applyFilters();
+    });
+
+    searchInput.addEventListener('input', function() {
+      topSearchInput.value = this.value;
+      clearSearchBtn.style.display = this.value.length > 0 ? 'block' : 'none';
+      applyFilters();
+    });
+
+    ['filterMarca','filterOperation','filterType','filterValidity','sortBy','groupByVal']
       .forEach(id => document.getElementById(id).addEventListener('input', applyFilters));
 
     function showLoader(v) { loader.style.display = v ? 'flex' : 'none'; }
@@ -565,6 +754,30 @@
     function handleFileUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
+
+      const nameRegex = /_(\d{2})-(\d{2})-(\d{4})_(\d{2})_(\d{2})/;
+      const match = file.name.match(nameRegex);
+      
+      let d = new Date();
+      if (match) {
+        currentImportDateStr = `${match[3]}-${match[2]}-${match[1]}`;
+        currentImportLabel = `${match[1]}/${match[2]}/${match[3]} às ${match[4]}:${match[5]}`;
+      } else {
+        currentImportDateStr = d.toISOString().slice(0,10);
+        const dia = String(d.getDate()).padStart(2,'0');
+        const mes = String(d.getMonth()+1).padStart(2,'0');
+        const ano = d.getFullYear();
+        const hr = String(d.getHours()).padStart(2,'0');
+        const mn = String(d.getMinutes()).padStart(2,'0');
+        currentImportLabel = `${dia}/${mes}/${ano} às ${hr}:${mn} (Autogerado)`;
+      }
+
+      document.getElementById('nav-date-badge').innerHTML = `
+        <span class="px-2.5 py-1 rounded-full bg-white/60 border border-black/10 text-[9px] font-black tracking-widest text-gray-700 uppercase ml-2 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#34C759] shadow-[0_0_4px_rgba(52,199,89,0.8)]"></span> BASE: ${currentImportLabel}
+        </span>
+      `;
+
       showLoader(true);
       const reader = new FileReader();
       reader.onload = (evt) => {
@@ -598,14 +811,27 @@
           validadeStatus: getValidityStatus(diff)
         });
       });
+
+      salvarSnapshot();
+
+      document.getElementById('notif-btn').style.display = 'flex';
+      document.getElementById('hist-btn').style.display  = 'flex';
+
       showLoader(false);
       emptyView.classList.add('hidden');
       mainContent.classList.remove('hidden');
       applyFilters();
+
+      renderNotificacoes();
+      renderComparacao();
+      renderTendenciaKpisGlobais(); // NOVA FUNÇÃO AQUI
+      renderTendencia();
+      verificarAlertaUrgente();
     }
 
     function applyFilters() {
-      const search   = normalizeText(document.getElementById('searchInput').value);
+      // Usa qualquer uma das duas barras (estão sincronizadas)
+      const search = normalizeText(document.getElementById('topSearchInput').value); 
       const fMarca   = document.getElementById('filterMarca').value;
       const fOp      = document.getElementById('filterOperation').value;
       const fTipo    = document.getElementById('filterType').value;
@@ -613,7 +839,7 @@
       const groupByVal = document.getElementById('groupByVal').value;
 
       let filtered = db.filter(item => {
-        if (search && !normalizeText(`${item.produto} ${item.cod}`).includes(search)) return false;
+        if (search && !normalizeText(`${item.produto} ${item.cod} ${item.lote}`).includes(search)) return false;
         if (fMarca !== 'TODOS' && item.marca !== fMarca) return false;
         if (fOp    !== 'TODOS' && item.operacao !== fOp) return false;
         if (fTipo  !== 'TODOS' && item.tipo !== fTipo) return false;
@@ -656,12 +882,7 @@
       document.getElementById('kpiQuebras').innerText = Math.round(s.quebras).toLocaleString('pt-BR');
       document.getElementById('kpiDoacao').innerText = Math.floor(s.doacaoQty / DONATION_PILE_BASE).toLocaleString('pt-BR');
       document.getElementById('kpiDataCurtaInfo').innerText = `${Math.round(s.shortQty).toLocaleString('pt-BR')} un críticas`;
-
-      // Grades Ocupadas - grades de uma unidade já somadas normalmente
       document.getElementById('kpiGradesOcupadas').innerText = calcularGradesOcupadas(list).toLocaleString('pt-BR');
-
-      // Removido: KPI de contagem de grades únicas
-
       renderKpiUrgenciaEtiquetas(list);
     }
 
@@ -672,7 +893,6 @@
         s.volMap[i.produto] = (s.volMap[i.produto] || 0) + i.qtd;
         s.brandTotal[i.marca] = (s.brandTotal[i.marca] || 0) + i.qtd;
         if (i.isDataCurta) s.brandShort[i.marca] = (s.brandShort[i.marca] || 0) + i.qtd;
-        // Sugestão: grades por marca (p.ex. exibir em chart)
         if (!s.gradeMap[i.marca]) s.gradeMap[i.marca] = 0;
         s.gradeMap[i.marca] += gradesDoItem(i);
       });
@@ -738,12 +958,77 @@
       });
     }
 
+    function renderTendencia() {
+      const historico = getHistorico();
+      if (historico.length < 2) { document.getElementById('tendencia-section').style.display = 'none'; return; }
+      document.getElementById('tendencia-section').style.display = 'block';
+
+      const labels = historico.map(h => {
+        const p = h.data.split('-');
+        return `${p[2]}/${p[1]}`;
+      });
+      const dataPerc = historico.map(h => h.percDataCurta);
+      const dataUrgentes = historico.map(h => h.qtdUrgentes);
+
+      if (charts['chartTendencia']) charts['chartTendencia'].destroy();
+      charts['chartTendencia'] = new Chart(document.getElementById('chartTendencia'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: '% Data Curta',
+              data: dataPerc,
+              borderColor: '#5856D6', backgroundColor: 'rgba(88,86,214,0.08)',
+              borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#5856D6',
+              tension: 0.4, fill: true, yAxisID: 'y'
+            },
+            {
+              label: 'Qtd Urgentes',
+              data: dataUrgentes,
+              borderColor: '#FF3B30', backgroundColor: 'rgba(255,59,48,0.06)',
+              borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#FF3B30',
+              tension: 0.4, fill: false, yAxisID: 'y2', borderDash: [4,3]
+            }
+          ]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'bottom',
+              labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 9, weight: '700', family: 'Inter' }, padding: 14 }
+            },
+            tooltip: {
+              backgroundColor: 'rgba(255,255,255,0.96)', titleColor: '#1C1C1E', bodyColor: '#555',
+              borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1, padding: 10, cornerRadius: 12,
+              titleFont: { size: 10, weight: '800', family: 'Inter' },
+              bodyFont:  { size: 9,  weight: '600', family: 'Inter' }
+            }
+          },
+          scales: {
+            x: { grid:{ display:false }, ticks:{ font:{ size:8, weight:'700', family:'Inter' }, color:'#999' }, border:{ display:false } },
+            y:  { display: true, position: 'left',  ticks:{ font:{ size:8, family:'Inter' }, color:'#5856D6', callback: v => v+'%' }, grid:{ color:'rgba(0,0,0,0.04)' }, border:{ display:false } },
+            y2: { display: true, position: 'right', ticks:{ font:{ size:8, family:'Inter' }, color:'#FF3B30' }, grid:{ display:false }, border:{ display:false } }
+          }
+        }
+      });
+    }
+
     function renderTable(list) {
+      const searchTerm = normalizeText(document.getElementById('topSearchInput').value); // Usa a busca principal para o Highlight
       tableBody.innerHTML = '';
       list.slice(0, 100).forEach(item => {
         const dtStr = item.validade
           ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}`
           : '-';
+
+        function highlight(text) {
+          if (!searchTerm || searchTerm.length < 2) return text;
+          const norm = normalizeText(text);
+          const idx  = norm.indexOf(searchTerm);
+          if (idx < 0) return text;
+          return text.slice(0, idx) + '<mark class="hl">' + text.slice(idx, idx + searchTerm.length) + '</mark>' + text.slice(idx + searchTerm.length);
+        }
 
         tableBody.innerHTML += `
           <tr class="table-row">
@@ -757,8 +1042,8 @@
                 ${item.tipo}
               </span>
             </td>
-            <td class="px-6 py-4 font-bold text-black text-[11px] leading-snug">${item.produto}</td>
-            <td class="px-6 py-4 text-center font-mono font-semibold text-gray-400 text-[10px]">${item.cod || '-'}</td>
+            <td class="px-6 py-4 font-bold text-black text-[11px] leading-snug">${highlight(item.produto)}</td>
+            <td class="px-6 py-4 text-center font-mono font-semibold text-gray-400 text-[10px]">${highlight(String(item.cod || '-'))}</td>
             <td class="px-6 py-4 text-center font-mono font-black text-black text-[11px]">
               ${Math.round(item.qtd).toLocaleString('pt-BR')}
               <span class="text-[8px] text-gray-300 font-semibold"> / ${item.lastro}</span>
@@ -776,7 +1061,302 @@
       });
     }
 
-    // --- Exportação de planilhas permanece igual ---
+    const HIST_KEY = 'panutrir_historico_v2'; 
+    const MAX_SNAPSHOTS = 7;
+
+    function calcKpiSnapshot() {
+      const total    = db.reduce((s,i) => s + i.qtd, 0);
+      const short    = db.filter(i => i.isDataCurta).reduce((s,i) => s + i.qtd, 0);
+      const pilhas   = db.filter(i => i.tipo==='PILHA' && i.operacao!=='DOACAO').length;
+      const quebras  = db.filter(i => i.tipo==='QUEBRA' && i.operacao!=='DOACAO').length;
+      const urgentes = db.filter(i => ['URGENTE','VENCIDO'].includes(i.validadeStatus) && i.operacao!=='DOACAO').length;
+      const grades   = calcularGradesOcupadas(db);
+      const perc     = total > 0 ? parseFloat(((short/total)*100).toFixed(1)) : 0;
+      return { total: Math.round(total), pilhas, quebras, percDataCurta: perc, qtdUrgentes: urgentes, gradesOcupadas: grades };
+    }
+
+    function salvarSnapshot() {
+      const hist = getHistorico();
+      const dataArquivo = currentImportDateStr; 
+      
+      const idx = hist.findIndex(h => h.data === dataArquivo);
+      const snap = { data: dataArquivo, fileLabel: currentImportLabel, ...calcKpiSnapshot() };
+      
+      if (idx >= 0) {
+        hist[idx] = snap; 
+      } else {
+        hist.push(snap);
+      }
+      
+      const trimmed = hist.sort((a,b) => a.data.localeCompare(b.data)).slice(-MAX_SNAPSHOTS);
+      try { localStorage.setItem(HIST_KEY, JSON.stringify(trimmed)); } catch(e) {}
+    }
+
+    function getHistorico() {
+      try { return JSON.parse(localStorage.getItem(HIST_KEY) || '[]'); } catch(e) { return []; }
+    }
+
+    function limparHistorico() {
+      if (!confirm('Limpar todo o histórico salvo?')) return;
+      try { localStorage.removeItem(HIST_KEY); } catch(e) {}
+      document.getElementById('historico-list').innerHTML = '<p style="font-size:12px;color:#aaa;text-align:center;padding:2rem;">Nenhum histórico salvo.</p>';
+      document.getElementById('comparacao-section').classList.add('hidden');
+      document.getElementById('tendencia-section').style.display = 'none';
+      document.getElementById('kpi-saldo-volume').innerText = '--';
+      document.getElementById('kpi-novos-alertas').innerText = '--';
+    }
+
+    function toggleHistorico() {
+      const d = document.getElementById('historico-drawer');
+      const o = document.getElementById('hist-overlay');
+      const open = d.classList.toggle('open');
+      o.style.display = open ? 'block' : 'none';
+      if (open) renderHistoricoList();
+    }
+
+    function renderHistoricoList() {
+      const hist = getHistorico();
+      const container = document.getElementById('historico-list');
+      if (hist.length === 0) {
+        container.innerHTML = '<p style="font-size:12px;color:#aaa;text-align:center;padding:2rem;">Nenhum histórico salvo ainda.</p>';
+        return;
+      }
+      container.innerHTML = [...hist].reverse().map((h) => {
+        const p = h.data.split('-'); 
+        const isBaseAtual = h.data === currentImportDateStr;
+        const labelDia = `${p[2]}/${p[1]}/${p[0]}`;
+        const horaExtract = h.fileLabel.split('às')[1] || '';
+
+        return `<div class="hist-item ${isBaseAtual ? 'active-hist' : ''}">
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#1C1C1E;">Dia ${labelDia}${isBaseAtual?' <span style="font-size:9px;color:#007AFF;font-weight:900;">BASE ATUAL</span>':''}</div>
+            <div style="font-size:10px;color:#999;font-weight:600;">Total: ${h.total.toLocaleString('pt-BR')} un · ${h.percDataCurta}% curtas · ${h.qtdUrgentes} urgentes</div>
+            <div style="font-size:9px;color:#ccc;font-weight:700;margin-top:2px;">Último arquivo importado às${horaExtract}</div>
+          </div>
+          <div style="font-size:10px;font-weight:900;color:${h.qtdUrgentes>0?'#FF3B30':'#34C759'};">${h.qtdUrgentes > 0 ? '⚠ '+h.qtdUrgentes+' urg.' : '✓ OK'}</div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── LÓGICA DOS NOVOS KPIs TOP 24H ──
+    function renderTendenciaKpisGlobais() {
+      const hist = getHistorico();
+      const saldoVolEl = document.getElementById('kpi-saldo-volume');
+      const saldoArrEl = document.getElementById('kpi-saldo-arrow');
+      const alertasEl = document.getElementById('kpi-novos-alertas');
+      const alertasArrEl = document.getElementById('kpi-alertas-arrow');
+
+      if (hist.length < 2) {
+          saldoVolEl.innerText = '--';
+          alertasEl.innerText = '--';
+          return;
+      }
+
+      const atual = hist[hist.length - 1];
+      const anterior = hist[hist.length - 2];
+
+      // KPI: Saldo de Volume
+      const diffVol = atual.total - anterior.total;
+      saldoVolEl.innerText = (diffVol > 0 ? '+' : '') + diffVol.toLocaleString('pt-BR');
+      saldoVolEl.className = `text-[2.5rem] font-black tracking-tighter leading-none ${diffVol > 0 ? 'text-[#34C759]' : (diffVol < 0 ? 'text-[#FF3B30]' : 'text-black')}`;
+      
+      saldoArrEl.innerText = diffVol > 0 ? '▲ Aumento' : (diffVol < 0 ? '▼ Saída' : '= Estável');
+      saldoArrEl.className = `text-[10px] font-black uppercase tracking-wider ${diffVol > 0 ? 'text-[#34C759]' : (diffVol < 0 ? 'text-[#FF3B30]' : 'text-gray-400')} inline-block`;
+      saldoArrEl.classList.remove('hidden');
+      
+      // KPI: Crescimento de Risco
+      const diffAlertas = (atual.qtdUrgentes || 0) - (anterior.qtdUrgentes || 0);
+      alertasEl.innerText = (diffAlertas > 0 ? '+' : '') + diffAlertas.toLocaleString('pt-BR');
+      alertasEl.className = `text-[2.5rem] font-black tracking-tighter leading-none ${diffAlertas > 0 ? 'text-[#FF3B30]' : (diffAlertas < 0 ? 'text-[#34C759]' : 'text-black')}`;
+
+      alertasArrEl.innerText = diffAlertas > 0 ? '▲ Piorou' : (diffAlertas < 0 ? '▼ Melhorou' : '= Sem alteração');
+      alertasArrEl.className = `text-[10px] font-black uppercase tracking-wider ${diffAlertas > 0 ? 'text-[#FF3B30]' : (diffAlertas < 0 ? 'text-[#34C759]' : 'text-gray-400')} inline-block`;
+      alertasArrEl.classList.remove('hidden');
+    }
+
+    function renderComparacao() {
+      const hist = getHistorico();
+      if (hist.length < 2) { document.getElementById('comparacao-section').classList.add('hidden'); return; }
+      
+      const sorted = [...hist].sort((a,b) => a.data.localeCompare(b.data));
+      const atual  = sorted[sorted.length - 1];
+      const anterior = sorted[sorted.length - 2];
+
+      const campos = [
+        { label: 'Estoque Total', key: 'total', suffix: ' un', higherBetter: true },
+        { label: '% Data Curta',  key: 'percDataCurta', suffix: '%', higherBetter: false },
+        { label: 'Urgentes',      key: 'qtdUrgentes',   suffix: '',  higherBetter: false },
+        { label: 'Grades Ocup.',  key: 'gradesOcupadas', suffix: '', higherBetter: false }
+      ];
+
+      const pAnt = anterior.data.split('-');
+      document.getElementById('comparacao-data-label').textContent = `vs Dia ${pAnt[2]}/${pAnt[1]}`;
+
+      document.getElementById('comparacao-grid').innerHTML = campos.map(c => {
+        const va = atual[c.key];
+        const vb = anterior[c.key];
+        const diff = va - vb;
+        const pct  = vb !== 0 ? ((diff/Math.abs(vb))*100).toFixed(1) : '—';
+        let arrow = '', cls = 'kpi-delta-eq';
+        if (diff > 0) { arrow = '▲'; cls = c.higherBetter ? 'kpi-delta-up' : 'kpi-delta-down'; }
+        if (diff < 0) { arrow = '▼'; cls = c.higherBetter ? 'kpi-delta-down' : 'kpi-delta-up'; }
+        return `<div style="background:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.6);border-radius:1.25rem;padding:1rem 1.2rem;">
+          <p style="font-size:9px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 4px;">${c.label}</p>
+          <div style="display:flex;align-items:baseline;gap:4px;flex-wrap:wrap;">
+            <span style="font-size:1.6rem;font-weight:900;color:#1C1C1E;line-height:1;">${typeof va === 'number' ? va.toLocaleString('pt-BR') : va}${c.suffix}</span>
+            ${diff !== 0 ? `<span class="${cls}" style="font-size:9px;">${arrow} ${Math.abs(pct)}%</span>` : '<span class="kpi-delta-eq" style="font-size:9px;">= igual</span>'}
+          </div>
+          <p style="font-size:9px;color:#bbb;font-weight:600;margin:3px 0 0;">ant: ${typeof vb === 'number' ? vb.toLocaleString('pt-BR') : vb}${c.suffix}</p>
+        </div>`;
+      }).join('');
+
+      document.getElementById('comparacao-section').classList.remove('hidden');
+      renderDeltasNosKPIs(atual, anterior);
+    }
+
+    function renderDeltasNosKPIs(atual, anterior) {
+      const pares = [
+        { kpiId: 'kpiTotal',          key: 'total',         higherBetter: true  },
+        { kpiId: 'kpiDataCurtaPerc',  key: 'percDataCurta', higherBetter: false },
+        { kpiId: 'kpiGradesOcupadas', key: 'gradesOcupadas',higherBetter: false }
+      ];
+      pares.forEach(({ kpiId, key, higherBetter }) => {
+        const el = document.getElementById(kpiId);
+        if (!el) return;
+        el.parentNode.querySelectorAll('.kpi-delta-inline').forEach(e => e.remove());
+        const diff = atual[key] - anterior[key];
+        if (diff === 0) return;
+        const arrow = diff > 0 ? '▲' : '▼';
+        const cls   = (diff > 0) === higherBetter ? 'kpi-delta-up' : 'kpi-delta-down';
+        const span  = document.createElement('span');
+        span.className = cls + ' kpi-delta-inline';
+        span.style.cssText = 'display:block;font-size:9px;margin-top:2px;';
+        span.textContent = `${arrow} ${Math.abs(diff).toLocaleString('pt-BR')} vs anterior`;
+        el.insertAdjacentElement('afterend', span);
+      });
+    }
+
+    function toggleNotif() {
+      const d = document.getElementById('notif-drawer');
+      const o = document.getElementById('notif-overlay');
+      const open = d.classList.toggle('open');
+      o.classList.toggle('open', open);
+    }
+
+    function renderNotificacoes() {
+      const criticos = db.filter(i =>
+        ['URGENTE','VENCIDO','CRITICO'].includes(i.validadeStatus) && i.operacao !== 'DOACAO'
+      ).sort((a,b) => a.diff - b.diff);
+
+      const badge = document.getElementById('notif-badge');
+      const subtitle = document.getElementById('notif-subtitle');
+      const list = document.getElementById('notif-list');
+
+      if (criticos.length === 0) {
+        badge.style.display = 'none';
+        subtitle.textContent = 'Nenhum item crítico no momento';
+        list.innerHTML = '<div style="text-align:center;padding:2rem;font-size:12px;color:#34C759;font-weight:700;">✓ Estoque dentro do prazo</div>';
+        return;
+      }
+
+      badge.style.display = 'flex';
+      badge.textContent = criticos.length > 99 ? '99+' : criticos.length;
+      subtitle.textContent = `${criticos.length} item${criticos.length > 1 ? 's' : ''} com validade crítica`;
+
+      const grupos = {};
+      criticos.forEach(i => {
+        if (!grupos[i.validadeStatus]) grupos[i.validadeStatus] = [];
+        grupos[i.validadeStatus].push(i);
+      });
+
+      const statusOrder = ['VENCIDO','URGENTE','CRITICO'];
+      const statusLabel = { VENCIDO: 'Vencidos', URGENTE: 'Urgentes (≤19d)', CRITICO: 'Críticos (≤22d)' };
+      list.innerHTML = '';
+
+      statusOrder.forEach(st => {
+        if (!grupos[st]) return;
+        list.innerHTML += `<div style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#aaa;margin:0.75rem 0 0.4rem;">${statusLabel[st]}</div>`;
+        grupos[st].slice(0, 20).forEach(i => {
+          const dtStr = i.validade
+            ? `${String(i.validade.getDate()).padStart(2,'0')}/${String(i.validade.getMonth()+1).padStart(2,'0')}`
+            : '-';
+          const diasLabel = i.diff < 0 ? `Vencido há ${Math.abs(i.diff)}d` : `${i.diff}d restantes`;
+          list.innerHTML += `<div class="notif-item ${st.toLowerCase()}">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;">
+              <div>
+                <div style="font-size:11px;font-weight:900;color:#1C1C1E;line-height:1.3;">${i.produto}</div>
+                <div style="font-size:9px;color:#aaa;font-weight:700;margin-top:2px;">Cód ${i.cod} · Qtd ${Math.round(i.qtd).toLocaleString('pt-BR')} · Venc ${dtStr}</div>
+              </div>
+              <span style="flex-shrink:0;font-size:9px;font-weight:900;padding:3px 8px;border-radius:99px;white-space:nowrap;${st==='VENCIDO'?'background:#1C1C1E;color:#fff;':st==='URGENTE'?'background:#FF3B30;color:#fff;':'background:#AF52DE;color:#fff;'}">${diasLabel}</span>
+            </div>
+          </div>`;
+        });
+        if (grupos[st].length > 20) {
+          list.innerHTML += `<div style="font-size:10px;color:#aaa;font-weight:700;text-align:center;padding:.25rem;">+ ${grupos[st].length - 20} mais…</div>`;
+        }
+      });
+    }
+
+    function tocarAlertta() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const play = (freq, start, dur, type='sine') => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.type = type; o.frequency.setValueAtTime(freq, ctx.currentTime + start);
+          g.gain.setValueAtTime(0, ctx.currentTime + start);
+          g.gain.linearRampToValueAtTime(0.3, ctx.currentTime + start + 0.05);
+          g.gain.linearRampToValueAtTime(0, ctx.currentTime + start + dur);
+          o.start(ctx.currentTime + start);
+          o.stop(ctx.currentTime + start + dur + 0.05);
+        };
+        play(880, 0,    0.18, 'square');
+        play(660, 0.22, 0.18, 'square');
+        play(880, 0.44, 0.28, 'square');
+      } catch(e) {}
+    }
+
+    function verificarAlertaUrgente() {
+      const criticos = db.filter(i =>
+        ['URGENTE','VENCIDO'].includes(i.validadeStatus) && i.operacao !== 'DOACAO'
+      ).sort((a,b) => a.diff - b.diff);
+
+      if (criticos.length === 0) return;
+
+      const agrupado = {};
+      criticos.forEach(i => {
+        if (!agrupado[i.cod]) agrupado[i.cod] = { ...i, qtdTotal: 0 };
+        agrupado[i.cod].qtdTotal += i.qtd;
+      });
+
+      const lista = document.getElementById('alerta-lista');
+      lista.innerHTML = Object.values(agrupado).slice(0, 12).map(i => {
+        const diasLabel = i.diff < 0 ? `Vencido há ${Math.abs(i.diff)} dia${Math.abs(i.diff)>1?'s':''}` : `${i.diff} dias restantes`;
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .75rem;background:${i.validadeStatus==='VENCIDO'?'#1C1C1E':'#FFF0EF'};border-radius:.75rem;gap:8px;">
+          <div>
+            <div style="font-size:11px;font-weight:900;color:${i.validadeStatus==='VENCIDO'?'#fff':'#1C1C1E'};line-height:1.3;">${i.produto}</div>
+            <div style="font-size:9px;color:${i.validadeStatus==='VENCIDO'?'rgba(255,255,255,0.6)':'#aaa'};font-weight:700;">Qtd: ${Math.round(i.qtdTotal).toLocaleString('pt-BR')}</div>
+          </div>
+          <span style="font-size:9px;font-weight:900;color:${i.validadeStatus==='VENCIDO'?'#ff6b6b':'#FF3B30'};white-space:nowrap;">${diasLabel}</span>
+        </div>`;
+      }).join('');
+
+      if (Object.keys(agrupado).length > 12) {
+        lista.innerHTML += `<div style="text-align:center;font-size:10px;color:#aaa;font-weight:700;padding:.25rem;">+ ${Object.keys(agrupado).length - 12} outros produtos</div>`;
+      }
+
+      const modal = document.getElementById('alerta-modal');
+      modal.classList.add('open');
+      document.getElementById('alerta-box').classList.add('shake');
+      setTimeout(() => document.getElementById('alerta-box').classList.remove('shake'), 500);
+      tocarAlertta();
+    }
+
+    function fecharAlerta() {
+      document.getElementById('alerta-modal').classList.remove('open');
+    }
+
     async function exportarResumoPilhas() {
       if (db.length === 0) return alert("Sem dados.");
       const agrupado = {};
@@ -940,7 +1520,6 @@
       const section = document.getElementById('kpiUrgenciaEtiquetasSection');
       const container = document.getElementById('kpiUrgenciaEtiquetasList');
 
-      // Filtrar: ignorar SKU '2279P', manter apenas isDataCurta, excluir DOACAO
       const urgentes = list.filter(i =>
         String(i.cod).trim() !== '2279P' &&
         i.isDataCurta &&
@@ -953,7 +1532,6 @@
         return;
       }
 
-      // Agrupar por cod + diff (mesma data de vencimento)
       const agrupado = {};
       urgentes.forEach(i => {
         const key = i.cod + '_' + i.diff;
@@ -972,7 +1550,6 @@
         agrupado[key].QTD_TOTAL += i.qtd;
       });
 
-      // Ordenar do menor para o maior vencimento (mais urgente primeiro) e limitar ao Top 5
       const itens = Object.values(agrupado).sort((a, b) => a.diff - b.diff).slice(0, 5);
 
       const statusColors = {
@@ -995,7 +1572,6 @@
         const caixas = Math.floor(qtd / unidadesPorCaixa);
         const unids  = Math.round(qtd % unidadesPorCaixa);
 
-        // Formato: se unidades == 0 → pilha completa 'X cxs'; senão 'X cxs e Y un'
         const calcStr = unids === 0
           ? `${caixas} cxs`
           : `${caixas} cxs e ${unids} un`;
@@ -1009,7 +1585,6 @@
           ? `Vencido há ${Math.abs(item.diff)}d`
           : `Faltam ${item.diff} dias`;
 
-        // Exibir número completo da etiqueta (sem truncar)
         const etqNum = item.etiqueta && String(item.etiqueta).trim() !== '' && item.etiqueta !== item.cod
           ? String(item.etiqueta).trim()
           : '-';
@@ -1028,12 +1603,49 @@
       section.classList.remove('hidden');
     }
 
-    function gerarExcel(d, n) {
-      const ws = XLSX.utils.json_to_sheet(d);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Dados");
-      XLSX.writeFile(wb, `${n}.xlsx`);
-    }
+    (function initPWA() {
+      const manifest = {
+        name: 'Gestão de Estoque – Panutrir',
+        short_name: 'Panutrir CD',
+        start_url: './',
+        display: 'standalone',
+        background_color: '#ECECF1',
+        theme_color: '#1C1C1E',
+        icons: [
+          { src: 'assets/logo.png', sizes: '192x192', type: 'image/png' },
+          { src: 'assets/logo.png', sizes: '512x512', type: 'image/png' }
+        ]
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      document.getElementById('pwaManifest').href = URL.createObjectURL(blob);
+
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+const CACHE = 'panutrir-v1';
+const ASSETS = ['./', './index.html'];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  e.respondWith(
+    fetch(e.request).then(r => {
+      const clone = r.clone();
+      caches.open(CACHE).then(c => c.put(e.request, clone)).catch(()=>{});
+      return r;
+    }).catch(() => caches.match(e.request))
+  );
+});`;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl  = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl).catch(() => {});
+      }
+    })();
   </script>
 </body>
 </html>
