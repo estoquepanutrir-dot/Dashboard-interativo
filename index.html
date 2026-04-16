@@ -94,10 +94,12 @@
     .status-quebra { background: #FFF4E5; color: #B25E09; }
     .status-doacao { background: #EEEEFF; color: #5856D6; }
     .status-vencido { background: #1C1C1E; color: #FFFFFF; }
+    .status-prazolimite { background: #8B4513; color: #FFFFFF; }
     .status-urgente { background: #FF3B30; color: #FFFFFF; }
-    .status-critico { background: #AF52DE; color: #FFFFFF; }
-    .status-atencao { background: #FFCC00; color: #4A3A00; }
-    .status-seguro  { background: #34C759; color: #FFFFFF; }
+    .status-critico { background: #FF9500; color: #FFFFFF; }
+    .status-atencao { background: #FFCC00; color: #1C1C1E; }
+    .status-normal   { background: transparent; color: inherit; border: 1px solid #e5e7eb; }
+    .status-seguro  { background: #34C759; color: #FFFFFF; opacity: 0.5; }
     .filter-btn {
       transition: all 0.18s ease;
       border: 1px solid rgba(0,0,0,0.07);
@@ -430,7 +432,7 @@
         <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
           <span class="chart-title-dot bg-[#FF3B30]"></span>Saúde do Estoque
         </h3>
-        <div class="h-64"><canvas id="chartValidade"></canvas></div>
+        <div class="h-64"><div id="kpiSaudeEstoque" class="flex flex-col gap-1.5 justify-center h-full py-1"></div></div>
       </div>
       <div class="glass-card p-7 rounded-[2.5rem]">
         <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
@@ -567,6 +569,8 @@
               <option value="URGENTE">Urgente</option>
               <option value="CRITICO">Crítico</option>
               <option value="ATENCAO">Atenção</option>
+              <option value="PRAZO_LIMITE">Prazo Limite</option>
+              <option value="NORMAL">Normal</option>
               <option value="SEGURO">Seguro</option>
             </select>
           </div>
@@ -730,9 +734,11 @@
     }
     function getValidityStatus(diff) {
       if (diff < 0) return 'VENCIDO';
+      if (diff < 10) return 'PRAZO_LIMITE';
       if (diff <= 19) return 'URGENTE';
-      if (diff <= 22) return 'CRITICO';
-      if (diff <= 25) return 'ATENCAO';
+      if (diff <= 21) return 'CRITICO';
+      if (diff <= 23) return 'ATENCAO';
+      if (diff <= 25) return 'NORMAL';
       return 'SEGURO';
     }
     function getValidityBadgeClass(s) {
@@ -895,7 +901,7 @@
     }
 
     function updateCharts(list) {
-      const s = { valMap:{ VENCIDO:0, URGENTE:0, CRITICO:0, ATENCAO:0, SEGURO:0 }, volMap:{}, brandTotal:{}, brandShort:{}, gradeMap:{} };
+      const s = { valMap:{ VENCIDO:0, PRAZO_LIMITE:0, URGENTE:0, CRITICO:0, ATENCAO:0, NORMAL:0, SEGURO:0 }, volMap:{}, brandTotal:{}, brandShort:{}, gradeMap:{} };
       list.forEach(i => {
         s.valMap[i.validadeStatus] += i.qtd;
         s.volMap[i.produto] = (s.volMap[i.produto] || 0) + i.qtd;
@@ -905,14 +911,25 @@
         s.gradeMap[i.marca] += gradesDoItem(i);
       });
 
-      createOrUpdateChart('chartValidade', 'doughnut', {
-        labels: ['Vencido','Urgente','Crítico','Atenção','Seguro'],
-        datasets: [{
-          data: [s.valMap.VENCIDO, s.valMap.URGENTE, s.valMap.CRITICO, s.valMap.ATENCAO, s.valMap.SEGURO].map(v => Math.round(v)),
-          backgroundColor: ['#1C1C1E','#FF3B30','#AF52DE','#FFCC00','#34C759'],
-          borderWidth: 0, cutout: '80%', hoverOffset: 4
-        }]
-      });
+      
+      const containerKpi = document.getElementById('kpiSaudeEstoque');
+      if (containerKpi) {
+        const items = [
+          { label: 'Normal (24-25 dias)', val: s.valMap.NORMAL || 0, bg: 'rgba(0,0,0,0.02)', fg: '#1C1C1E', border: '1px solid #eee' },
+          { label: 'Atenção (22-23 dias)', val: s.valMap.ATENCAO || 0, bg: '#FFCC00', fg: '#1C1C1E' },
+          { label: 'Crítico (20-21 dias)', val: s.valMap.CRITICO || 0, bg: '#FF9500', fg: '#FFFFFF' },
+          { label: 'Urgente (10-19 dias)', val: s.valMap.URGENTE || 0, bg: '#FF3B30', fg: '#FFFFFF' },
+          { label: 'Prazo Limite (Menos de 10 dias)', val: s.valMap.PRAZO_LIMITE || 0, bg: '#8B4513', fg: '#FFFFFF' },
+          { label: 'Vencido', val: s.valMap.VENCIDO || 0, bg: '#1C1C1E', fg: '#FFFFFF' }
+        ];
+        containerKpi.innerHTML = items.map(i => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.45rem 0.8rem; border-radius: 10px; background: ${i.bg}; color: ${i.fg}; border: ${i.border || 'none'};">
+            <span style="font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em;">${i.label}</span>
+            <span style="font-weight: 900; font-size: 14px;">${Math.round(i.val).toLocaleString('pt-BR')}</span>
+          </div>
+        `).join('');
+      }
+    
 
       const brands = ['PANUTRIR','UNISABOR','MUFFATO','DEL GRANO','NOSSA PADARIA'];
       const brandPercs = brands.map(b => ({
@@ -920,15 +937,52 @@
         val: s.brandTotal[b] > 0 ? ((s.brandShort[b]||0) / s.brandTotal[b] * 100) : 0
       })).sort((a,b) => b.val - a.val);
 
+      
+      const getBrandColor = (brandName) => {
+        const b = brandName.toUpperCase();
+        if (b.includes('NOSSA PADARIA')) return '#C19A6B'; // Marrom Claro
+        if (b.includes('PANUTRIR')) return '#FF3B30'; // Vermelho
+        if (b.includes('MUFFATO')) return '#007AFF'; // Azul
+        if (b.includes('DEL GRANO')) return '#DAA520'; // Dourado
+        if (b.includes('UNISABOR') || b.includes('UNI SABOR')) return '#FF9500'; // Laranjado
+        return '#8E8E93'; // Cor padrão caso não reconheça
+      };
+
       createOrUpdateChart('chartMarcaDataCurta', 'bar', {
         labels: brandPercs.map(x => x.label),
-        datasets: [{ label: '% Crítico', data: brandPercs.map(x => Math.round(x.val)), backgroundColor: '#007AFF', borderRadius: 12, borderSkipped: false }]
+        datasets: [{ 
+          label: '% Crítico', 
+          data: brandPercs.map(x => Math.round(x.val)), 
+          backgroundColor: brandPercs.map(x => getBrandColor(x.label)), 
+          borderRadius: 12, 
+          borderSkipped: false 
+        }]
       });
 
       const top = Object.entries(s.volMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      
+      const getSkuColor = (name) => {
+        const n = name.toUpperCase();
+        if (n.includes('HOT DOG') || n.includes('HOTDOG')) return { bg: '#FF0000', border: 'transparent', bw: 0 };
+        if (n.includes('HAMBURGUER GOURMET') || n.includes('HAMB GOURMET') || n.includes('GOURMET')) return { bg: '#000000', border: 'transparent', bw: 0 };
+        if (n.includes('PAEZINHOS') || n.includes('PÃEZINHOS')) return { bg: '#FFFFFF', border: '#1C1C1E', bw: 2 };
+        if (n.includes('LEITE')) return { bg: '#FF6B6B', border: 'transparent', bw: 0 };
+        if (n.includes('INTEGRAL')) return { bg: '#34C759', border: 'transparent', bw: 0 };
+        if (n.includes('FORMA')) return { bg: '#FFCC00', border: 'transparent', bw: 0 };
+        return { bg: '#1C1C1E', border: 'transparent', bw: 0 };
+      };
+
       createOrUpdateChart('chartTopSku', 'bar', {
         labels: top.map(x => x[0]),
-        datasets: [{ label: 'Volume', data: top.map(x => Math.round(x[1])), backgroundColor: '#1C1C1E', borderRadius: 12, borderSkipped: false }]
+        datasets: [{ 
+          label: 'Volume', 
+          data: top.map(x => Math.round(x[1])), 
+          backgroundColor: top.map(x => getSkuColor(x[0]).bg), 
+          borderColor: top.map(x => getSkuColor(x[0]).border),
+          borderWidth: top.map(x => getSkuColor(x[0]).bw),
+          borderRadius: 12, 
+          borderSkipped: false 
+        }]
       });
     }
 
@@ -1346,7 +1400,7 @@
 
     function renderNotificacoes() {
       const criticos = db.filter(i =>
-        ['URGENTE','VENCIDO','CRITICO'].includes(i.validadeStatus) && i.operacao !== 'DOACAO'
+        ['VENCIDO','PRAZO_LIMITE','URGENTE','CRITICO'].includes(i.validadeStatus) && i.operacao !== 'DOACAO'
       ).sort((a,b) => a.diff - b.diff);
 
       const badge = document.getElementById('notif-badge');
@@ -1370,8 +1424,8 @@
         grupos[i.validadeStatus].push(i);
       });
 
-      const statusOrder = ['VENCIDO','URGENTE','CRITICO'];
-      const statusLabel = { VENCIDO: 'Vencidos', URGENTE: 'Urgentes (≤19d)', CRITICO: 'Críticos (≤22d)' };
+      const statusOrder = ['VENCIDO','PRAZO_LIMITE','URGENTE','CRITICO'];
+      const statusLabel = { VENCIDO: 'Vencido', PRAZO_LIMITE: 'Prazo Limite (<10d)', URGENTE: 'Urgente (10-19d)', CRITICO: 'Crítico (20-21d)' };
       list.innerHTML = '';
 
       statusOrder.forEach(st => {
@@ -1420,7 +1474,7 @@
 
     function verificarAlertaUrgente() {
       const criticos = db.filter(i =>
-        ['URGENTE','VENCIDO'].includes(i.validadeStatus) && i.operacao !== 'DOACAO'
+        ['URGENTE','PRAZO_LIMITE','VENCIDO'].includes(i.validadeStatus) && i.operacao !== 'DOACAO'
       ).sort((a,b) => a.diff - b.diff);
 
       if (criticos.length === 0) return;
@@ -1431,15 +1485,22 @@
         agrupado[i.cod].qtdTotal += i.qtd;
       });
 
+      const getAlertStyle = (st) => {
+        if (st === 'VENCIDO') return { bg: '#1C1C1E', fg: '#fff', fgDim: 'rgba(255,255,255,0.6)', fgAlert: '#ff6b6b' };
+        if (st === 'PRAZO_LIMITE') return { bg: '#8B4513', fg: '#fff', fgDim: 'rgba(255,255,255,0.8)', fgAlert: '#FFA07A' };
+        if (st === 'URGENTE') return { bg: '#FF3B30', fg: '#fff', fgDim: 'rgba(255,255,255,0.8)', fgAlert: '#FFDAB9' };
+        return { bg: '#FFF0EF', fg: '#1C1C1E', fgDim: '#aaa', fgAlert: '#FF3B30' };
+      };
       const lista = document.getElementById('alerta-lista');
       lista.innerHTML = Object.values(agrupado).slice(0, 12).map(i => {
         const diasLabel = i.diff < 0 ? `Vencido há ${Math.abs(i.diff)} dia${Math.abs(i.diff)>1?'s':''}` : `${i.diff} dias restantes`;
-        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .75rem;background:${i.validadeStatus==='VENCIDO'?'#1C1C1E':'#FFF0EF'};border-radius:.75rem;gap:8px;">
+        const stInfo = getAlertStyle(i.validadeStatus);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem .75rem;background:${stInfo.bg};border-radius:.75rem;gap:8px;">
           <div>
-            <div style="font-size:11px;font-weight:900;color:${i.validadeStatus==='VENCIDO'?'#fff':'#1C1C1E'};line-height:1.3;">${i.produto}</div>
-            <div style="font-size:9px;color:${i.validadeStatus==='VENCIDO'?'rgba(255,255,255,0.6)':'#aaa'};font-weight:700;">Qtd: ${Math.round(i.qtdTotal).toLocaleString('pt-BR')}</div>
+            <div style="font-size:11px;font-weight:900;color:${stInfo.fg};line-height:1.3;">${i.produto}</div>
+            <div style="font-size:9px;color:${stInfo.fgDim};font-weight:700;">Qtd: ${Math.round(i.qtdTotal).toLocaleString('pt-BR')}</div>
           </div>
-          <span style="font-size:9px;font-weight:900;color:${i.validadeStatus==='VENCIDO'?'#ff6b6b':'#FF3B30'};white-space:nowrap;">${diasLabel}</span>
+          <span style="font-size:9px;font-weight:900;color:${stInfo.fgAlert};white-space:nowrap;">${diasLabel}</span>
         </div>`;
       }).join('');
 
@@ -1581,22 +1642,41 @@
       
       itens.forEach(item => {
         let st, col;
-        if (item.PRAZO < 20) { st = "URGENTE";  col = "FFFF9500"; }
-        else if (item.PRAZO < 22) { st = "CRÍTICO";  col = "FFFF3B30"; }
-        else if (item.PRAZO < 24) { st = "ATENÇÃO";  col = "FFFFCC00"; }
-        else                      { st = "NORMAL";   col = "FFFFFFFF"; }
+        const statusInfo = getStatusCorDC(item.PRAZO);
+        st = statusInfo.st; col = statusInfo.col;
 
         const r = ws.addRow({...item, STATUS: st});
         
         if (col && col !== "FFFFFFFF") {
           r.eachCell(c => {
             c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:col } };
-            c.font = { bold:true, color:{ argb: (col === 'FFFFCC00' || col === 'FFFF9500') ? 'FF1C1C1E' : 'FFFFFFFF' } };
+            c.font = { bold:true, color:{ argb: statusInfo.textDark ? 'FF1C1C1E' : 'FFFFFFFF' } };
           });
         } else {
           r.eachCell(c => { c.font = { bold:true }; });
         }
       });
+      // Linha de legenda ao final
+      ws.addRow([]);
+      const legendRow = ws.addRow(['LEGENDA:','','','','','']);
+      legendRow.getCell(1).font = { bold: true, size: 8, color: { argb: 'FF888888' } };
+
+      const legendas = [
+        ['FFFFFFFF', 'FF1C1C1E', 'Normal (24 e 25 dias)'],
+        ['FFFFCC00', 'FF1C1C1E', 'Atenção (22-23 dias)'],
+        ['FFFF9500', 'FFFFFFFF', 'Crítico (20-21 dias)'],
+        ['FFFF3B30', 'FFFFFFFF', 'Urgente (10-19 dias)'],
+        ['FF8B4513', 'FFFFFFFF', 'Prazo Limite (<10 dias)'],
+        ['FF1C1C1E', 'FFFFFFFF', 'Vencido (<0 dias)'],
+      ];
+      legendas.forEach(([bg, fg, texto]) => {
+        const lr = ws.addRow(['', texto]);
+        lr.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+        lr.getCell(2).font = { bold: true, size: 8, color: { argb: fg } };
+        lr.getCell(2).alignment = { horizontal: 'left' };
+        lr.getCell(2).border = { outline: true };
+      });
+
       const buf = await workbook.xlsx.writeBuffer();
       saveAs(new Blob([buf]), 'Datas_Curtas.xlsx');
     }
@@ -1809,9 +1889,11 @@
     }
 
     function getStatusCorDC(prazo) {
-      if (prazo < 20) return { st: "URGENTE",  col: "FFFF9500", textDark: true  };
-      if (prazo < 22) return { st: "CRÍTICO",  col: "FFFF3B30", textDark: false };
-      if (prazo < 24) return { st: "ATENÇÃO",  col: "FFFFCC00", textDark: true  };
+      if (prazo < 0) return { st: "VENCIDO", col: "FF1C1C1E", textDark: false };
+      if (prazo < 10) return { st: "PRAZO LIMITE", col: "FF8B4513", textDark: false };
+      if (prazo <= 19) return { st: "URGENTE", col: "FFFF3B30", textDark: false };
+      if (prazo <= 21) return { st: "CRÍTICO", col: "FFFF9500", textDark: false };
+      if (prazo <= 23) return { st: "ATENÇÃO", col: "FFFFCC00", textDark: true };
       return             { st: "NORMAL",   col: "FFFFFFFF", textDark: true  };
     }
 
@@ -1853,16 +1935,24 @@
         const { st, col, textDark } = getStatusCorDC(item.PRAZO);
         const textArgb = textDark ? 'FF1C1C1E' : 'FFFFFFFF';
 
+        // Se não tem direcionamento, QTD_RESTANTE = QTD_TOTAL (estoque intacto)
+        const qtdRestante = item.DIRECIONAMENTO
+          ? item.QTD_RESTANTE
+          : Math.round(item.QTD_TOTAL);
+
+        // STATUS: se zerou (esgotado pelo pedido), mostrar DIRECIONADO
+        const statusFinal = item._esgotado ? 'DIRECIONADO' : st;
+
         const r = ws.addRow({
           COD:           item.COD,
           PRODUTO:       item.PRODUTO,
           QTD_TOTAL:     Math.round(item.QTD_TOTAL),
           VALIDADE:      item.VALIDADE,
           PRAZO:         item.PRAZO,
-          STATUS:        st,
+          STATUS:        statusFinal,
           DIRECIONAMENTO:item.DIRECIONAMENTO || '—',
           QTD_PEDIDA:    item.QTD_PEDIDA  > 0 ? item.QTD_PEDIDA  : '',
-          QTD_RESTANTE:  item.DIRECIONAMENTO ? item.QTD_RESTANTE : '',
+          QTD_RESTANTE:  qtdRestante,
         });
 
         if (item._esgotado) {
@@ -1895,11 +1985,13 @@
       legendRow.getCell(1).font = { bold: true, size: 8, color: { argb: 'FF888888' } };
       
       const legendas = [
-        ['FFFFFFFF', 'FF1C1C1E', 'Normal (≥24 dias)'],
+        ['FFFFFFFF', 'FF1C1C1E', 'Normal (24 e 25 dias)'],
         ['FFFFCC00', 'FF1C1C1E', 'Atenção (22-23 dias)'],
-        ['FFFF9500', 'FF1C1C1E', 'Urgente (<20 dias)'],
-        ['FFFF3B30', 'FFFFFFFF', 'Crítico (20-21 dias)'],
-        ['FF34C759', 'FFFFFFFF', 'Lote ESGOTADO pelo pedido'],
+        ['FFFF9500', 'FFFFFFFF', 'Crítico (20-21 dias)'],
+        ['FFFF3B30', 'FFFFFFFF', 'Urgente (10-19 dias)'],
+        ['FF8B4513', 'FFFFFFFF', 'Prazo Limite (<10 dias)'],
+        ['FF1C1C1E', 'FFFFFFFF', 'Vencido (<0 dias)'],
+        ['FF34C759', 'FFFFFFFF', 'TOTALMENTE DIRECIONADO'],
       ];
       legendas.forEach(([bg, fg, texto]) => {
         const lr = ws.addRow(['', texto]);
@@ -1978,9 +2070,11 @@
 
       const statusColors = {
         VENCIDO: 'status-vencido',
+        PRAZO_LIMITE: 'status-prazolimite',
         URGENTE: 'status-urgente',
         CRITICO: 'status-critico',
         ATENCAO: 'status-atencao',
+        NORMAL:  'status-normal',
         SEGURO:  'status-seguro'
       };
 
