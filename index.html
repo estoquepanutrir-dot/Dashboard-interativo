@@ -254,6 +254,70 @@
     /* ── TENDÊNCIA ────────────────────────────────── */
     #tendencia-section { display: none; }
 
+    /* ── AUTOCOMPLETE DROPDOWN ──────────────────── */
+    #autocomplete-dropdown {
+      position: fixed;
+      background: rgba(252,252,255,0.98);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid rgba(200,200,220,0.45);
+      border-radius: 1.25rem;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+      z-index: 99999;
+      max-height: 320px;
+      overflow-y: auto;
+      display: none;
+      animation: popoverIn 0.15s ease;
+    }
+    #autocomplete-dropdown.open { display: block; }
+    .autocomplete-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.55rem 1rem;
+      cursor: pointer;
+      transition: background 0.1s;
+      gap: 8px;
+    }
+    .autocomplete-item:hover, .autocomplete-item.focused { background: rgba(0,122,255,0.07); }
+    .autocomplete-item-name { font-size: 12px; font-weight: 800; color: #1C1C1E; }
+    .autocomplete-item-cod  { font-size: 10px; font-weight: 700; color: #aaa; white-space: nowrap; }
+
+    /* ── KPI FANTASMAS ──────────────────────────── */
+    #kpi-fantasmas-section {
+      display: none;
+    }
+    #fantasmas-expand-btn {
+      background: rgba(0,0,0,0.05);
+      border: none; border-radius: 99px;
+      padding: 4px 10px;
+      font-size: 9px; font-weight: 900;
+      color: #888; cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      letter-spacing: 0.03em;
+    }
+    #fantasmas-expand-btn:hover { background: rgba(0,0,0,0.09); color: #1C1C1E; }
+    #fantasmas-detail { display: none; margin-top: 1rem; }
+
+    /* ── SKU HISTÓRICO CURVAS ───────────────────── */
+    #sku-historico-section { display: none; }
+    
+    /* ── SKU FILTER PILL ──────────────────────── */
+    #sku-filter-pill {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0,122,255,0.10);
+      border: 1px solid rgba(0,122,255,0.25);
+      border-radius: 99px;
+      padding: 4px 12px 4px 10px;
+      font-size: 10px; font-weight: 900;
+      color: #007AFF;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #sku-filter-pill:hover { background: rgba(0,122,255,0.16); }
+
     /* ── KPI COMPARE SELECTOR ─────────────────────── */
     .kpi-compare-btn {
       position: absolute;
@@ -448,12 +512,17 @@
 
   <main id="mainContent" class="px-8 pt-8 pb-16 max-w-[1760px] mx-auto hidden">
 
-    <div class="glass-card rounded-[2rem] p-3 mb-7 flex items-center gap-3 shadow-sm transition-all focus-within:ring-2 focus-within:ring-blue-500/20">
+    <div class="glass-card rounded-[2rem] p-3 mb-4 flex items-center gap-3 shadow-sm transition-all focus-within:ring-2 focus-within:ring-blue-500/20" style="position:relative;">
       <div class="bg-[#1C1C1E] p-2.5 rounded-xl text-white flex-shrink-0">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
       </div>
-      <input id="topSearchInput" type="text" placeholder="Pesquisa Global: Procure por nome do produto, lote ou código da etiqueta..." class="w-full bg-transparent border-none outline-none text-sm font-semibold text-gray-800 placeholder-gray-400 h-10 px-2" />
-      <button onclick="document.getElementById('topSearchInput').value=''; document.getElementById('searchInput').value=''; applyFilters();" class="text-gray-400 hover:text-gray-600 px-3 hidden" id="clearSearchBtn">
+      <input id="topSearchInput" type="text" autocomplete="off" placeholder="Busca Global com Autocomplete: digite o código ou nome do SKU..." class="w-full bg-transparent border-none outline-none text-sm font-semibold text-gray-800 placeholder-gray-400 h-10 px-2" />
+      <div id="sku-filter-pill">
+        <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span id="sku-filter-pill-label">SKU</span>
+        <span onclick="clearSkuFilter()" style="opacity:0.7;font-size:11px;margin-left:2px;" title="Limpar filtro de SKU">✕</span>
+      </div>
+      <button onclick="clearSkuFilter(); document.getElementById('topSearchInput').value=''; document.getElementById('searchInput').value='';" class="text-gray-400 hover:text-gray-600 px-3 hidden" id="clearSearchBtn">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
@@ -524,6 +593,46 @@
       <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
         <div id="kpiUrgenciaEtiquetasList" class="flex flex-col gap-1.5" style="min-width: 900px;"></div>
       </div>
+    </div>
+
+    <!-- KPI ETIQUETAS FANTASMAS -->
+    <div id="kpi-fantasmas-section" class="glass-card rounded-[2.5rem] p-7 mb-7" style="border-left: 4px solid #AF52DE;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:1rem;background:rgba(175,82,222,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="20" height="20" fill="none" stroke="#AF52DE" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-0.5">Etiquetas Fantasmas</p>
+            <p style="font-size:9px;color:#aaa;font-weight:600;margin:0;line-height:1.4;">Saldos virtuais — conferentes não biparam saída no Picking</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="text-align:right;">
+            <h2 id="kpi-fantasmas-count" style="font-size:2.8rem;font-weight:900;color:#AF52DE;line-height:1;letter-spacing:-0.04em;margin:0;">0</h2>
+            <span style="font-size:9px;color:#aaa;font-weight:700;">etiquetas encontradas</span>
+          </div>
+          <button id="fantasmas-expand-btn" onclick="toggleFantasmasDetail()">
+            <span id="fantasmas-expand-icon">▼</span> DETALHAR
+          </button>
+        </div>
+      </div>
+      <div id="fantasmas-detail">
+        <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.07),transparent);margin:1rem 0;"></div>
+        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+          <div id="fantasmas-table" style="min-width:600px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICO HISTÓRICO SKU SELECIONADO -->
+    <div id="sku-historico-section" class="glass-card p-7 rounded-[2.5rem] mb-7">
+      <h3 class="text-[11px] font-black text-black mb-2 flex items-center gap-2.5 tracking-widest uppercase">
+        <span class="chart-title-dot bg-[#007AFF]"></span>Curva Histórica de Data Curta
+        <span id="sku-historico-label" class="text-[9px] text-gray-400 font-bold ml-auto tracking-wide normal-case px-3 py-1 rounded-full" style="background:rgba(0,0,0,0.04);"></span>
+      </h3>
+      <p style="font-size:10px;color:#aaa;font-weight:600;margin-bottom:1.25rem;">Histórico de entradas deste SKU em estado de data curta ao longo das importações — indicador de tendência de risco.</p>
+      <div class="h-52"><canvas id="chartSkuHistorico"></canvas></div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-7">
@@ -625,14 +734,8 @@
           </div>
         </div>
         <div class="section-sep"></div>
-        <div class="grid grid-cols-1 md:grid-cols-4 xl:grid-cols-7 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Buscar</label>
-            <div class="relative w-full">
-               <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-               <input id="searchInput" type="text" placeholder="Filtro rápido..." class="ios-input !pl-9" />
-            </div>
-          </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3">
+          <input id="searchInput" type="text" class="hidden" />
           <div class="flex flex-col gap-1.5">
             <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Marca</label>
             <select id="filterMarca" class="ios-input">
@@ -714,6 +817,8 @@
     </div>
   </main>
 
+  <div id="autocomplete-dropdown"></div>
+
   <script>
     let currentImportDateStr = '';
     let currentImportLabel = '';
@@ -758,7 +863,8 @@
     let db = [];
     let charts = {};
     let currentQuickFilter = 'TODOS';
-    let selectedCompareUniqueKey = null; // chave do snapshot selecionado para comparação
+    let selectedCompareUniqueKey = null;
+    let selectedSkuFilter = null; // { cod, produto } — filtro global de SKU
 
     const fileUpload = document.getElementById('fileUpload');
     const loader    = document.getElementById('loader');
@@ -778,11 +884,119 @@
     const topSearchInput = document.getElementById('topSearchInput');
     const searchInput = document.getElementById('searchInput');
     const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const autocompleteDropdown = document.getElementById('autocomplete-dropdown');
+
+    // ── AUTOCOMPLETE LOGIC ──────────────────────────────────
+    let _acFocusIdx = -1;
+
+    function buildAutocompleteItems(query) {
+      if (!query || query.length < 1 || !db.length) return [];
+      const q = normalizeText(query);
+      const seen = new Set();
+      const results = [];
+      db.forEach(item => {
+        const key = item.cod;
+        if (seen.has(key)) return;
+        const haystack = normalizeText(`${item.produto} ${item.cod}`);
+        if (haystack.includes(q)) {
+          seen.add(key);
+          results.push({ cod: item.cod, produto: item.produto });
+        }
+      });
+      return results.slice(0, 12);
+    }
+
+    function positionAutocompleteDropdown() {
+      const rect = topSearchInput.getBoundingClientRect();
+      autocompleteDropdown.style.top  = (rect.bottom + 6) + 'px';
+      autocompleteDropdown.style.left = rect.left + 'px';
+      autocompleteDropdown.style.width = (rect.right - rect.left) + 'px';
+    }
+
+    function renderAutocomplete(items) {
+      if (!items.length) {
+        autocompleteDropdown.classList.remove('open');
+        return;
+      }
+      _acFocusIdx = -1;
+      autocompleteDropdown.innerHTML = items.map((it, i) => `
+        <div class="autocomplete-item" data-idx="${i}" data-cod="${it.cod}" data-produto="${it.produto.replace(/"/g,'&quot;')}"
+          onmousedown="selectAutocompleteSku('${it.cod}', this.dataset.produto)">
+          <span class="autocomplete-item-name">${it.produto}</span>
+          <span class="autocomplete-item-cod">[${it.cod}]</span>
+        </div>`).join('');
+      positionAutocompleteDropdown();
+      autocompleteDropdown.classList.add('open');
+    }
+
+    function selectAutocompleteSku(cod, produto) {
+      selectedSkuFilter = { cod, produto };
+      topSearchInput.value = produto + ' [' + cod + ']';
+      searchInput.value = '';
+      autocompleteDropdown.classList.remove('open');
+      clearSearchBtn.style.display = 'block';
+      updateSkuPill(cod, produto);
+      applyFilters();
+      renderSkuHistorico(cod, produto);
+    }
+
+    function clearSkuFilter() {
+      selectedSkuFilter = null;
+      topSearchInput.value = '';
+      searchInput.value = '';
+      clearSearchBtn.style.display = 'none';
+      document.getElementById('sku-filter-pill').style.display = 'none';
+      document.getElementById('sku-historico-section').style.display = 'none';
+      applyFilters();
+    }
+
+    function updateSkuPill(cod, produto) {
+      const pill = document.getElementById('sku-filter-pill');
+      document.getElementById('sku-filter-pill-label').textContent = produto.length > 28 ? produto.slice(0,28)+'…' : produto;
+      pill.style.display = 'flex';
+    }
 
     topSearchInput.addEventListener('input', function() {
-      searchInput.value = this.value;
-      clearSearchBtn.style.display = this.value.length > 0 ? 'block' : 'none';
+      const val = this.value;
+      clearSearchBtn.style.display = val.length > 0 ? 'block' : 'none';
+      if (selectedSkuFilter) {
+        // Se o usuário edita depois de ter um SKU selecionado, reseta
+        selectedSkuFilter = null;
+        document.getElementById('sku-filter-pill').style.display = 'none';
+        document.getElementById('sku-historico-section').style.display = 'none';
+      }
+      const items = buildAutocompleteItems(val);
+      if (items.length && val.trim().length >= 1) {
+        renderAutocomplete(items);
+      } else {
+        autocompleteDropdown.classList.remove('open');
+      }
+      searchInput.value = val;
       applyFilters();
+    });
+
+    topSearchInput.addEventListener('keydown', function(e) {
+      const items = autocompleteDropdown.querySelectorAll('.autocomplete-item');
+      if (!items.length) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        _acFocusIdx = Math.min(_acFocusIdx + 1, items.length - 1);
+        items.forEach((el, i) => el.classList.toggle('focused', i === _acFocusIdx));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        _acFocusIdx = Math.max(_acFocusIdx - 1, 0);
+        items.forEach((el, i) => el.classList.toggle('focused', i === _acFocusIdx));
+      } else if (e.key === 'Enter' && _acFocusIdx >= 0) {
+        e.preventDefault();
+        const el = items[_acFocusIdx];
+        selectAutocompleteSku(el.dataset.cod, el.dataset.produto);
+      } else if (e.key === 'Escape') {
+        autocompleteDropdown.classList.remove('open');
+      }
+    });
+
+    topSearchInput.addEventListener('blur', function() {
+      setTimeout(() => autocompleteDropdown.classList.remove('open'), 150);
     });
 
     searchInput.addEventListener('input', function() {
@@ -906,6 +1120,9 @@
     function processData(rows) {
       const today = new Date(); today.setHours(0,0,0,0);
       db = [];
+      selectedSkuFilter = null;
+      document.getElementById('sku-filter-pill').style.display = 'none';
+      document.getElementById('sku-historico-section').style.display = 'none';
       rows.forEach((row, i) => {
         const n = {}; Object.keys(row || {}).forEach(k => n[normalizeKey(k)] = row[k]);
         const cod     = String(getField(n, ['COD','CODIGO','SKU'])).trim();
@@ -945,7 +1162,7 @@
     }
 
     function applyFilters() {
-      const search = normalizeText(document.getElementById('topSearchInput').value); 
+      const search = selectedSkuFilter ? '' : normalizeText(document.getElementById('topSearchInput').value); 
       const fMarca   = document.getElementById('filterMarca').value;
       const fOp      = document.getElementById('filterOperation').value;
       const fTipo    = document.getElementById('filterType').value;
@@ -953,6 +1170,8 @@
       const groupByVal = document.getElementById('groupByVal').value;
 
       let filtered = db.filter(item => {
+        // SKU filter: quando um SKU está selecionado, todo o dashboard filtra por ele
+        if (selectedSkuFilter && item.cod !== selectedSkuFilter.cod) return false;
         if (search && !normalizeText(`${item.produto} ${item.cod} ${item.lote}`).includes(search)) return false;
         if (fMarca !== 'TODOS' && item.marca !== fMarca) return false;
         if (fOp    !== 'TODOS' && item.operacao !== fOp) return false;
@@ -966,6 +1185,7 @@
 
       updateKPIs(filtered);
       updateCharts(filtered);
+      renderKpiFantasmas(filtered);
 
       let tableData = filtered;
       if (groupByVal === 'DATA') {
@@ -2230,6 +2450,138 @@
       });
       const buf = await wb.xlsx.writeBuffer();
       saveAs(new Blob([buf]), 'Relatorio_Completo.xlsx');
+    }
+
+    // ── KPI ETIQUETAS FANTASMAS ────────────────────────────────
+    function renderKpiFantasmas(list) {
+      // Regras: (A) descrição 100% em maiúsculas (etiqueta de picking)
+      //         (B) qtd < 30 unidades
+      //         (C) validade restante < 28 dias
+      const fantasmas = list.filter(item => {
+        const nome = item.produto;
+        const isAllUpper = nome === nome.toUpperCase() && /[A-Z]/.test(nome);
+        return isAllUpper && item.qtd < 30 && item.diff < 28;
+      });
+
+      const section = document.getElementById('kpi-fantasmas-section');
+      const countEl = document.getElementById('kpi-fantasmas-count');
+
+      if (fantasmas.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = 'block';
+      countEl.textContent = fantasmas.length;
+
+      // Renderizar tabela de detalhe
+      const tableEl = document.getElementById('fantasmas-table');
+      tableEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:7rem 1fr 9rem;gap:0 1rem;padding:0 0.75rem 0.35rem;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#aaa;">
+          <span>Etiqueta / Cód</span><span>Nome do SKU</span><span style="text-align:center;">Validade</span>
+        </div>
+        <div style="height:1px;background:rgba(0,0,0,0.06);margin-bottom:0.4rem;"></div>` +
+        fantasmas.map(item => {
+          const etqLabel = (item.etiqueta && String(item.etiqueta).trim() && item.etiqueta !== item.cod)
+            ? String(item.etiqueta).trim()
+            : String(item.cod);
+          const dtStr = item.validade
+            ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}/${item.validade.getFullYear()}`
+            : '-';
+          const diasStr = item.diff < 0 ? `Vencido há ${Math.abs(item.diff)}d` : `${item.diff}d restantes`;
+          const diasColor = item.diff < 10 ? '#FF3B30' : item.diff < 20 ? '#FF9500' : '#FFCC00';
+          return `<div style="display:grid;grid-template-columns:7rem 1fr 9rem;gap:0 1rem;align-items:center;padding:0.4rem 0.75rem;border-radius:0.75rem;background:rgba(175,82,222,0.04);margin-bottom:0.2rem;font-size:11px;">
+            <span style="font-weight:900;color:#AF52DE;font-family:monospace;">${etqLabel}</span>
+            <span style="font-weight:700;color:#1C1C1E;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.produto}">${item.produto}</span>
+            <span style="text-align:center;"><span style="font-size:9px;font-weight:900;padding:3px 8px;border-radius:99px;background:${diasColor}20;color:${diasColor};">${dtStr} · ${diasStr}</span></span>
+          </div>`;
+        }).join('');
+    }
+
+    function toggleFantasmasDetail() {
+      const detail = document.getElementById('fantasmas-detail');
+      const icon = document.getElementById('fantasmas-expand-icon');
+      const isOpen = detail.style.display === 'block';
+      detail.style.display = isOpen ? 'none' : 'block';
+      icon.textContent = isOpen ? '▼' : '▲';
+    }
+
+    // ── GRÁFICO HISTÓRICO SKU SELECIONADO ──────────────────────
+    function renderSkuHistorico(cod, produto) {
+      const historico = getHistorico();
+      const section = document.getElementById('sku-historico-section');
+      const labelEl = document.getElementById('sku-historico-label');
+
+      if (historico.length < 2) {
+        section.style.display = 'none';
+        return;
+      }
+
+      // Coleta dados: quantos snapshots têm esse SKU e qual era o saldo
+      const pontos = historico.map(h => {
+        const skuData = h.skus && h.skus[cod];
+        const qtd = skuData ? skuData.qtd : null;
+        const p = h.data.split('-');
+        const hora = h.fileLabel.split('às')[1] || '';
+        return {
+          label: `${p[2]}/${p[1]} ${hora.trim()}`,
+          qtd
+        };
+      }).filter(p => p.qtd !== null);
+
+      if (pontos.length < 2) {
+        section.style.display = 'none';
+        return;
+      }
+
+      section.style.display = 'block';
+      labelEl.textContent = produto;
+
+      const labels = pontos.map(p => p.label);
+      const data   = pontos.map(p => p.qtd);
+
+      if (charts['chartSkuHistorico']) charts['chartSkuHistorico'].destroy();
+      charts['chartSkuHistorico'] = new Chart(document.getElementById('chartSkuHistorico'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Volume em Data Curta (un)',
+            data,
+            borderColor: '#007AFF',
+            backgroundColor: 'rgba(0,122,255,0.07)',
+            borderWidth: 2.5,
+            pointRadius: 5,
+            pointBackgroundColor: data.map((v, i) => {
+              if (i === data.length - 1) return '#007AFF';
+              return v > (data[i-1] || v) ? '#FF3B30' : '#34C759';
+            }),
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.35,
+            fill: true
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(255,255,255,0.97)',
+              titleColor: '#1C1C1E', bodyColor: '#555',
+              borderColor: 'rgba(0,0,0,0.08)', borderWidth: 1,
+              padding: 12, cornerRadius: 14, displayColors: false,
+              titleFont: { size: 11, weight: '800', family: 'Inter' },
+              bodyFont:  { size: 10, weight: '600', family: 'Inter' },
+              callbacks: { label: ctx => `${ctx.parsed.y.toLocaleString('pt-BR')} unidades` }
+            }
+          },
+          scales: {
+            x: { grid:{ display:false }, ticks:{ font:{ size:8, weight:'700', family:'Inter' }, color:'#999' }, border:{ display:false } },
+            y: { display: true, ticks:{ font:{ size:8, family:'Inter' }, color:'#007AFF', callback: v => v.toLocaleString('pt-BR') }, grid:{ color:'rgba(0,0,0,0.04)' }, border:{ display:false } }
+          }
+        }
+      });
     }
 
     function renderKpiUrgenciaEtiquetas(list) {
