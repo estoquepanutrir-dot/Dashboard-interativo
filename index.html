@@ -612,6 +612,7 @@
             <h2 id="kpi-fantasmas-count" style="font-size:2.8rem;font-weight:900;color:#AF52DE;line-height:1;letter-spacing:-0.04em;margin:0;">0</h2>
             <span style="font-size:9px;color:#aaa;font-weight:700;">etiquetas encontradas</span>
           </div>
+          <button onclick="downloadRelatorioFantasmas()" title="Baixar relatório para impressão" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;border:1.5px solid rgba(175,82,222,0.35);background:rgba(175,82,222,0.07);color:#AF52DE;font-size:9px;font-weight:900;letter-spacing:.08em;cursor:pointer;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> RELATÓRIO</button>
           <button id="fantasmas-expand-btn" onclick="toggleFantasmasDetail()">
             <span id="fantasmas-expand-icon">▼</span> DETALHAR
           </button>
@@ -1133,7 +1134,7 @@
         const lastro = getLastro(cod, produto);
         const diff   = Math.ceil((validade - today) / 86400000);
         db.push({
-          id: i, cod, produto: produto.toUpperCase(), qtd, validade, diff,
+          id: i, cod, produto: produto, qtd, validade, diff,
           lote: String(getField(n,['LOTE'])).trim(),
           etiqueta: String(getField(n,['ETIQUETA'])).trim(),
           lastro,
@@ -1183,6 +1184,7 @@
         return true;
       });
 
+      window._lastFiltered = filtered;
       updateKPIs(filtered);
       updateCharts(filtered);
       renderKpiFantasmas(filtered);
@@ -1431,13 +1433,13 @@
               ${Math.round(item.qtd).toLocaleString('pt-BR')}
               <span class="text-[8px] text-gray-300 font-semibold"> / ${item.lastro}</span>
             </td>
-            <td class="px-6 py-4 text-center text-gray-400 text-[10px] font-bold">${dtStr}</td>
+            <td class="px-6 py-4 text-center text-[10px] font-black" style="color:#1C1C1E;">${dtStr}</td>
             <td class="px-6 py-4 text-center">
               <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase ${getValidityBadgeClass(item.validadeStatus)}">
                 ${item.validadeStatus}
               </span>
             </td>
-            <td class="px-8 py-4 text-right font-black text-[11px] ${item.isDataCurta?'text-[#FF3B30]':'text-black'}">
+            <td class="px-8 py-4 text-right font-black text-[11px]" style="color:${item.isDataCurta?'#FF3B30':'#1C1C1E'};background:${item.isDataCurta?'rgba(255,59,48,0.07)':'transparent'};border-radius:8px;">
               ${item.diff}d
             </td>
           </tr>`;
@@ -2454,13 +2456,17 @@
 
     // ── KPI ETIQUETAS FANTASMAS ────────────────────────────────
     function renderKpiFantasmas(list) {
-      // Regras: (A) descrição 100% em maiúsculas (etiqueta de picking)
-      //         (B) qtd < 30 unidades
-      //         (C) validade restante < 28 dias
       const fantasmas = list.filter(item => {
         const nome = item.produto;
-        const isAllUpper = nome === nome.toUpperCase() && /[A-Z]/.test(nome);
-        return isAllUpper && item.qtd < 30 && item.diff < 28;
+        
+        // Verifica se é 100% maiúsculo (ignorando números/símbolos)
+        // Usa toLowerCase() !== nome para garantir que realmente tem letras que poderiam ser minúsculas
+        const isAllUpper = (nome === nome.toUpperCase()) && (nome !== nome.toLowerCase());
+        
+        if (isAllUpper) return true; // Condição A: Picking (100% Maiúsculo)
+        
+        // Condição B: Etiqueta de estoque normal (baixa rotação)
+        return !isAllUpper && item.qtd < 15 && item.diff < 27;
       });
 
       const section = document.getElementById('kpi-fantasmas-section');
@@ -2474,7 +2480,6 @@
       section.style.display = 'block';
       countEl.textContent = fantasmas.length;
 
-      // Renderizar tabela de detalhe
       const tableEl = document.getElementById('fantasmas-table');
       tableEl.innerHTML = `
         <div style="display:grid;grid-template-columns:7rem 1fr 9rem;gap:0 1rem;padding:0 0.75rem 0.35rem;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#aaa;">
@@ -2489,16 +2494,155 @@
             ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}/${item.validade.getFullYear()}`
             : '-';
           const diasStr = item.diff < 0 ? `Vencido há ${Math.abs(item.diff)}d` : `${item.diff}d restantes`;
-          const diasColor = item.diff < 10 ? '#FF3B30' : item.diff < 20 ? '#FF9500' : '#FFCC00';
+          const diasBg   = item.diff < 10 ? '#FF3B30' : item.diff < 20 ? '#FF9500' : '#FFCC00';
+          const diasText = item.diff < 10 ? '#fff'    : item.diff < 20 ? '#fff'    : '#7A5C00';
+          
+          // Badge visual para indicar qual regra identificou a etiqueta
+          const tipoFantasma = (item.produto === item.produto.toUpperCase() && item.produto !== item.produto.toLowerCase()) 
+            ? '<span style="background:#AF52DE;color:#fff;padding:2px 6px;border-radius:4px;font-size:7px;">PICKING</span>' 
+            : '<span style="background:#FF9500;color:#fff;padding:2px 6px;border-radius:4px;font-size:7px;">ESTOQUE (BAIXA ROT.)</span>';
+
           return `<div style="display:grid;grid-template-columns:7rem 1fr 9rem;gap:0 1rem;align-items:center;padding:0.4rem 0.75rem;border-radius:0.75rem;background:rgba(175,82,222,0.04);margin-bottom:0.2rem;font-size:11px;">
             <span style="font-weight:900;color:#AF52DE;font-family:monospace;">${etqLabel}</span>
-            <span style="font-weight:700;color:#1C1C1E;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.produto}">${item.produto}</span>
-            <span style="text-align:center;"><span style="font-size:9px;font-weight:900;padding:3px 8px;border-radius:99px;background:${diasColor}20;color:${diasColor};">${dtStr} · ${diasStr}</span></span>
+            <div style="display:flex; flex-direction:column; gap:2px; overflow:hidden;">
+              <span style="font-weight:700;color:#1C1C1E;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.produto}">${item.produto}</span>
+              <div>${tipoFantasma}</div>
+            </div>
+            <span style="text-align:center;"><span style="font-size:9px;font-weight:900;padding:3px 8px;border-radius:99px;background:${diasBg};color:${diasText};">${dtStr} · ${diasStr}</span></span>
           </div>`;
         }).join('');
     }
 
-    function toggleFantasmasDetail() {
+    function downloadRelatorioFantasmas() {
+      // Coletar dados atuais da lista de fantasmas
+      const filtered = getFiltered ? getFiltered() : (window._lastFiltered || []);
+      const fantasmas = filtered.filter(item => {
+        const nome = item.produto;
+        const isAllUpper = (nome === nome.toUpperCase()) && (nome !== nome.toLowerCase());
+        if (isAllUpper) return true;
+        return !isAllUpper && item.qtd < 15 && item.diff < 27;
+      });
+
+      const agora = new Date();
+      const dtRelatorio = `${String(agora.getDate()).padStart(2,'0')}/${String(agora.getMonth()+1).padStart(2,'0')}/${agora.getFullYear()} ${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
+      const total = fantasmas.length;
+      const totalPicking = fantasmas.filter(i => i.produto === i.produto.toUpperCase() && i.produto !== i.produto.toLowerCase()).length;
+      const totalEstoque = total - totalPicking;
+
+      const linhas = fantasmas.map((item, idx) => {
+        const etqLabel = (item.etiqueta && String(item.etiqueta).trim() && item.etiqueta !== item.cod)
+          ? String(item.etiqueta).trim() : String(item.cod);
+        const dtStr = item.validade
+          ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}/${item.validade.getFullYear()}`
+          : '-';
+        const diasStr = item.diff < 0 ? `Vencido há ${Math.abs(item.diff)}d` : `${item.diff}d restantes`;
+        const tipo = (item.produto === item.produto.toUpperCase() && item.produto !== item.produto.toLowerCase()) ? 'PICKING' : 'ESTOQUE (BAIXA ROT.)';
+        const tipoCor = tipo === 'PICKING' ? '#AF52DE' : '#FF9500';
+        const validBg = item.diff < 10 ? '#FF3B30' : item.diff < 20 ? '#FF9500' : '#FFCC00';
+        const validTxt = item.diff < 10 ? '#fff' : item.diff < 20 ? '#fff' : '#7A5C00';
+        const rowBg = idx % 2 === 0 ? '#faf8ff' : '#ffffff';
+        return `<tr style="background:${rowBg};">
+          <td style="padding:9px 14px;font-weight:900;color:#AF52DE;font-family:monospace;font-size:12px;border-bottom:1px solid #f0ebfa;">${etqLabel}</td>
+          <td style="padding:9px 14px;font-weight:700;color:#1C1C1E;font-size:12px;border-bottom:1px solid #f0ebfa;">${item.produto}</td>
+          <td style="padding:9px 14px;text-align:center;border-bottom:1px solid #f0ebfa;"><span style="background:${tipoCor};color:#fff;padding:3px 8px;border-radius:4px;font-size:9px;font-weight:900;">${tipo}</span></td>
+          <td style="padding:9px 14px;text-align:center;font-weight:700;font-size:12px;color:#1C1C1E;border-bottom:1px solid #f0ebfa;">${item.qtd}</td>
+          <td style="padding:9px 14px;text-align:center;border-bottom:1px solid #f0ebfa;"><span style="background:${validBg};color:${validTxt};padding:3px 10px;border-radius:99px;font-size:10px;font-weight:900;">${dtStr} · ${diasStr}</span></td>
+          <td style="padding:9px 14px;text-align:center;font-weight:700;font-size:12px;color:#666;border-bottom:1px solid #f0ebfa;">${item.lote || '-'}</td>
+        </tr>`;
+      }).join('');
+
+      const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório — Etiquetas Fantasmas</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, 'Inter', sans-serif; background:#fff; color:#1C1C1E; padding:32px; }
+  @media print {
+    body { padding:16px; }
+    .no-print { display:none !important; }
+    @page { margin:1.5cm; size: A4 landscape; }
+  }
+  .header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:28px; padding-bottom:20px; border-bottom:3px solid #AF52DE; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand-icon { width:44px; height:44px; background:rgba(175,82,222,0.12); border-radius:12px; display:flex; align-items:center; justify-content:center; }
+  .brand-title { font-size:18px; font-weight:900; color:#AF52DE; letter-spacing:-0.02em; }
+  .brand-sub { font-size:10px; color:#aaa; font-weight:600; margin-top:2px; }
+  .meta { text-align:right; font-size:10px; color:#aaa; font-weight:600; line-height:1.7; }
+  .resumo { display:flex; gap:16px; margin-bottom:24px; }
+  .resumo-card { flex:1; padding:16px 20px; border-radius:14px; }
+  .resumo-card .num { font-size:2rem; font-weight:900; line-height:1; letter-spacing:-0.04em; }
+  .resumo-card .lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-top:4px; }
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:#AF52DE; }
+  thead th { padding:10px 14px; color:#fff; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.1em; text-align:left; }
+  thead th:nth-child(3), thead th:nth-child(4), thead th:nth-child(5), thead th:nth-child(6) { text-align:center; }
+  .footer { margin-top:24px; padding-top:14px; border-top:1px solid #eee; font-size:9px; color:#bbb; font-weight:600; text-align:center; }
+  .print-btn { margin-bottom:20px; padding:10px 24px; background:#AF52DE; color:#fff; border:none; border-radius:99px; font-size:11px; font-weight:900; cursor:pointer; letter-spacing:.06em; }
+</style>
+</head>
+<body>
+  <button class="no-print print-btn" onclick="window.print()">🖨️ IMPRIMIR / SALVAR PDF</button>
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="22" height="22" fill="none" stroke="#AF52DE" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg>
+      </div>
+      <div>
+        <div class="brand-title">Etiquetas Fantasmas</div>
+        <div class="brand-sub">Saldos virtuais — conferentes não biparam saída no Picking</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div>Gerado em: <strong>${dtRelatorio}</strong></div>
+      <div>Total de etiquetas: <strong style="color:#AF52DE;">${total}</strong></div>
+    </div>
+  </div>
+
+  <div class="resumo">
+    <div class="resumo-card" style="background:rgba(175,82,222,0.07);border:1.5px solid rgba(175,82,222,0.18);">
+      <div class="num" style="color:#AF52DE;">${total}</div>
+      <div class="lbl" style="color:#AF52DE;">Total de Fantasmas</div>
+    </div>
+    <div class="resumo-card" style="background:rgba(175,82,222,0.04);border:1.5px solid rgba(175,82,222,0.12);">
+      <div class="num" style="color:#AF52DE;">${totalPicking}</div>
+      <div class="lbl" style="color:#AF52DE;">Picking (Maiúsculas)</div>
+    </div>
+    <div class="resumo-card" style="background:rgba(255,149,0,0.06);border:1.5px solid rgba(255,149,0,0.18);">
+      <div class="num" style="color:#FF9500;">${totalEstoque}</div>
+      <div class="lbl" style="color:#FF9500;">Estoque (Baixa Rot.)</div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Etiqueta / Cód</th>
+        <th>Nome do SKU</th>
+        <th style="text-align:center;">Tipo</th>
+        <th style="text-align:center;">Qtd</th>
+        <th style="text-align:center;">Validade</th>
+        <th style="text-align:center;">Lote</th>
+      </tr>
+    </thead>
+    <tbody>${linhas}</tbody>
+  </table>
+
+  <div class="footer">Dashboard de Estoque · Relatório gerado automaticamente em ${dtRelatorio} · ${total} etiqueta(s) identificada(s)</div>
+</body>
+</html>`;
+
+      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `etiquetas-fantasmas-${agora.getFullYear()}${String(agora.getMonth()+1).padStart(2,'0')}${String(agora.getDate()).padStart(2,'0')}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+        function toggleFantasmasDetail() {
       const detail = document.getElementById('fantasmas-detail');
       const icon = document.getElementById('fantasmas-expand-icon');
       const isOpen = detail.style.display === 'block';
