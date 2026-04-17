@@ -1816,7 +1816,7 @@
 
     async function exportarDataCurta() {
       // Filtra: datas curtas = MENOS de 25 dias (diff < 25)
-      const raw = db.filter(i => i.diff < 25 && i.diff >= 0 && i.cod !== DONATION_CODE && i.qtd >= 10);
+      const raw = db.filter(i => i.diff <= 25 && i.diff >= 0 && i.cod !== DONATION_CODE && i.qtd >= 10);
       if (raw.length === 0) return alert("Sem dados.");
       const agrupado = {};
       raw.forEach(i => {
@@ -2006,7 +2006,7 @@
      * Estrutura: [ { COD, PRODUTO, QTD_TOTAL (saldo), VALIDADE, PRAZO } ]
      */
     function buildLotesFEFO() {
-      const raw = db.filter(i => i.isDataCurta && i.cod !== DONATION_CODE && i.qtd >= 10);
+      const raw = db.filter(i => (i.isDataCurta || i.diff <= 25) && i.diff >= 0 && i.cod !== DONATION_CODE && i.qtd >= 10);
       const agrupado = {};
       raw.forEach(i => {
         const key = i.cod + '_' + i.diff;
