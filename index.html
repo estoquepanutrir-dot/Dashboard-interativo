@@ -15,6 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
@@ -595,36 +596,7 @@
       </div>
     </div>
 
-    <!-- KPI ETIQUETAS FANTASMAS -->
-    <div id="kpi-fantasmas-section" class="glass-card rounded-[2.5rem] p-7 mb-7" style="border-left: 4px solid #AF52DE;">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:40px;height:40px;border-radius:1rem;background:rgba(175,82,222,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-            <svg width="20" height="20" fill="none" stroke="#AF52DE" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2v-4M9 21H5a2 2 0 01-2-2v-4m0 0h18"/></svg>
-          </div>
-          <div>
-            <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-0.5">Etiquetas Fantasmas</p>
-            <p style="font-size:9px;color:#aaa;font-weight:600;margin:0;line-height:1.4;">Saldos virtuais — conferentes não biparam saída no Picking</p>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="text-align:right;">
-            <h2 id="kpi-fantasmas-count" style="font-size:2.8rem;font-weight:900;color:#AF52DE;line-height:1;letter-spacing:-0.04em;margin:0;">0</h2>
-            <span style="font-size:9px;color:#aaa;font-weight:700;">etiquetas encontradas</span>
-          </div>
-          <button onclick="downloadRelatorioFantasmas()" title="Baixar relatório para impressão" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;border:1.5px solid rgba(175,82,222,0.35);background:rgba(175,82,222,0.07);color:#AF52DE;font-size:9px;font-weight:900;letter-spacing:.08em;cursor:pointer;"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> RELATÓRIO</button>
-          <button id="fantasmas-expand-btn" onclick="toggleFantasmasDetail()">
-            <span id="fantasmas-expand-icon">▼</span> DETALHAR
-          </button>
-        </div>
-      </div>
-      <div id="fantasmas-detail">
-        <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.07),transparent);margin:1rem 0;"></div>
-        <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-          <div id="fantasmas-table" style="min-width:600px;"></div>
-        </div>
-      </div>
-    </div>
+
 
     <!-- GRÁFICO HISTÓRICO SKU SELECIONADO -->
     <div id="sku-historico-section" class="glass-card p-7 rounded-[2.5rem] mb-7">
@@ -724,12 +696,63 @@
               ↓ DATAS CURTAS COM DIRECIONAMENTO
             </button>
             <div class="w-px h-5 bg-black/10 mx-1"></div>
-            <button onclick="exportarDataCurta()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#FF9500] text-white text-[10px]">DATAS CURTAS</button>
-            <button onclick="exportarResumoPilhas()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#34C759] text-white text-[10px]">PILHAS</button>
-            <button onclick="exportarListaQuebras()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#1C1C1E] text-white text-[10px]">QUEBRAS</button>
+            <!-- DATAS CURTAS: dropdown compacto -->
+            <div style="position:relative;display:inline-block;" id="dcDropdownWrap">
+              <button onclick="toggleDcDropdown(event)"
+                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#FF9500;">
+                DATAS CURTAS
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="dcDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:9999;min-width:145px;overflow:hidden;backdrop-filter:blur(16px);">
+                <button onclick="exportarDataCurta(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#B25E09;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(255,149,0,0.08)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Excel (.xlsx)
+                </button>
+                <div style="height:1px;background:rgba(0,0,0,0.06);margin:0 10px;"></div>
+                <button onclick="exportarDataCurtaPDF(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#B25E09;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(255,149,0,0.08)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  PDF (imprimir)
+                </button>
+              </div>
+            </div>
+            <!-- PILHAS: dropdown compacto -->
+            <div style="position:relative;display:inline-block;" id="pilhasDropdownWrap">
+              <button onclick="togglePilhasDropdown(event)"
+                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#34C759;">
+                PILHAS
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="pilhasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:9999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
+                <button onclick="exportarResumoPilhas(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#1D8A3F;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(52,199,89,0.08)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Excel (.xlsx)
+                </button>
+                <div style="height:1px;background:rgba(0,0,0,0.06);margin:0 10px;"></div>
+                <button onclick="exportarPilhasPDF(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#1D8A3F;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(52,199,89,0.08)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  PDF (imprimir)
+                </button>
+              </div>
+            </div>
+            <!-- QUEBRAS: dropdown compacto -->
+            <div style="position:relative;display:inline-block;" id="quebrasDropdownWrap">
+              <button onclick="toggleQuebrasDropdown(event)"
+                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#5856D6;">
+                QUEBRAS
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="quebrasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:9999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
+                <button onclick="exportarListaQuebras(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#5856D6;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(88,86,214,0.08)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Excel (.xlsx)
+                </button>
+                <div style="height:1px;background:rgba(0,0,0,0.06);margin:0 10px;"></div>
+                <button onclick="exportarQuebrasPDF(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#5856D6;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(88,86,214,0.08)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  PDF (imprimir)
+                </button>
+              </div>
+            </div>
             <button onclick="exportarRelatorioTransferencia()"
               class="dl-btn px-5 py-2 rounded-full bg-[#007AFF] text-white text-[10px]">RELATÓRIO</button>
           </div>
@@ -1950,7 +1973,7 @@
           agrupado[i.cod]["Qtd Pilhas"] += 1;
         }
       });
-      const final = Object.values(agrupado);
+      const final = Object.values(agrupado).sort((a, b) => a['Nome do produto'].localeCompare(b['Nome do produto'], 'pt-BR'));
       if (final.length === 0) return alert("Nenhuma etiqueta de pilha fechada encontrada.");
 
       const workbook = new ExcelJS.Workbook();
@@ -1997,11 +2020,7 @@
         };
       });
 
-      rows.sort((a,b) => {
-        if (a.OBS && !b.OBS) return -1;
-        if (!a.OBS && b.OBS) return 1;
-        return 0;
-      });
+      rows.sort((a,b) => a.NOME.localeCompare(b.NOME, 'pt-BR'));
 
       const workbook = new ExcelJS.Workbook();
       const ws = workbook.addWorksheet('Quebras');
@@ -2514,9 +2533,9 @@
     }
 
     function downloadRelatorioFantasmas() {
-      // Coletar dados atuais da lista de fantasmas
-      const filtered = getFiltered ? getFiltered() : (window._lastFiltered || []);
-      const fantasmas = filtered.filter(item => {
+      // Coletar dados atuais da lista de fantasmas diretamente do db
+      if (!db || db.length === 0) return alert('Sem dados. Importe a base de estoque primeiro.');
+      const fantasmas = db.filter(item => {
         const nome = item.produto;
         const isAllUpper = (nome === nome.toUpperCase()) && (nome !== nome.toLowerCase());
         if (isAllUpper) return true;
@@ -2640,6 +2659,79 @@
       a.download = `etiquetas-fantasmas-${agora.getFullYear()}${String(agora.getMonth()+1).padStart(2,'0')}${String(agora.getDate()).padStart(2,'0')}.html`;
       a.click();
       URL.revokeObjectURL(url);
+    }
+
+    async function downloadXlsFantasmas() {
+      if (!db || db.length === 0) return alert('Sem dados. Importe a base de estoque primeiro.');
+      const fantasmas = db.filter(item => {
+        const nome = item.produto;
+        const isAllUpper = (nome === nome.toUpperCase()) && (nome !== nome.toLowerCase());
+        if (isAllUpper) return true;
+        return !isAllUpper && item.qtd < 15 && item.diff < 27;
+      });
+      if (fantasmas.length === 0) return alert('Nenhuma etiqueta fantasma encontrada na base atual.');
+
+      const workbook = new ExcelJS.Workbook();
+      const ws = workbook.addWorksheet('Etiquetas Fantasmas');
+      ws.columns = [
+        { header: 'ETIQUETA / CÓD', key: 'ETIQUETA', width: 18 },
+        { header: 'NOME DO SKU',     key: 'PRODUTO',  width: 42 },
+        { header: 'TIPO',            key: 'TIPO',     width: 22 },
+        { header: 'QTD',             key: 'QTD',      width: 10 },
+        { header: 'VALIDADE',        key: 'VALIDADE', width: 14 },
+        { header: 'DIAS',            key: 'DIAS',     width: 10 },
+        { header: 'STATUS',          key: 'STATUS',   width: 20 },
+        { header: 'LOTE',            key: 'LOTE',     width: 14 }
+      ];
+
+      // Estilo do cabeçalho
+      ws.getRow(1).eachCell(cell => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFAF52DE' } };
+        cell.alignment = { horizontal: 'center' };
+      });
+
+      fantasmas.forEach((item, idx) => {
+        const etqLabel = (item.etiqueta && String(item.etiqueta).trim() && item.etiqueta !== item.cod)
+          ? String(item.etiqueta).trim() : String(item.cod);
+        const dtStr = item.validade
+          ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}/${item.validade.getFullYear()}`
+          : '-';
+        const tipo = (item.produto === item.produto.toUpperCase() && item.produto !== item.produto.toLowerCase())
+          ? 'PICKING' : 'ESTOQUE (BAIXA ROT.)';
+        const diasStr = item.diff < 0 ? `Vencido há ${Math.abs(item.diff)}d` : `${item.diff}d restantes`;
+        const statusInfo = getStatusCorDC(item.diff);
+
+        const row = ws.addRow({
+          ETIQUETA: etqLabel,
+          PRODUTO:  item.produto,
+          TIPO:     tipo,
+          QTD:      Math.round(item.qtd),
+          VALIDADE: dtStr,
+          DIAS:     item.diff,
+          STATUS:   statusInfo.st,
+          LOTE:     item.lote || '-'
+        });
+
+        // Cor de urgência nas linhas
+        const bg = statusInfo.col !== 'FFFFFFFF' ? statusInfo.col : (idx % 2 === 0 ? 'FFFFF8FF' : 'FFFFFFFF');
+        const fg = statusInfo.textDark ? 'FF1C1C1E' : (statusInfo.col !== 'FFFFFFFF' ? 'FFFFFFFF' : 'FF1C1C1E');
+        row.eachCell(cell => {
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: bg } };
+          cell.font = { bold: true, color: { argb: fg } };
+        });
+        // Coluna TIPO: cor específica
+        const tipoCell = row.getCell('TIPO');
+        tipoCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: tipo === 'PICKING' ? 'FFAF52DE' : 'FFFF9500' } };
+        tipoCell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        tipoCell.alignment = { horizontal: 'center' };
+      });
+
+      autoFitWorksheetColumns(ws);
+      const agora = new Date();
+      const dataStr = `${agora.getFullYear()}${String(agora.getMonth()+1).padStart(2,'0')}${String(agora.getDate()).padStart(2,'0')}`;
+      const buf = await workbook.xlsx.writeBuffer();
+      saveAs(new Blob([buf]), `Etiquetas_Fantasmas_${dataStr}.xlsx`);
     }
 
         function toggleFantasmasDetail() {
@@ -2860,6 +2952,940 @@ self.addEventListener('fetch', e => {
         navigator.serviceWorker.register(swUrl).catch(() => {});
       }
     })();
+
+    // ══════════════════════════════════════════════════════════════════
+    // GERADOR DE PDF — HELPER COMPARTILHADO
+    // ══════════════════════════════════════════════════════════════════
+    function _pdfColors() {
+      return {
+        roxo:      [175, 82,  222],
+        roxoLight: [245, 238, 255],
+        roxoMid:   [225, 205, 245],
+        verde:     [ 52, 199,  89],
+        verdeEsc:  [ 29, 138,  59],
+        dark:      [ 28,  28,  30],
+        cinza:     [108, 108, 112],
+        cinzaBg:   [242, 242, 247],
+        borda:     [229, 229, 234],
+        vermelho:  [255,  59,  48],
+        laranja:   [255, 149,   0],
+        amarelo:   [255, 204,   0],
+        azul:      [ 88,  86, 214],
+        azulEsc:   [  0, 122, 255],
+        branco:    [255, 255, 255],
+      };
+    }
+
+    function _statusCor(dataStr) {
+      const c = _pdfColors();
+      try {
+        const [d, m, a] = dataStr.split('/').map(Number);
+        const diff = Math.floor((new Date(a, m-1, d) - new Date()) / 86400000);
+        if (diff < 0)   return { bg: c.dark,     txt: c.branco, label: 'VENCIDO'      };
+        if (diff < 10)  return { bg: [139,69,19], txt: c.branco, label: 'PRAZO LIMITE' };
+        if (diff <= 19) return { bg: c.vermelho,  txt: c.branco, label: 'URGENTE'      };
+        if (diff <= 21) return { bg: c.laranja,   txt: c.branco, label: 'CRITICO'      };
+        if (diff <= 23) return { bg: c.amarelo,   txt: c.dark,   label: 'ATENÇÃO'      };
+        return                  { bg: c.borda,    txt: c.dark,   label: 'NORMAL'       };
+      } catch { return          { bg: c.borda,    txt: c.dark,   label: ''             }; }
+    }
+
+    function _drawPdfHeader(doc, titulo, subtitulo, accentColor, totalLabel, totalVal, hoje) {
+      const c = _pdfColors();
+      const pgW = doc.internal.pageSize.getWidth();
+
+      // Fundo do cabeçalho
+      doc.setFillColor(...accentColor);
+      doc.roundedRect(10, 8, pgW - 20, 26, 3, 3, 'F');
+
+      // Ícone / bolinha decorativa
+      doc.setFillColor(255, 255, 255, 0.15);
+      doc.circle(pgW - 22, 14, 10, 'F');
+      doc.setFillColor(255, 255, 255, 0.08);
+      doc.circle(pgW - 18, 24, 15, 'F');
+
+      // Título
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text(titulo, 17, 19);
+
+      // Subtítulo
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(220, 200, 255);
+      doc.text(subtitulo, 17, 25);
+
+      // Meta direita
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`Gerado em: ${hoje}`, pgW - 14, 18, { align: 'right' });
+      doc.text(`${totalLabel}: ${totalVal}`, pgW - 14, 24, { align: 'right' });
+      doc.text('CD Matriz Panutrir', pgW - 14, 30, { align: 'right' });
+
+      // Logo canto superior direito
+      try {
+        const logoEl = document.querySelector('img[src="assets/logo.png"]');
+        if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
+          const canvas = document.createElement('canvas');
+          const ratio = logoEl.naturalWidth / logoEl.naturalHeight;
+          canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
+          canvas.getContext('2d').drawImage(logoEl, 0, 0);
+          const imgData = canvas.toDataURL('image/png');
+          const lH = 7, lW = lH * ratio;
+          doc.addImage(imgData, 'PNG', pgW - 10 - lW, 4, lW, lH);
+        }
+      } catch(e) {}
+
+      return 38; // y após o cabeçalho
+    }
+
+    function _drawKpiBar(doc, kpis, y) {
+      const c = _pdfColors();
+      const pgW = doc.internal.pageSize.getWidth();
+      const margin = 10;
+      const cardW = (pgW - margin * 2 - (kpis.length - 1) * 3) / kpis.length;
+
+      kpis.forEach((k, i) => {
+        const x = margin + i * (cardW + 3);
+        doc.setFillColor(...c.cinzaBg);
+        doc.roundedRect(x, y, cardW, 16, 2, 2, 'F');
+        doc.setDrawColor(...c.borda);
+        doc.setLineWidth(0.3);
+        doc.roundedRect(x, y, cardW, 16, 2, 2, 'S');
+
+        // Linha colorida no topo do card
+        doc.setFillColor(...k.cor);
+        doc.roundedRect(x, y, cardW, 2, 1, 1, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(...k.cor);
+        doc.text(String(k.val), x + cardW / 2, y + 11, { align: 'center' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(5.5);
+        doc.setTextColor(...c.cinza);
+        doc.text(k.lbl.toUpperCase(), x + cardW / 2, y + 15.5, { align: 'center' });
+      });
+
+      return y + 21;
+    }
+
+    function _drawCheckbox(doc, x, y, size = 4) {
+      const c = _pdfColors();
+      doc.setDrawColor(...c.roxo);
+      doc.setLineWidth(0.6);
+      doc.roundedRect(x, y, size, size, 0.8, 0.8, 'S');
+    }
+
+    function _drawTableHeader(doc, cols, y, headerBg) {
+      const c = _pdfColors();
+      const pgW = doc.internal.pageSize.getWidth();
+      const totalW = cols.reduce((s, col) => s + col.w, 0);
+
+      doc.setFillColor(...headerBg);
+      doc.roundedRect(10, y, pgW - 20, 7, 1.5, 1.5, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.setTextColor(255, 255, 255);
+
+      let cx = 10;
+      cols.forEach(col => {
+        doc.text(col.label, cx + col.w / 2, y + 4.8, { align: 'center' });
+        cx += col.w;
+      });
+      return y + 8;
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PDF QUEBRAS
+    // ══════════════════════════════════════════════════════════════════
+    function exportarQuebrasPDF() {
+      if (db.length === 0) return alert('Sem dados. Importe a base primeiro.');
+      const c = _pdfColors();
+
+      const listaQuebras = db.filter(i => i.qtd < i.lastro);
+      if (listaQuebras.length === 0) return alert('Nenhuma quebra encontrada.');
+
+      const minDiff = Math.min(...listaQuebras.map(i => i.diff));
+      const rows = listaQuebras.map(i => {
+        const div = i.produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
+        const upCx = i.lastro / div;
+        return {
+          etiqueta: String(i.etiqueta || i.cod || '-'),
+          data:     i.validade ? i.validade.toLocaleDateString('pt-BR') : '-',
+          nome:     i.produto,
+          cx:       Math.floor(i.qtd / upCx),
+          unds:     Math.round(i.qtd % upCx),
+          total:    Math.round(i.qtd),
+          obs:      (i.qtd < 30 && i.diff === minDiff) ? '⚠ FANTASMA?' : '',
+        };
+      }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pgW = doc.internal.pageSize.getWidth();
+      const pgH = doc.internal.pageSize.getHeight();
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      // KPIs
+      const totalCx   = rows.reduce((s, r) => s + r.cx,    0);
+      const totalUnds = rows.reduce((s, r) => s + r.unds,   0);
+      const totalVol  = rows.reduce((s, r) => s + r.total,  0);
+      const totalFant = rows.filter(r => r.obs).length;
+
+      let y = _drawPdfHeader(doc, 'Relatório de Quebras', 'Saldos com quantidade inferior ao lastro da pilha',
+        c.azul, 'Total de etiquetas', rows.length, hoje);
+
+      y = _drawKpiBar(doc, [
+        { val: rows.length, lbl: 'Etiquetas',  cor: c.azul    },
+        { val: totalCx,     lbl: 'Caixas',     cor: c.verde   },
+        { val: totalUnds,   lbl: 'Unidades',   cor: c.laranja },
+        { val: totalVol,    lbl: 'Vol. Total', cor: c.dark    },
+        { val: totalFant,   lbl: 'Fantasmas',  cor: c.amarelo },
+      ], y);
+
+      // Legenda das caixinhas
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...c.cinza);
+      doc.text('✓ Confirmar presença no estoque:', 12, y + 4);
+      _drawCheckbox(doc, 84, y + 1, 3.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Presente', 88.5, y + 4);
+      _drawCheckbox(doc, 104, y + 1, 3.5);
+      doc.text('Ausente / Retirado', 108.5, y + 4);
+      y += 9;
+
+      // Colunas: [ label, width, key, align ]
+      // Largura total = pgW - 20 = 170mm
+      const cols = [
+        { label: '✓', w: 7,  key: 'check',    align: 'center' },
+        { label: 'ETIQUETA', w: 22, key: 'etiqueta', align: 'center' },
+        { label: 'VENCIMENTO', w: 22, key: 'data',   align: 'center' },
+        { label: 'NOME DO PRODUTO', w: 67, key: 'nome',  align: 'left'   },
+        { label: 'CX', w: 14, key: 'cx',    align: 'center' },
+        { label: 'UNDS', w: 16, key: 'unds', align: 'center' },
+        { label: 'TOTAL', w: 16, key: 'total',align: 'center' },
+        { label: 'OBS', w: 6,  key: 'obs',  align: 'center' }, // hidden, only for fantasma badge
+      ];
+      // Remover coluna OBS da renderização explícita (incorporado no nome)
+      const visCols = cols.slice(0, 7);
+
+      y = _drawTableHeader(doc, visCols, y, c.azul);
+
+      const rowH = 6.5;
+      const maxY = pgH - 14;
+      let pageNum = 1;
+
+      const drawPageFooter = () => {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6);
+        doc.setTextColor(...c.cinza);
+        doc.text(`Página ${pageNum} · Relatório de Quebras · ${hoje} · CD Matriz Panutrir`,
+          pgW / 2, pgH - 6, { align: 'center' });
+      };
+
+      rows.forEach((row, idx) => {
+        if (y + rowH > maxY) {
+          drawPageFooter();
+          doc.addPage();
+          pageNum++;
+          y = 14;
+          y = _drawTableHeader(doc, visCols, y, c.azul);
+        }
+
+        const isOdd = idx % 2 === 0;
+        const isFantasma = !!row.obs;
+        const st = _statusCor(row.data);
+
+        // Fundo da linha
+        if (isFantasma) {
+          doc.setFillColor(255, 248, 220);
+        } else if (isOdd) {
+          doc.setFillColor(248, 246, 255);
+        } else {
+          doc.setFillColor(255, 255, 255);
+        }
+        doc.rect(10, y, pgW - 20, rowH, 'F');
+
+        // Linha separadora suave
+        doc.setDrawColor(...c.borda);
+        doc.setLineWidth(0.2);
+        doc.line(10, y + rowH, pgW - 20 + 10, y + rowH);
+
+        // Dados das células
+        let cx = 10;
+        visCols.forEach(col => {
+          const cellY = y + rowH / 2 + 1.2;
+
+          if (col.key === 'check') {
+            _drawCheckbox(doc, cx + 1.5, y + 1.2, 4);
+          } else if (col.key === 'etiqueta') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.5);
+            doc.setTextColor(...c.azul);
+            doc.text(row.etiqueta, cx + col.w / 2, cellY, { align: 'center' });
+          } else if (col.key === 'data') {
+            // Badge colorido de status — texto centrado dentro do rect
+            const bx = cx + 1, by = y + 0.8, bw = col.w - 2, bh = rowH - 1.6;
+            doc.setFillColor(...st.bg);
+            doc.roundedRect(bx, by, bw, bh, 1.2, 1.2, 'F');
+            const midY = by + bh / 2;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(5.5);
+            doc.setTextColor(...st.txt);
+            doc.text(row.data, bx + bw / 2, midY - 0.3, { align: 'center' });
+            doc.setFontSize(4.8);
+            doc.text(st.label, bx + bw / 2, midY + 2.8, { align: 'center' });
+          } else if (col.key === 'nome') {
+            doc.setFont('helvetica', isFantasma ? 'bold' : 'normal');
+            doc.setFontSize(6.2);
+            doc.setTextColor(isFantasma ? 180 : 28, isFantasma ? 100 : 28, isFantasma ? 0 : 30);
+            // Truncar nome se longo
+            let nome = row.nome;
+            while (doc.getTextWidth(nome) > col.w - 3 && nome.length > 10)
+              nome = nome.slice(0, -1);
+            if (nome !== row.nome) nome = nome.slice(0, -1) + '…';
+            doc.text(nome, cx + 2, cellY);
+            if (isFantasma) {
+              doc.setFillColor(255, 200, 50);
+              doc.roundedRect(cx + 2, y + rowH - 2.5, 18, 2, 0.5, 0.5, 'F');
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(4.5);
+              doc.setTextColor(...c.dark);
+              doc.text('⚠ FANTASMA?', cx + 3, y + rowH - 1);
+            }
+          } else {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...c.dark);
+            doc.text(String(row[col.key] ?? ''), cx + col.w / 2, cellY, { align: 'center' });
+          }
+          cx += col.w;
+        });
+
+        y += rowH;
+      });
+
+      drawPageFooter();
+
+      // Resumo final
+      if (y + 20 > maxY) { doc.addPage(); pageNum++; y = 14; }
+      y += 4;
+      doc.setFillColor(...c.cinzaBg);
+      doc.roundedRect(10, y, pgW - 20, 14, 2, 2, 'F');
+      doc.setDrawColor(...c.borda);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(10, y, pgW - 20, 14, 2, 2, 'S');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(...c.cinza);
+      doc.text('TOTAIS DO RELATÓRIO', 15, y + 5.5);
+      doc.setFontSize(7.5);
+      doc.setTextColor(...c.dark);
+      doc.text(`${rows.length} etiquetas   ·   ${totalCx} cxs   ·   ${totalUnds} unds avulsas   ·   ${totalVol} unidades total`, 15, y + 11);
+
+      const dataArq = new Date().toISOString().slice(0,10).replace(/-/g,'');
+      doc.save(`Relatorio_Quebras_${dataArq}.pdf`);
+    }
+
+    // Dropdown Datas Curtas
+    function toggleDcDropdown(e) {
+      e.stopPropagation();
+      const d = document.getElementById('dcDropdown');
+      d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
+    function closeDcDropdown() {
+      const d = document.getElementById('dcDropdown');
+      if (d) d.style.display = 'none';
+    }
+    // Dropdown Pilhas
+    function togglePilhasDropdown(e) {
+      e.stopPropagation();
+      const d = document.getElementById('pilhasDropdown');
+      d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
+    function closePilhasDropdown() {
+      document.getElementById('pilhasDropdown').style.display = 'none';
+    }
+    // Dropdown Quebras
+    function toggleQuebrasDropdown(e) {
+      e.stopPropagation();
+      const d = document.getElementById('quebrasDropdown');
+      d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
+    function closeQuebrasDropdown() {
+      document.getElementById('quebrasDropdown').style.display = 'none';
+    }
+    document.addEventListener('click', function(e) {
+      const wp = document.getElementById('pilhasDropdownWrap');
+      const wq = document.getElementById('quebrasDropdownWrap');
+      const wd = document.getElementById('dcDropdownWrap');
+      if (wp && !wp.contains(e.target)) closePilhasDropdown();
+      if (wq && !wq.contains(e.target)) closeQuebrasDropdown();
+      if (wd && !wd.contains(e.target)) closeDcDropdown();
+    });
+
+    // ══════════════════════════════════════════════════════════════════
+    // PDF PILHAS — compacto, 1 folha A4
+    // ══════════════════════════════════════════════════════════════════
+    function exportarPilhasPDF() {
+      if (db.length === 0) return alert('Sem dados. Importe a base primeiro.');
+      const c = _pdfColors();
+
+      const agrupado = {};
+      db.forEach(i => {
+        if (i.qtd === i.lastro) {
+          if (!agrupado[i.cod]) agrupado[i.cod] = { cod: i.cod, produto: i.produto, qtdPilhas: 0 };
+          agrupado[i.cod].qtdPilhas += 1;
+        }
+      });
+      const rows = Object.values(agrupado).sort((a, b) => a.produto.localeCompare(b.produto, 'pt-BR'));
+      if (rows.length === 0) return alert('Nenhuma etiqueta de pilha fechada encontrada.');
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pgW = doc.internal.pageSize.getWidth();
+      const pgH = doc.internal.pageSize.getHeight();
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      const totalPilhas = rows.reduce((s, r) => s + r.qtdPilhas, 0);
+
+      // ── CABEÇALHO compacto (20mm) ──────────────────────────────
+      doc.setFillColor(...c.verdeEsc);
+      doc.roundedRect(10, 8, pgW - 20, 20, 3, 3, 'F');
+      // Bola decorativa
+      doc.setFillColor(255, 255, 255);
+      doc.setGState && doc.setGState(doc.GState({ opacity: 0.07 }));
+      doc.circle(pgW - 20, 10, 14, 'F');
+      doc.setGState && doc.setGState(doc.GState({ opacity: 1 }));
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(255, 255, 255);
+      doc.text('Relatório de Pilhas', 16, 16);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(195, 240, 210);
+      doc.text('Pilhas fechadas (lastro completo) · CD Matriz Panutrir', 16, 21.5);
+
+      // Meta direita
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`Gerado: ${hoje}`, pgW - 13, 15, { align: 'right' });
+      doc.text(`${rows.length} SKUs · ${totalPilhas} pilhas`, pgW - 13, 21, { align: 'right' });
+
+      // Logo canto superior direito
+      try {
+        const logoEl = document.querySelector('img[src="assets/logo.png"]');
+        if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
+          const canvas = document.createElement('canvas');
+          const ratio = logoEl.naturalWidth / logoEl.naturalHeight;
+          canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
+          canvas.getContext('2d').drawImage(logoEl, 0, 0);
+          const imgData = canvas.toDataURL('image/png');
+          const lH = 7, lW = lH * ratio;
+          doc.addImage(imgData, 'PNG', pgW - 10 - lW, 3, lW, lH);
+        }
+      } catch(e) {}
+
+      let y = 32;
+
+      // ── MINI KPI INLINE (2 pills na mesma linha) ───────────────
+      const pillW = 42; const pillH = 10; const pillGap = 4;
+      const pillStartX = 10;
+      const kpis2 = [
+        { val: rows.length,  lbl: 'SKUs DISTINTOS', cor: c.verde    },
+        { val: totalPilhas,  lbl: 'TOTAL DE PILHAS', cor: c.verdeEsc },
+      ];
+      kpis2.forEach((k, i) => {
+        const px = pillStartX + i * (pillW + pillGap);
+        doc.setFillColor(...c.cinzaBg);
+        doc.roundedRect(px, y, pillW, pillH, 2, 2, 'F');
+        doc.setFillColor(...k.cor);
+        doc.roundedRect(px, y, 3, pillH, 1, 1, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...k.cor);
+        doc.text(String(k.val), px + 10, y + 7.2);
+        doc.setFontSize(5.5);
+        doc.setTextColor(...c.cinza);
+        doc.text(k.lbl, px + 22, y + 7.2);
+      });
+
+      // Legenda caixinhas — na mesma linha dos KPIs, lado direito
+      const legX = pillStartX + kpis2.length * (pillW + pillGap) + 6;
+      doc.setFontSize(6);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...c.cinza);
+      doc.text('CONFIRMAR:', legX, y + 4.5);
+      _drawCheckbox(doc, legX, y + 5.5, 3.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(5.8);
+      doc.text('Presente', legX + 4.5, y + 8.5);
+      _drawCheckbox(doc, legX + 22, y + 5.5, 3.5);
+      doc.text('Ausente', legX + 26.5, y + 8.5);
+
+      y += 14;
+
+      // ── TABELA ─────────────────────────────────────────────────
+      const cols = [
+        { label: '✓',              w: 7,   key: 'check'     },
+        { label: 'CÓDIGO',          w: 22,  key: 'cod'        },
+        { label: 'NOME DO PRODUTO', w: 113, key: 'produto'    },
+        { label: 'PILHAS',          w: 28,  key: 'qtdPilhas'  },
+      ];
+
+      // Cabeçalho
+      doc.setFillColor(...c.verdeEsc);
+      doc.roundedRect(10, y, pgW - 20, 6.5, 1.5, 1.5, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.8);
+      doc.setTextColor(255, 255, 255);
+      let cx2 = 10;
+      cols.forEach(col => {
+        doc.text(col.label, cx2 + col.w / 2, y + 4.4, { align: 'center' });
+        cx2 += col.w;
+      });
+      y += 7.5;
+
+      // Calcular rowH dinâmico para tentar caber em 1 página
+      const availH = pgH - y - 18; // 18 = rodapé + margem
+      const rowH = Math.min(6, Math.max(4.5, availH / Math.max(rows.length, 1)));
+      const maxY = pgH - 16;
+      let pageNum = 1;
+
+      const drawFoot = () => {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(5.8);
+        doc.setTextColor(...c.cinza);
+        doc.text(`Pág. ${pageNum} · Relatório de Pilhas · ${hoje} · CD Matriz Panutrir`, pgW / 2, pgH - 6, { align: 'center' });
+      };
+
+      rows.forEach((row, idx) => {
+        if (y + rowH > maxY) {
+          drawFoot();
+          doc.addPage();
+          pageNum++;
+          y = 12;
+          // Repetir cabeçalho da tabela
+          doc.setFillColor(...c.verdeEsc);
+          doc.roundedRect(10, y, pgW - 20, 6.5, 1.5, 1.5, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(5.8);
+          doc.setTextColor(255, 255, 255);
+          let hcx = 10;
+          cols.forEach(col => {
+            doc.text(col.label, hcx + col.w / 2, y + 4.4, { align: 'center' });
+            hcx += col.w;
+          });
+          y += 7.5;
+        }
+
+        // Linha zebrada
+        doc.setFillColor(idx % 2 === 0 ? 240 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 245 : 255);
+        doc.rect(10, y, pgW - 20, rowH, 'F');
+        doc.setDrawColor(...c.borda);
+        doc.setLineWidth(0.15);
+        doc.line(10, y + rowH, pgW - 20 + 10, y + rowH);
+
+        const cellY = y + rowH * 0.65;
+        let cx = 10;
+        cols.forEach(col => {
+          if (col.key === 'check') {
+            _drawCheckbox(doc, cx + 1.5, y + rowH * 0.18, Math.min(3.8, rowH * 0.65));
+          } else if (col.key === 'cod') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.5);
+            doc.setTextColor(...c.verdeEsc);
+            doc.text(String(row.cod), cx + col.w / 2, cellY, { align: 'center' });
+          } else if (col.key === 'produto') {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(6);
+            doc.setTextColor(...c.dark);
+            let nome = row.produto;
+            while (doc.getTextWidth(nome) > col.w - 3 && nome.length > 10) nome = nome.slice(0, -1);
+            if (nome !== row.produto) nome = nome.slice(0, -1) + '…';
+            doc.text(nome, cx + 2, cellY);
+          } else if (col.key === 'qtdPilhas') {
+            doc.setFillColor(...c.verde);
+            const bh = Math.min(rowH - 1.5, 4.5);
+            doc.roundedRect(cx + 5, y + (rowH - bh) / 2, col.w - 10, bh, 1.5, 1.5, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7);
+            doc.setTextColor(255, 255, 255);
+            doc.text(String(row.qtdPilhas), cx + col.w / 2, y + rowH / 2 + 1.2, { align: 'center' });
+          }
+          cx += col.w;
+        });
+        y += rowH;
+      });
+
+      drawFoot();
+
+      // Rodapé resumo compacto
+      if (y + 10 > maxY) { doc.addPage(); pageNum++; y = 12; }
+      y += 3;
+      doc.setFillColor(...c.cinzaBg);
+      doc.roundedRect(10, y, pgW - 20, 9, 1.5, 1.5, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(...c.verdeEsc);
+      doc.text(`${rows.length} SKUs  ·  ${totalPilhas} pilhas totais`, pgW / 2, y + 5.8, { align: 'center' });
+
+      const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      doc.save(`Relatorio_Pilhas_${dataArq}.pdf`);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PDF DATAS CURTAS — visual minimalista iOS
+    // ══════════════════════════════════════════════════════════════════
+    function exportarDataCurtaPDF() {
+      if (db.length === 0) return alert('Sem dados. Importe a base primeiro.');
+      const c = _pdfColors();
+
+      const raw = db.filter(i => i.diff <= 25 && i.diff >= 0 && i.cod !== DONATION_CODE && i.qtd >= 10);
+      if (raw.length === 0) return alert('Sem dados de datas curtas.');
+
+      const agrupado = {};
+      raw.forEach(i => {
+        const key = i.cod + '_' + i.diff;
+        if (!agrupado[key]) agrupado[key] = {
+          cod: i.cod, produto: i.produto, qtd: 0,
+          validade: i.validade ? i.validade.toLocaleDateString('pt-BR') : '-',
+          prazo: i.diff
+        };
+        agrupado[key].qtd += i.qtd;
+      });
+      const itens = Object.values(agrupado)
+        .filter(it => it.qtd >= 10)
+        .sort((a, b) => a.prazo - b.prazo);
+      if (itens.length === 0) return alert('Sem dados.');
+
+      const statusDC = (prazo) => {
+        if (prazo < 0)   return { label: 'VENCIDO',      txt: c.branco, pill: [28,28,30],     accent: [28,28,30]     };
+        if (prazo < 10)  return { label: 'PRAZO LIMITE', txt: c.branco, pill: [139,69,19],    accent: [139,69,19]    };
+        if (prazo <= 19) return { label: 'URGENTE',      txt: c.branco, pill: [255,59,48],    accent: [255,59,48]    };
+        if (prazo <= 21) return { label: 'CRÍTICO',      txt: c.branco, pill: [255,149,0],    accent: [255,149,0]    };
+        if (prazo <= 23) return { label: 'ATENÇÃO',      txt: c.dark,   pill: [255,204,0],    accent: [180,140,0]    };
+        return                   { label: 'NORMAL',       txt: c.dark,   pill: [180,180,190],  accent: [130,130,140]  };
+      };
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pgW = doc.internal.pageSize.getWidth();
+      const pgH = doc.internal.pageSize.getHeight();
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      const grupos = { VENCIDO:0, 'PRAZO LIMITE':0, URGENTE:0, 'CRÍTICO':0, 'ATENÇÃO':0, NORMAL:0 };
+      itens.forEach(it => { const s = statusDC(it.prazo); if (grupos[s.label] !== undefined) grupos[s.label]++; });
+      const totalItens = itens.length;
+      const totalVol   = Math.round(itens.reduce((s, it) => s + it.qtd, 0));
+
+      // ── helper: adicionar logo no canto superior direito ──────────
+      const _addLogo = (pageDoc) => {
+        try {
+          const logoEl = document.querySelector('img[src="assets/logo.png"]');
+          if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
+            const canvas = document.createElement('canvas');
+            const ratio = logoEl.naturalWidth / logoEl.naturalHeight;
+            canvas.width  = logoEl.naturalWidth;
+            canvas.height = logoEl.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(logoEl, 0, 0);
+            const imgData = canvas.toDataURL('image/png');
+            const logoH = 8, logoW = logoH * ratio;
+            pageDoc.addImage(imgData, 'PNG', pgW - 10 - logoW, 6, logoW, logoH);
+          }
+        } catch(e) {}
+      };
+
+      // ── CABEÇALHO MINIMALISTA ──────────────────────────────────────
+      // Barra de acento laranja fina no topo
+      doc.setFillColor(255, 149, 0);
+      doc.rect(0, 0, pgW, 1.2, 'F');
+
+      // Área de cabeçalho limpa
+      doc.setFillColor(250, 250, 252);
+      doc.rect(0, 1.2, pgW, 30, 'F');
+
+      // Separador inferior do cabeçalho
+      doc.setDrawColor(235, 235, 240);
+      doc.setLineWidth(0.3);
+      doc.line(0, 31.2, pgW, 31.2);
+
+      // Título principal
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(28, 28, 30);
+      doc.text('Datas Curtas', 13, 16);
+
+      // Subtítulo
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(130, 130, 140);
+      doc.text('Produtos com vencimento em até 25 dias · Ordenados por urgência', 13, 22.5);
+
+      // Meta info (data, contagem) — alinhado à esquerda embaixo do subtítulo
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6.5);
+      doc.setTextColor(175, 175, 185);
+      doc.text(`${totalItens} itens · ${totalVol.toLocaleString('pt-BR')} unidades · Gerado ${hoje} · CD Matriz Panutrir`, 13, 28.5);
+
+      // Logo canto superior direito
+      _addLogo(doc);
+
+      let y = 37;
+
+      // ── KPI CARDS (6 status) ──────────────────────────────────────
+      const kpiList = [
+        { label: 'VENCIDO',      cor: c.dark,         val: grupos['VENCIDO']      },
+        { label: 'PRAZO LIMITE', cor: [139,69,19],     val: grupos['PRAZO LIMITE'] },
+        { label: 'URGENTE',      cor: c.vermelho,      val: grupos['URGENTE']      },
+        { label: 'CRÍTICO',      cor: c.laranja,       val: grupos['CRÍTICO']      },
+        { label: 'ATENÇÃO',      cor: [180,140,0],     val: grupos['ATENÇÃO']      },
+        { label: 'NORMAL',       cor: [130,130,140],   val: grupos['NORMAL']       },
+      ];
+      const kW = (pgW - 20 - 5 * 2) / 6;
+      const kH = 14;
+      kpiList.forEach((k, i) => {
+        const px = 10 + i * (kW + 2);
+        // Card fundo branco com sombra sutil
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(px, y, kW, kH, 1.5, 1.5, 'F');
+        doc.setDrawColor(235, 235, 240);
+        doc.setLineWidth(0.25);
+        doc.roundedRect(px, y, kW, kH, 1.5, 1.5, 'S');
+        // Indicador colorido à esquerda
+        doc.setFillColor(...k.cor);
+        doc.roundedRect(px, y, 2, kH, 0.8, 0.8, 'F');
+        // Número
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(k.val > 9 ? 11 : 12);
+        doc.setTextColor(...k.cor);
+        doc.text(String(k.val), px + kW / 2 + 1, y + 8.5, { align: 'center' });
+        // Label
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(4.5);
+        doc.setTextColor(160, 160, 170);
+        doc.text(k.label, px + kW / 2 + 1, y + kH - 1.5, { align: 'center' });
+      });
+      y += kH + 5;
+
+      // ── LEGENDA ───────────────────────────────────────────────────
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.5);
+      doc.setTextColor(160, 160, 170);
+      doc.text('LEGENDA', 12, y + 3);
+
+      const legendas = [
+        { label: 'Normal (24-25d)',      pill: [180,180,190], txt: c.branco  },
+        { label: 'Atenção (22-23d)',     pill: [255,204,0],   txt: c.dark    },
+        { label: 'Crítico (20-21d)',     pill: [255,149,0],   txt: c.branco  },
+        { label: 'Urgente (10-19d)',     pill: [255,59,48],   txt: c.branco  },
+        { label: 'Prazo Limite (<10d)',  pill: [139,69,19],   txt: c.branco  },
+        { label: 'Vencido',             pill: [28,28,30],    txt: c.branco  },
+      ];
+      const legW = 26.5; const legStartX = 32;
+      legendas.forEach((leg, i) => {
+        const lx = legStartX + i * (legW + 1.5);
+        doc.setFillColor(...leg.pill);
+        doc.roundedRect(lx, y, legW, 5.5, 1.2, 1.2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(4.8);
+        doc.setTextColor(...leg.txt);
+        doc.text(leg.label, lx + legW / 2, y + 3.4, { align: 'center' });
+      });
+
+      // Legenda checkbox
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.5);
+      doc.setTextColor(160, 160, 170);
+      const legCheckX = legStartX + legendas.length * (legW + 1.5) + 4;
+      _drawCheckbox(doc, legCheckX, y + 0.5, 3.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(5.2);
+      doc.setTextColor(120, 120, 130);
+      doc.text('Presente', legCheckX + 4.5, y + 3.5);
+      _drawCheckbox(doc, legCheckX + 20, y + 0.5, 3.5);
+      doc.text('Ausente', legCheckX + 24.5, y + 3.5);
+
+      y += 10;
+
+      // ── CABEÇALHO DA TABELA ───────────────────────────────────────
+      const colsAdj = [
+        { label: '✓',        w: 8,   key: 'check'    },
+        { label: 'CÓD',      w: 14,  key: 'cod'      },
+        { label: 'PRODUTO',  w: 72,  key: 'produto'  },
+        { label: 'QTD',      w: 18,  key: 'qtd'      },
+        { label: 'VALIDADE', w: 26,  key: 'validade' },
+        { label: 'DIAS',     w: 12,  key: 'prazo'    },
+        { label: 'STATUS',   w: 20,  key: 'status'   },
+      ]; // soma = 170 ✓
+
+      const drawTableHead = (yy) => {
+        doc.setFillColor(242, 242, 247);
+        doc.roundedRect(10, yy, pgW - 20, 6.5, 1.2, 1.2, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(5.5);
+        doc.setTextColor(120, 120, 130);
+        let hx = 10;
+        colsAdj.forEach(col => {
+          doc.text(col.label, hx + col.w / 2, yy + 4.2, { align: 'center' });
+          hx += col.w;
+        });
+        return yy + 8;
+      };
+
+      y = drawTableHead(y);
+
+      // ── LINHAS DA TABELA ─────────────────────────────────────────
+      const rowH = 6;
+      const maxY = pgH - 16;
+      let pageNum = 1;
+      let lastStatus = null;
+
+      const drawFoot = () => {
+        doc.setDrawColor(235, 235, 240);
+        doc.setLineWidth(0.25);
+        doc.line(0, pgH - 10, pgW, pgH - 10);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(5.5);
+        doc.setTextColor(175, 175, 185);
+        doc.text(`Página ${pageNum}`, 13, pgH - 6);
+        doc.text(`Relatório de Datas Curtas · ${hoje} · CD Matriz Panutrir`, pgW / 2, pgH - 6, { align: 'center' });
+      };
+
+      itens.forEach((item, idx) => {
+        const st = statusDC(item.prazo);
+
+        // Separador de grupo de status
+        if (st.label !== lastStatus) {
+          if (y + 5 > maxY) {
+            drawFoot(); doc.addPage(); pageNum++;
+            // Faixa de acento laranja no topo da nova página
+            doc.setFillColor(255, 149, 0);
+            doc.rect(0, 0, pgW, 1.2, 'F');
+            _addLogo(doc);
+            y = 8; y = drawTableHead(y);
+          }
+          // Faixa de separação de grupo — minimalista
+          doc.setFillColor(250, 250, 252);
+          doc.rect(10, y, pgW - 20, 4.5, 'F');
+          doc.setFillColor(...st.pill);
+          doc.roundedRect(10, y + 1.5, 2.5, 1.5, 0.5, 0.5, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(5.5);
+          doc.setTextColor(...st.accent);
+          const grpCount = itens.filter(x => statusDC(x.prazo).label === st.label).length;
+          doc.text(`${st.label}  ·  ${grpCount} ${grpCount === 1 ? 'item' : 'itens'}`, 15.5, y + 3.2);
+          // Linha fina abaixo do grupo label
+          doc.setDrawColor(235, 235, 240);
+          doc.setLineWidth(0.2);
+          doc.line(10, y + 4.5, pgW - 10, y + 4.5);
+          y += 5;
+          lastStatus = st.label;
+        }
+
+        if (y + rowH > maxY) {
+          drawFoot(); doc.addPage(); pageNum++;
+          doc.setFillColor(255, 149, 0);
+          doc.rect(0, 0, pgW, 1.2, 'F');
+          _addLogo(doc);
+          y = 8; y = drawTableHead(y); lastStatus = null;
+        }
+
+        // Fundo zebrado limpo — branco ou off-white
+        doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252);
+        doc.rect(10, y, pgW - 20, rowH, 'F');
+
+        // Faixa de cor de status à esquerda (2px)
+        doc.setFillColor(...st.pill);
+        doc.rect(10, y, 1.8, rowH, 'F');
+
+        // Separador inferior sutil
+        doc.setDrawColor(240, 240, 244);
+        doc.setLineWidth(0.12);
+        doc.line(11.8, y + rowH, pgW - 10, y + rowH);
+
+        const cellY = y + rowH * 0.67;
+        let cx = 10;
+        colsAdj.forEach(col => {
+          if (col.key === 'check') {
+            _drawCheckbox(doc, cx + 2, y + (rowH - 3.5) / 2, 3.5);
+          } else if (col.key === 'cod') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(5.8);
+            doc.setTextColor(160, 160, 170);
+            doc.text(String(item.cod), cx + col.w / 2, cellY, { align: 'center' });
+          } else if (col.key === 'produto') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6);
+            doc.setTextColor(28, 28, 30);
+            let nome = item.produto;
+            while (doc.getTextWidth(nome) > col.w - 4 && nome.length > 8) nome = nome.slice(0, -1);
+            if (nome !== item.produto) nome = nome.slice(0, -1) + '…';
+            doc.text(nome, cx + 3, cellY);
+          } else if (col.key === 'qtd') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.5);
+            doc.setTextColor(28, 28, 30);
+            doc.text(Math.round(item.qtd).toLocaleString('pt-BR'), cx + col.w / 2, cellY, { align: 'center' });
+          } else if (col.key === 'validade') {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(6);
+            doc.setTextColor(80, 80, 90);
+            doc.text(item.validade, cx + col.w / 2, cellY, { align: 'center' });
+          } else if (col.key === 'prazo') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7);
+            doc.setTextColor(...st.accent);
+            doc.text(`${item.prazo}d`, cx + col.w / 2, cellY, { align: 'center' });
+          } else if (col.key === 'status') {
+            // Pill de status compacto
+            const pw = col.w - 2, ph = rowH - 2;
+            doc.setFillColor(...st.pill);
+            doc.roundedRect(cx + 1, y + 1, pw, ph, 1.2, 1.2, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(4.5);
+            doc.setTextColor(...st.txt);
+            doc.text(st.label, cx + col.w / 2, y + rowH / 2 + 0.8, { align: 'center' });
+          }
+          cx += col.w;
+        });
+        y += rowH;
+      });
+
+      drawFoot();
+
+      // ── RODAPÉ RESUMO ─────────────────────────────────────────────
+      if (y + 12 > maxY) { drawFoot(); doc.addPage(); pageNum++; y = 14; }
+      y += 5;
+
+      doc.setFillColor(250, 250, 252);
+      doc.roundedRect(10, y, pgW - 20, 10, 2, 2, 'F');
+      doc.setDrawColor(235, 235, 240);
+      doc.setLineWidth(0.25);
+      doc.roundedRect(10, y, pgW - 20, 10, 2, 2, 'S');
+      // Accent bar
+      doc.setFillColor(255, 149, 0);
+      doc.roundedRect(10, y, 2, 10, 0.8, 0.8, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.setTextColor(130, 130, 140);
+      doc.text('RESUMO', 16, y + 4.5);
+      doc.setTextColor(28, 28, 30);
+      doc.text(`${totalItens} itens  ·  ${totalVol.toLocaleString('pt-BR')} unidades  ·  Gerado ${hoje}`, 34, y + 4.5);
+
+      const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      doc.save(`Datas_Curtas_${dataArq}.pdf`);
+    }
+
   </script>
 </body>
 </html>
