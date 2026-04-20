@@ -589,8 +589,10 @@
 
     <div id="kpiUrgenciaEtiquetasSection" class="glass-card rounded-[2.5rem] p-7 mb-7 hidden">
       <h3 class="text-[11px] font-black text-black mb-5 flex items-center gap-2.5 tracking-widest uppercase">
-        <span class="chart-title-dot bg-[#FF3B30]"></span>Urgência de Etiquetas
+        <span class="chart-title-dot bg-[#FF3B30]"></span>Saúde do estoque
       </h3>
+      <!-- STATUS COUNT CARDS -->
+      <div id="kpiStatusCountCards" class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-4"></div>
       <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
         <div id="kpiUrgenciaEtiquetasList" class="flex flex-col gap-1.5" style="min-width: 900px;"></div>
       </div>
@@ -839,6 +841,30 @@
         </table>
       </div>
     </div>
+
+    <!-- CARD: ETIQUETAS POR DATA E STATUS -->
+    <div id="etiquetasDataStatusSection" class="glass-card rounded-[2.5rem] p-7 mb-7 hidden">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h3 class="text-[11px] font-black text-black flex items-center gap-2.5 tracking-widest uppercase">
+          <span class="chart-title-dot bg-[#5856D6]"></span>Etiquetas por Data &amp; Status
+        </h3>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button onclick="filtroEtiquetasData('TODOS')" id="edbtn-todos" class="filter-btn active px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">TODOS</button>
+          <button onclick="filtroEtiquetasData('VENCIDO')" id="edbtn-vencido" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">VENCIDO</button>
+          <button onclick="filtroEtiquetasData('PRAZO_LIMITE')" id="edbtn-prazo_limite" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">PRAZO LIMITE</button>
+          <button onclick="filtroEtiquetasData('URGENTE')" id="edbtn-urgente" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">URGENTE</button>
+          <button onclick="filtroEtiquetasData('CRITICO')" id="edbtn-critico" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">CRÍTICO</button>
+          <button onclick="filtroEtiquetasData('ATENCAO')" id="edbtn-atencao" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">ATENÇÃO</button>
+          <button onclick="filtroEtiquetasData('NORMAL')" id="edbtn-normal" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">NORMAL</button>
+          <button onclick="filtroEtiquetasData('SEGURO')" id="edbtn-seguro" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">SEGURO</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+        <div id="etiquetasDataStatusBody" style="min-width:940px;"></div>
+      </div>
+      <p id="etiquetasDataStatusEmpty" style="display:none;font-size:12px;color:#aaa;font-weight:700;text-align:center;padding:1.5rem 0;">Nenhuma etiqueta nesta categoria.</p>
+    </div>
+
   </main>
 
   <div id="autocomplete-dropdown"></div>
@@ -2823,6 +2849,7 @@
     function renderKpiUrgenciaEtiquetas(list) {
       const section = document.getElementById('kpiUrgenciaEtiquetasSection');
       const container = document.getElementById('kpiUrgenciaEtiquetasList');
+      const countCardsEl = document.getElementById('kpiStatusCountCards');
 
       const urgentes = list.filter(i =>
         String(i.cod).trim() !== '2279P' &&
@@ -2833,7 +2860,43 @@
       if (urgentes.length === 0) {
         section.classList.add('hidden');
         container.innerHTML = '';
+        if (countCardsEl) countCardsEl.innerHTML = '';
+        renderEtiquetasDataStatus(list);
         return;
+      }
+
+      // STATUS COUNT CARDS WITH LEGEND BELOW
+      if (countCardsEl) {
+        const statusDefs = [
+          { key: 'VENCIDO',      bg: '#1C1C1E', fg: '#FFFFFF', label: 'Vencido',      range: 'Expirado'       },
+          { key: 'PRAZO_LIMITE', bg: '#8B4513', fg: '#FFFFFF', label: 'Prazo Limite', range: '< 10 dias'      },
+          { key: 'URGENTE',      bg: '#FF3B30', fg: '#FFFFFF', label: 'Urgente',      range: '10 – 19 dias'   },
+          { key: 'CRITICO',      bg: '#FF9500', fg: '#FFFFFF', label: 'Crítico',      range: '20 – 21 dias'   },
+          { key: 'ATENCAO',      bg: '#FFCC00', fg: '#1C1C1E', label: 'Atenção',      range: '22 – 23 dias'   },
+          { key: 'NORMAL',       bg: 'rgba(0,0,0,0.05)', fg: '#1C1C1E', label: 'Normal', range: '24 – 25 dias' },
+        ];
+        const countMap = {};
+        statusDefs.forEach(s => countMap[s.key] = 0);
+        urgentes.forEach(i => {
+          if (countMap[i.validadeStatus] !== undefined) {
+            countMap[i.validadeStatus] += Number(i.qtd) || 0;
+          }
+        });
+
+        countCardsEl.innerHTML = statusDefs.map(s => {
+          const cnt = Math.round(countMap[s.key] || 0);
+          return `<div style="display:flex;flex-direction:column;gap:6px;">
+            <div style="background:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.65);border-radius:1.5rem;padding:1rem;position:relative;overflow:hidden;text-align:center;">
+              <p style="font-size:9px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 4px;">${s.label}</p>
+              <p style="font-size:2rem;font-weight:900;color:#1C1C1E;line-height:1;letter-spacing:-.03em;margin:0;">${cnt.toLocaleString('pt-BR')}</p>
+              <p style="font-size:9px;color:#bbb;font-weight:700;margin:4px 0 0;">unidades</p>
+            </div>
+            <div style="border-radius:0.75rem;padding:5px 8px;background:${s.bg};text-align:center;">
+              <p style="font-size:8px;font-weight:900;color:${s.fg};margin:0;text-transform:uppercase;letter-spacing:.05em;">${s.label}</p>
+              <p style="font-size:7px;font-weight:700;color:${s.fg};opacity:0.75;margin:1px 0 0;">${s.range}</p>
+            </div>
+          </div>`;
+        }).join('');
       }
 
       const agrupado = {};
@@ -2906,6 +2969,92 @@
           </div>`;
       }).join('');
 
+      section.classList.remove('hidden');
+      renderEtiquetasDataStatus(list);
+    }
+
+    // ── CARD: ETIQUETAS POR DATA E STATUS ──────────────────────────────
+    let _filtroEtiquetasData = 'TODOS';
+
+    function filtroEtiquetasData(f) {
+      _filtroEtiquetasData = f;
+      const keys = ['todos','vencido','prazo_limite','urgente','critico','atencao','normal','seguro'];
+      keys.forEach(k => {
+        const btn = document.getElementById('edbtn-' + k);
+        if (!btn) return;
+        if (k === f.toLowerCase()) {
+          btn.style.background = '#1C1C1E'; btn.style.color = '#fff'; btn.style.borderColor = 'transparent';
+        } else {
+          btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+        }
+        btn.classList.toggle('active', k === f.toLowerCase());
+      });
+      renderEtiquetasDataStatus(window._lastFiltered || []);
+    }
+
+    function renderEtiquetasDataStatus(list) {
+      const section = document.getElementById('etiquetasDataStatusSection');
+      const body = document.getElementById('etiquetasDataStatusBody');
+      const empty = document.getElementById('etiquetasDataStatusEmpty');
+      if (!section || !body) return;
+
+      // Lista plana: cada etiqueta deve ocupar uma linha independente.
+      let itens = list.filter(i => i.operacao !== 'DOACAO');
+      const f = _filtroEtiquetasData;
+      if (f !== 'TODOS') itens = itens.filter(i => i.validadeStatus === f);
+      itens.sort((a, b) => {
+        const diffA = Number.isFinite(a.diff) ? a.diff : 9999;
+        const diffB = Number.isFinite(b.diff) ? b.diff : 9999;
+        if (diffA !== diffB) return diffA - diffB;
+        const dateA = a.validade ? a.validade.getTime() : Number.MAX_SAFE_INTEGER;
+        const dateB = b.validade ? b.validade.getTime() : Number.MAX_SAFE_INTEGER;
+        if (dateA !== dateB) return dateA - dateB;
+        return String(a.produto || '').localeCompare(String(b.produto || ''), 'pt-BR');
+      });
+
+      if (itens.length === 0) {
+        body.innerHTML = '';
+        empty.style.display = 'block';
+        section.classList.remove('hidden');
+        return;
+      }
+      empty.style.display = 'none';
+
+      const colLayout = 'minmax(18rem,1.75fr) minmax(8.5rem,0.95fr) minmax(10.5rem,1fr) minmax(8.2rem,0.8fr) minmax(10.5rem,1fr) minmax(8rem,0.7fr)';
+      const header = `<div style="display:grid;grid-template-columns:${colLayout};column-gap:1rem;padding:0 0.75rem 0.45rem;font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:#b1b1ba;align-items:center;">
+        <span style="white-space:nowrap;">Produto</span>
+        <span style="text-align:center;white-space:nowrap;">Status</span>
+        <span style="text-align:center;white-space:nowrap;">Nº da Etiqueta</span>
+        <span style="text-align:center;white-space:nowrap;">Data</span>
+        <span style="text-align:center;white-space:nowrap;">Lote</span>
+        <span style="text-align:right;white-space:nowrap;">Unidades</span>
+      </div><div style="height:1px;background:rgba(0,0,0,0.05);margin-bottom:0.4rem;"></div>`;
+
+      const rows = itens.map((item, idx) => {
+        const etqNum = item.etiqueta && String(item.etiqueta).trim() !== '' && item.etiqueta !== item.cod
+          ? String(item.etiqueta).trim()
+          : '-';
+        const dtStr = item.validade
+          ? `${String(item.validade.getDate()).padStart(2,'0')}/${String(item.validade.getMonth()+1).padStart(2,'0')}/${item.validade.getFullYear()}`
+          : 'Sem data';
+        const loteStr = item.lote ? String(item.lote) : '-';
+        const qtdStr = Math.round(item.qtd || 0).toLocaleString('pt-BR');
+        const statusClass = getValidityBadgeClass(item.validadeStatus);
+        const statusLabel = String(item.validadeStatus || 'SEGURO').replaceAll('_', ' ');
+
+        return `<div style="display:grid;grid-template-columns:${colLayout};column-gap:1rem;align-items:center;padding:0.46rem 0.75rem;border-radius:0.75rem;background:rgba(0,0,0,${idx%2===0?'0.015':'0.03'});margin-bottom:0.22rem;font-size:10.5px;line-height:1.25;">
+          <span style="font-weight:600;color:#444;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.produto || '-'}">${item.produto || '-'}</span>
+          <span style="text-align:center;">
+            <span class="px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${statusClass}" style="display:inline-block;white-space:nowrap;">${statusLabel}</span>
+          </span>
+          <span style="font-weight:800;color:#555;text-align:center;white-space:nowrap;">${etqNum}</span>
+          <span style="font-weight:800;color:#1C1C1E;text-align:center;white-space:nowrap;">${dtStr}</span>
+          <span style="font-weight:700;color:#888;text-align:center;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${loteStr}">${loteStr}</span>
+          <span style="font-weight:900;color:#1C1C1E;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;">${qtdStr} un</span>
+        </div>`;
+      }).join('');
+
+      body.innerHTML = header + rows;
       section.classList.remove('hidden');
     }
 
@@ -3101,7 +3250,9 @@ self.addEventListener('fetch', e => {
     }
 
     // ══════════════════════════════════════════════════════════════════
-    // PDF QUEBRAS
+
+    // ══════════════════════════════════════════════════════════════════
+    // PDF QUEBRAS — minimalista, cores preservadas
     // ══════════════════════════════════════════════════════════════════
     function exportarQuebrasPDF() {
       if (db.length === 0) return alert('Sem dados. Importe a base primeiro.');
@@ -3121,7 +3272,7 @@ self.addEventListener('fetch', e => {
           cx:       Math.floor(i.qtd / upCx),
           unds:     Math.round(i.qtd % upCx),
           total:    Math.round(i.qtd),
-          obs:      (i.qtd < 30 && i.diff === minDiff) ? '⚠ FANTASMA?' : '',
+          obs:      (i.qtd < 30 && i.diff === minDiff) ? 'FANTASMA?' : '',
         };
       }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
@@ -3131,138 +3282,195 @@ self.addEventListener('fetch', e => {
       const pgH = doc.internal.pageSize.getHeight();
       const hoje = new Date().toLocaleDateString('pt-BR');
 
-      // KPIs
       const totalCx   = rows.reduce((s, r) => s + r.cx,    0);
       const totalUnds = rows.reduce((s, r) => s + r.unds,   0);
       const totalVol  = rows.reduce((s, r) => s + r.total,  0);
       const totalFant = rows.filter(r => r.obs).length;
 
-      let y = _drawPdfHeader(doc, 'Relatório de Quebras', 'Saldos com quantidade inferior ao lastro da pilha',
-        c.azul, 'Total de etiquetas', rows.length, hoje);
+      const _addLogo = (pd) => {
+        try {
+          const logoEl = document.querySelector('img[src="assets/logo.png"]');
+          if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
+            const canvas = document.createElement('canvas');
+            const ratio = logoEl.naturalWidth / logoEl.naturalHeight;
+            canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
+            canvas.getContext('2d').drawImage(logoEl, 0, 0);
+            const imgData = canvas.toDataURL('image/png');
+            const lH = 7, lW = lH * ratio;
+            pd.addImage(imgData, 'PNG', pgW - 10 - lW, 5, lW, lH);
+          }
+        } catch(e) {}
+      };
 
-      y = _drawKpiBar(doc, [
-        { val: rows.length, lbl: 'Etiquetas',  cor: c.azul    },
-        { val: totalCx,     lbl: 'Caixas',     cor: c.verde   },
-        { val: totalUnds,   lbl: 'Unidades',   cor: c.laranja },
-        { val: totalVol,    lbl: 'Vol. Total', cor: c.dark    },
-        { val: totalFant,   lbl: 'Fantasmas',  cor: c.amarelo },
-      ], y);
+      const _statusCor2 = (dataStr) => {
+        try {
+          const [d, m, a] = dataStr.split('/').map(Number);
+          const diff = Math.floor((new Date(a, m-1, d) - new Date()) / 86400000);
+          if (diff < 0)   return { bg: c.dark,     txt: c.branco, label: 'VENCIDO'      };
+          if (diff < 10)  return { bg: [139,69,19], txt: c.branco, label: 'PRAZO LIM.'  };
+          if (diff <= 19) return { bg: c.vermelho,  txt: c.branco, label: 'URGENTE'      };
+          if (diff <= 21) return { bg: c.laranja,   txt: c.branco, label: 'CRITICO'      };
+          if (diff <= 23) return { bg: c.amarelo,   txt: c.dark,   label: 'ATENCAO'      };
+          return                  { bg: c.borda,    txt: c.dark,   label: 'NORMAL'       };
+        } catch { return          { bg: c.borda,    txt: c.dark,   label: ''             }; }
+      };
 
-      // Legenda das caixinhas
-      doc.setFontSize(6.5);
+      // CABECALHO MINIMALISTA — acento azul/roxo
+      const accentColor = c.azul; // [88,86,214]
+      doc.setFillColor(...accentColor);
+      doc.rect(0, 0, pgW, 1.5, 'F');
+      doc.setFillColor(250, 250, 253);
+      doc.rect(0, 1.5, pgW, 26, 'F');
+      doc.setDrawColor(235, 235, 242);
+      doc.setLineWidth(0.3);
+      doc.line(0, 27.5, pgW, 27.5);
+
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...c.cinza);
-      doc.text('✓ Confirmar presença no estoque:', 12, y + 4);
-      _drawCheckbox(doc, 84, y + 1, 3.5);
+      doc.setFontSize(15);
+      doc.setTextColor(28, 28, 30);
+      doc.text('Quebras', 13, 14);
       doc.setFont('helvetica', 'normal');
-      doc.text('Presente', 88.5, y + 4);
-      _drawCheckbox(doc, 104, y + 1, 3.5);
-      doc.text('Ausente / Retirado', 108.5, y + 4);
-      y += 9;
+      doc.setFontSize(7);
+      doc.setTextColor(130, 130, 140);
+      doc.text('Saldos com quantidade inferior ao lastro da pilha - CD Matriz Panutrir', 13, 21);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(6);
+      doc.setTextColor(175, 175, 185);
+      doc.text(rows.length + ' etiquetas - Gerado ' + hoje, 13, 26);
+      _addLogo(doc);
 
-      // Colunas: [ label, width, key, align ]
-      // Largura total = pgW - 20 = 170mm
-      const cols = [
-        { label: '✓', w: 7,  key: 'check',    align: 'center' },
-        { label: 'ETIQUETA', w: 22, key: 'etiqueta', align: 'center' },
-        { label: 'VENCIMENTO', w: 22, key: 'data',   align: 'center' },
-        { label: 'NOME DO PRODUTO', w: 67, key: 'nome',  align: 'left'   },
-        { label: 'CX', w: 14, key: 'cx',    align: 'center' },
-        { label: 'UNDS', w: 16, key: 'unds', align: 'center' },
-        { label: 'TOTAL', w: 16, key: 'total',align: 'center' },
-        { label: 'OBS', w: 6,  key: 'obs',  align: 'center' }, // hidden, only for fantasma badge
+      let y = 32;
+
+      // KPI BAR (4 cards)
+      const kpis = [
+        { val: rows.length, lbl: 'ETIQUETAS', cor: accentColor  },
+        { val: totalCx,     lbl: 'CAIXAS',    cor: c.verde      },
+        { val: totalUnds,   lbl: 'UNIDADES',  cor: c.laranja    },
+        { val: totalVol,    lbl: 'VOL. TOTAL',cor: c.dark       },
       ];
-      // Remover coluna OBS da renderização explícita (incorporado no nome)
-      const visCols = cols.slice(0, 7);
+      const kW = (pgW - 20 - 3 * 3) / 4;
+      kpis.forEach((k, i) => {
+        const px = 10 + i * (kW + 3);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(px, y, kW, 12, 1.2, 1.2, 'F');
+        doc.setDrawColor(235, 235, 242); doc.setLineWidth(0.2);
+        doc.roundedRect(px, y, kW, 12, 1.2, 1.2, 'S');
+        doc.setFillColor(...k.cor);
+        doc.roundedRect(px, y, 2, 12, 0.8, 0.8, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(k.val > 999 ? 9 : 12); doc.setTextColor(28, 28, 30);
+        doc.text(String(k.val), px + kW / 2 + 1, y + 7.5, { align: 'center' });
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(4.8); doc.setTextColor(150, 150, 160);
+        doc.text(k.lbl, px + kW / 2 + 1, y + 11, { align: 'center' });
+      });
 
-      y = _drawTableHeader(doc, visCols, y, c.azul);
+      // Instrucao conferencia
+      const instrX = 10 + 4 * (kW + 3) + 4;
+      if (instrX + 45 < pgW) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); doc.setTextColor(160, 160, 170);
+        doc.text('CONFERENCIA:', instrX, y + 4);
+        _drawCheckbox(doc, instrX, y + 5, 3.5);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(5.2); doc.setTextColor(120, 120, 130);
+        doc.text('Presente', instrX + 4.5, y + 8);
+        _drawCheckbox(doc, instrX + 22, y + 5, 3.5);
+        doc.text('Ausente', instrX + 26.5, y + 8);
+      }
 
+      y += 16;
+
+      // TABELA
+      const visCols = [
+        { label: 'CONF.', w: 9,  key: 'check',    align: 'center' },
+        { label: 'ETIQUETA', w: 22, key: 'etiqueta', align: 'center' },
+        { label: 'VENCIMENTO', w: 24, key: 'data',  align: 'center' },
+        { label: 'PRODUTO', w: 67, key: 'nome',     align: 'left'   },
+        { label: 'CX', w: 14, key: 'cx',            align: 'center' },
+        { label: 'UNDS', w: 17, key: 'unds',        align: 'center' },
+        { label: 'TOTAL', w: 17, key: 'total',      align: 'center' },
+      ]; // soma = 170
+
+      const drawHead = (yy) => {
+        doc.setFillColor(242, 242, 247);
+        doc.roundedRect(10, yy, pgW - 20, 6.5, 1.2, 1.2, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); doc.setTextColor(120, 120, 130);
+        let hx = 10;
+        visCols.forEach(col => {
+          doc.text(col.label, hx + col.w / 2, yy + 4.2, { align: 'center' });
+          hx += col.w;
+        });
+        return yy + 8;
+      };
+
+      y = drawHead(y);
       const rowH = 6.5;
       const maxY = pgH - 14;
       let pageNum = 1;
 
-      const drawPageFooter = () => {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(6);
-        doc.setTextColor(...c.cinza);
-        doc.text(`Página ${pageNum} · Relatório de Quebras · ${hoje} · CD Matriz Panutrir`,
-          pgW / 2, pgH - 6, { align: 'center' });
+      const drawFoot = () => {
+        doc.setDrawColor(235, 235, 240); doc.setLineWidth(0.2);
+        doc.line(0, pgH - 10, pgW, pgH - 10);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(175, 175, 185);
+        doc.text('Pagina ' + pageNum, 13, pgH - 6);
+        doc.text('Relatorio de Quebras - ' + hoje + ' - CD Matriz Panutrir', pgW / 2, pgH - 6, { align: 'center' });
       };
 
       rows.forEach((row, idx) => {
         if (y + rowH > maxY) {
-          drawPageFooter();
-          doc.addPage();
-          pageNum++;
-          y = 14;
-          y = _drawTableHeader(doc, visCols, y, c.azul);
+          drawFoot(); doc.addPage(); pageNum++;
+          doc.setFillColor(...accentColor); doc.rect(0, 0, pgW, 1.5, 'F');
+          _addLogo(doc);
+          y = 8; y = drawHead(y);
         }
 
-        const isOdd = idx % 2 === 0;
         const isFantasma = !!row.obs;
-        const st = _statusCor(row.data);
+        const st = _statusCor2(row.data);
 
-        // Fundo da linha
+        // Fundo da linha — fantasma: amarelo sutil, zebra normal
         if (isFantasma) {
-          doc.setFillColor(255, 248, 220);
-        } else if (isOdd) {
-          doc.setFillColor(248, 246, 255);
+          doc.setFillColor(255, 250, 230);
         } else {
-          doc.setFillColor(255, 255, 255);
+          doc.setFillColor(idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 253);
         }
         doc.rect(10, y, pgW - 20, rowH, 'F');
+        // Acento lateral esquerdo — cor do status de validade
+        doc.setFillColor(...st.bg);
+        doc.rect(10, y, 1.8, rowH, 'F');
+        // Separador
+        doc.setDrawColor(240, 240, 244); doc.setLineWidth(0.12);
+        doc.line(11.8, y + rowH, pgW - 10, y + rowH);
 
-        // Linha separadora suave
-        doc.setDrawColor(...c.borda);
-        doc.setLineWidth(0.2);
-        doc.line(10, y + rowH, pgW - 20 + 10, y + rowH);
-
-        // Dados das células
         let cx = 10;
         visCols.forEach(col => {
           const cellY = y + rowH / 2 + 1.2;
-
           if (col.key === 'check') {
-            _drawCheckbox(doc, cx + 1.5, y + 1.2, 4);
+            _drawCheckbox(doc, cx + 2.5, y + (rowH - 4) / 2, 4);
           } else if (col.key === 'etiqueta') {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
-            doc.setTextColor(...c.azul);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(6); doc.setTextColor(...accentColor);
             doc.text(row.etiqueta, cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'data') {
-            // Badge colorido de status — texto centrado dentro do rect
+            // Pill de data com cor de status
             const bx = cx + 1, by = y + 0.8, bw = col.w - 2, bh = rowH - 1.6;
             doc.setFillColor(...st.bg);
             doc.roundedRect(bx, by, bw, bh, 1.2, 1.2, 'F');
-            const midY = by + bh / 2;
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(5.5);
-            doc.setTextColor(...st.txt);
-            doc.text(row.data, bx + bw / 2, midY - 0.3, { align: 'center' });
-            doc.setFontSize(4.8);
-            doc.text(st.label, bx + bw / 2, midY + 2.8, { align: 'center' });
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); doc.setTextColor(...st.txt);
+            doc.text(row.data, bx + bw / 2, by + bh / 2 - 0.3, { align: 'center' });
+            doc.setFontSize(4.5);
+            doc.text(st.label, bx + bw / 2, by + bh / 2 + 2.8, { align: 'center' });
           } else if (col.key === 'nome') {
             doc.setFont('helvetica', isFantasma ? 'bold' : 'normal');
-            doc.setFontSize(6.2);
-            doc.setTextColor(isFantasma ? 180 : 28, isFantasma ? 100 : 28, isFantasma ? 0 : 30);
-            // Truncar nome se longo
+            doc.setFontSize(6);
+            doc.setTextColor(isFantasma ? 160 : 28, isFantasma ? 90 : 28, isFantasma ? 0 : 30);
             let nome = row.nome;
-            while (doc.getTextWidth(nome) > col.w - 3 && nome.length > 10)
-              nome = nome.slice(0, -1);
-            if (nome !== row.nome) nome = nome.slice(0, -1) + '…';
-            doc.text(nome, cx + 2, cellY);
+            while (doc.getTextWidth(nome) > col.w - 3 && nome.length > 10) nome = nome.slice(0, -1);
+            if (nome !== row.nome) nome = nome.slice(0, -1) + '...';
+            doc.text(nome, cx + 2.5, cellY);
             if (isFantasma) {
               doc.setFillColor(255, 200, 50);
-              doc.roundedRect(cx + 2, y + rowH - 2.5, 18, 2, 0.5, 0.5, 'F');
-              doc.setFont('helvetica', 'bold');
-              doc.setFontSize(4.5);
-              doc.setTextColor(...c.dark);
-              doc.text('⚠ FANTASMA?', cx + 3, y + rowH - 1);
+              doc.roundedRect(cx + 2.5, y + rowH - 2.5, 18, 2, 0.5, 0.5, 'F');
+              doc.setFont('helvetica', 'bold'); doc.setFontSize(4.2); doc.setTextColor(28, 28, 30);
+              doc.text('FANTASMA?', cx + 4, y + rowH - 1);
             }
           } else {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7.5);
-            doc.setTextColor(...c.dark);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(28, 28, 30);
             doc.text(String(row[col.key] ?? ''), cx + col.w / 2, cellY, { align: 'center' });
           }
           cx += col.w;
@@ -3271,27 +3479,29 @@ self.addEventListener('fetch', e => {
         y += rowH;
       });
 
-      drawPageFooter();
+      drawFoot();
 
-      // Resumo final
-      if (y + 20 > maxY) { doc.addPage(); pageNum++; y = 14; }
+      if (y + 18 > maxY) { doc.addPage(); pageNum++; y = 14; }
       y += 4;
-      doc.setFillColor(...c.cinzaBg);
-      doc.roundedRect(10, y, pgW - 20, 14, 2, 2, 'F');
-      doc.setDrawColor(...c.borda);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(10, y, pgW - 20, 14, 2, 2, 'S');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(...c.cinza);
-      doc.text('TOTAIS DO RELATÓRIO', 15, y + 5.5);
-      doc.setFontSize(7.5);
-      doc.setTextColor(...c.dark);
-      doc.text(`${rows.length} etiquetas   ·   ${totalCx} cxs   ·   ${totalUnds} unds avulsas   ·   ${totalVol} unidades total`, 15, y + 11);
+      doc.setFillColor(250, 250, 253);
+      doc.roundedRect(10, y, pgW - 20, 12, 1.5, 1.5, 'F');
+      doc.setDrawColor(235, 235, 242); doc.setLineWidth(0.2);
+      doc.roundedRect(10, y, pgW - 20, 12, 1.5, 1.5, 'S');
+      doc.setFillColor(...accentColor);
+      doc.roundedRect(10, y, 2, 12, 0.8, 0.8, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(130, 130, 140);
+      doc.text('RESUMO', 15.5, y + 5.5);
+      doc.setTextColor(28, 28, 30);
+      doc.text(rows.length + ' etiquetas  -  ' + totalCx + ' cxs  -  ' + totalUnds + ' unds  -  ' + totalVol + ' unidades total', 32, y + 5.5);
+      if (totalFant > 0) {
+        doc.setTextColor(160, 100, 0); doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
+        doc.text(totalFant + ' possiveis fantasmas identificados', 32, y + 10);
+      }
 
       const dataArq = new Date().toISOString().slice(0,10).replace(/-/g,'');
-      doc.save(`Relatorio_Quebras_${dataArq}.pdf`);
+      doc.save('Relatorio_Quebras_' + dataArq + '.pdf');
     }
+
 
     // Dropdown Datas Curtas
     function toggleDcDropdown(e) {
@@ -3331,7 +3541,9 @@ self.addEventListener('fetch', e => {
     });
 
     // ══════════════════════════════════════════════════════════════════
-    // PDF PILHAS — compacto, 1 folha A4
+
+    // ══════════════════════════════════════════════════════════════════
+    // PDF PILHAS — minimalista iOS
     // ══════════════════════════════════════════════════════════════════
     function exportarPilhasPDF() {
       if (db.length === 0) return alert('Sem dados. Importe a base primeiro.');
@@ -3354,171 +3566,152 @@ self.addEventListener('fetch', e => {
       const hoje = new Date().toLocaleDateString('pt-BR');
       const totalPilhas = rows.reduce((s, r) => s + r.qtdPilhas, 0);
 
-      // ── CABEÇALHO compacto (20mm) ──────────────────────────────
-      doc.setFillColor(...c.verdeEsc);
-      doc.roundedRect(10, 8, pgW - 20, 20, 3, 3, 'F');
-      // Bola decorativa
-      doc.setFillColor(255, 255, 255);
-      doc.setGState && doc.setGState(doc.GState({ opacity: 0.07 }));
-      doc.circle(pgW - 20, 10, 14, 'F');
-      doc.setGState && doc.setGState(doc.GState({ opacity: 1 }));
+      const _addLogo = (pd) => {
+        try {
+          const logoEl = document.querySelector('img[src="assets/logo.png"]');
+          if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
+            const canvas = document.createElement('canvas');
+            const ratio = logoEl.naturalWidth / logoEl.naturalHeight;
+            canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
+            canvas.getContext('2d').drawImage(logoEl, 0, 0);
+            const imgData = canvas.toDataURL('image/png');
+            const lH = 7, lW = lH * ratio;
+            pd.addImage(imgData, 'PNG', pgW - 10 - lW, 5, lW, lH);
+          }
+        } catch(e) {}
+      };
+
+      // CABECALHO MINIMALISTA
+      doc.setFillColor(52, 199, 89);
+      doc.rect(0, 0, pgW, 1.5, 'F');
+      doc.setFillColor(250, 252, 250);
+      doc.rect(0, 1.5, pgW, 26, 'F');
+      doc.setDrawColor(235, 240, 235);
+      doc.setLineWidth(0.3);
+      doc.line(0, 27.5, pgW, 27.5);
 
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(12);
-      doc.setTextColor(255, 255, 255);
-      doc.text('Relatório de Pilhas', 16, 16);
+      doc.setFontSize(15);
+      doc.setTextColor(28, 28, 30);
+      doc.text('Pilhas', 13, 14);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(6.5);
-      doc.setTextColor(195, 240, 210);
-      doc.text('Pilhas fechadas (lastro completo) · CD Matriz Panutrir', 16, 21.5);
-
-      // Meta direita
+      doc.setFontSize(7);
+      doc.setTextColor(130, 130, 140);
+      doc.text('Pilhas fechadas (lastro completo) - CD Matriz Panutrir', 13, 21);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6.5);
-      doc.setTextColor(255, 255, 255);
-      doc.text(`Gerado: ${hoje}`, pgW - 13, 15, { align: 'right' });
-      doc.text(`${rows.length} SKUs · ${totalPilhas} pilhas`, pgW - 13, 21, { align: 'right' });
-
-      // Logo canto superior direito
-      try {
-        const logoEl = document.querySelector('img[src="assets/logo.png"]');
-        if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
-          const canvas = document.createElement('canvas');
-          const ratio = logoEl.naturalWidth / logoEl.naturalHeight;
-          canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
-          canvas.getContext('2d').drawImage(logoEl, 0, 0);
-          const imgData = canvas.toDataURL('image/png');
-          const lH = 7, lW = lH * ratio;
-          doc.addImage(imgData, 'PNG', pgW - 10 - lW, 3, lW, lH);
-        }
-      } catch(e) {}
+      doc.setFontSize(6);
+      doc.setTextColor(175, 175, 185);
+      doc.text(rows.length + ' SKUs - ' + totalPilhas + ' pilhas - Gerado ' + hoje, 13, 26);
+      _addLogo(doc);
 
       let y = 32;
 
-      // ── MINI KPI INLINE (2 pills na mesma linha) ───────────────
-      const pillW = 42; const pillH = 10; const pillGap = 4;
-      const pillStartX = 10;
+      // KPI mini cards (2)
       const kpis2 = [
-        { val: rows.length,  lbl: 'SKUs DISTINTOS', cor: c.verde    },
-        { val: totalPilhas,  lbl: 'TOTAL DE PILHAS', cor: c.verdeEsc },
+        { val: rows.length, lbl: 'SKUs DISTINTOS' },
+        { val: totalPilhas, lbl: 'TOTAL DE PILHAS' },
       ];
+      const kW2 = 42;
       kpis2.forEach((k, i) => {
-        const px = pillStartX + i * (pillW + pillGap);
-        doc.setFillColor(...c.cinzaBg);
-        doc.roundedRect(px, y, pillW, pillH, 2, 2, 'F');
-        doc.setFillColor(...k.cor);
-        doc.roundedRect(px, y, 3, pillH, 1, 1, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(...k.cor);
-        doc.text(String(k.val), px + 10, y + 7.2);
-        doc.setFontSize(5.5);
-        doc.setTextColor(...c.cinza);
-        doc.text(k.lbl, px + 22, y + 7.2);
+        const px = 10 + i * (kW2 + 3);
+        doc.setFillColor(255, 255, 255);
+        doc.roundedRect(px, y, kW2, 8, 1.2, 1.2, 'F');
+        doc.setDrawColor(235, 240, 235); doc.setLineWidth(0.2);
+        doc.roundedRect(px, y, kW2, 8, 1.2, 1.2, 'S');
+        doc.setFillColor(52, 199, 89);
+        doc.roundedRect(px, y, 2, 8, 0.8, 0.8, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(28, 28, 30);
+        doc.text(String(k.val), px + 14, y + 5.5);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(4.5); doc.setTextColor(140, 140, 150);
+        doc.text(k.lbl, px + 14, y + 5.5 - 4);
       });
 
-      // Legenda caixinhas — na mesma linha dos KPIs, lado direito
-      const legX = pillStartX + kpis2.length * (pillW + pillGap) + 6;
-      doc.setFontSize(6);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...c.cinza);
-      doc.text('CONFIRMAR:', legX, y + 4.5);
-      _drawCheckbox(doc, legX, y + 5.5, 3.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(5.8);
-      doc.text('Presente', legX + 4.5, y + 8.5);
-      _drawCheckbox(doc, legX + 22, y + 5.5, 3.5);
-      doc.text('Ausente', legX + 26.5, y + 8.5);
+      // Instrucao de conferencia
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(160, 160, 170);
+      doc.text('Confirme a presenca de cada pilha usando as caixas de marcacao', 10 + 2 * (kW2 + 3) + 6, y + 3.5);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
+      _drawCheckbox(doc, 10 + 2 * (kW2 + 3) + 6, y + 4.5, 3.5);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(5.2); doc.setTextColor(120, 120, 130);
+      doc.text('Presente', 10 + 2 * (kW2 + 3) + 11, y + 7.5);
+      _drawCheckbox(doc, 10 + 2 * (kW2 + 3) + 30, y + 4.5, 3.5);
+      doc.text('Ausente', 10 + 2 * (kW2 + 3) + 35, y + 7.5);
 
-      y += 14;
+      y += 12;
 
-      // ── TABELA ─────────────────────────────────────────────────
+      // TABELA
       const cols = [
-        { label: '✓',              w: 7,   key: 'check'     },
-        { label: 'CÓDIGO',          w: 22,  key: 'cod'        },
-        { label: 'NOME DO PRODUTO', w: 113, key: 'produto'    },
-        { label: 'PILHAS',          w: 28,  key: 'qtdPilhas'  },
+        { label: 'CONF.', w: 10, key: 'check'    },
+        { label: 'COD',   w: 22, key: 'cod'       },
+        { label: 'PRODUTO', w: 110, key: 'produto' },
+        { label: 'PILHAS', w: 28, key: 'qtdPilhas'},
       ];
 
-      // Cabeçalho
-      doc.setFillColor(...c.verdeEsc);
-      doc.roundedRect(10, y, pgW - 20, 6.5, 1.5, 1.5, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(5.8);
-      doc.setTextColor(255, 255, 255);
-      let cx2 = 10;
-      cols.forEach(col => {
-        doc.text(col.label, cx2 + col.w / 2, y + 4.4, { align: 'center' });
-        cx2 += col.w;
-      });
-      y += 7.5;
+      const drawHead = (yy) => {
+        doc.setFillColor(242, 242, 247);
+        doc.roundedRect(10, yy, pgW - 20, 6.5, 1.2, 1.2, 'F');
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); doc.setTextColor(120, 120, 130);
+        let hx = 10;
+        cols.forEach(col => {
+          doc.text(col.label, hx + col.w / 2, yy + 4.2, { align: 'center' });
+          hx += col.w;
+        });
+        return yy + 8;
+      };
 
-      // Calcular rowH dinâmico para tentar caber em 1 página
-      const availH = pgH - y - 18; // 18 = rodapé + margem
-      const rowH = Math.min(6, Math.max(4.5, availH / Math.max(rows.length, 1)));
-      const maxY = pgH - 16;
+      y = drawHead(y);
+
+      const availH = pgH - y - 16;
+      // Prioriza legibilidade: nunca comprime demais as linhas.
+      const minRowH = 4.8;
+      const targetRowH = availH / Math.max(rows.length, 1);
+      const rowH = Math.max(minRowH, Math.min(6.2, targetRowH));
+      // Aproveita melhor a folha antes de quebrar de pagina.
+      const maxY = pgH - 10.8;
       let pageNum = 1;
 
       const drawFoot = () => {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(5.8);
-        doc.setTextColor(...c.cinza);
-        doc.text(`Pág. ${pageNum} · Relatório de Pilhas · ${hoje} · CD Matriz Panutrir`, pgW / 2, pgH - 6, { align: 'center' });
+        doc.setDrawColor(235, 235, 240); doc.setLineWidth(0.2);
+        doc.line(0, pgH - 10, pgW, pgH - 10);
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(175, 175, 185);
+        doc.text('Pagina ' + pageNum, 13, pgH - 6);
+        doc.text('Relatorio de Pilhas - ' + hoje + ' - CD Matriz Panutrir', pgW / 2, pgH - 6, { align: 'center' });
       };
 
       rows.forEach((row, idx) => {
-        if (y + rowH > maxY) {
-          drawFoot();
-          doc.addPage();
-          pageNum++;
-          y = 12;
-          // Repetir cabeçalho da tabela
-          doc.setFillColor(...c.verdeEsc);
-          doc.roundedRect(10, y, pgW - 20, 6.5, 1.5, 1.5, 'F');
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(5.8);
-          doc.setTextColor(255, 255, 255);
-          let hcx = 10;
-          cols.forEach(col => {
-            doc.text(col.label, hcx + col.w / 2, y + 4.4, { align: 'center' });
-            hcx += col.w;
-          });
-          y += 7.5;
+        if (y + rowH + 0.3 > maxY) {
+          drawFoot(); doc.addPage(); pageNum++;
+          doc.setFillColor(52, 199, 89); doc.rect(0, 0, pgW, 1.5, 'F');
+          _addLogo(doc);
+          y = 8; y = drawHead(y);
         }
-
-        // Linha zebrada
-        doc.setFillColor(idx % 2 === 0 ? 240 : 255, idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 245 : 255);
+        // Zebra limpa
+        doc.setFillColor(idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251);
         doc.rect(10, y, pgW - 20, rowH, 'F');
-        doc.setDrawColor(...c.borda);
-        doc.setLineWidth(0.15);
-        doc.line(10, y + rowH, pgW - 20 + 10, y + rowH);
+        doc.setDrawColor(240, 242, 240); doc.setLineWidth(0.12);
+        doc.line(10, y + rowH, pgW - 10, y + rowH);
 
-        const cellY = y + rowH * 0.65;
+        const cellY = y + rowH * 0.64;
         let cx = 10;
         cols.forEach(col => {
           if (col.key === 'check') {
-            _drawCheckbox(doc, cx + 1.5, y + rowH * 0.18, Math.min(3.8, rowH * 0.65));
+            const cbSize = Math.min(3.8, rowH - 1.2);
+            _drawCheckbox(doc, cx + 2.5, y + (rowH - cbSize) / 2, cbSize);
           } else if (col.key === 'cod') {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
-            doc.setTextColor(...c.verdeEsc);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(5.6); doc.setTextColor(130, 130, 140);
             doc.text(String(row.cod), cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'produto') {
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(6);
-            doc.setTextColor(...c.dark);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(28, 28, 30);
             let nome = row.produto;
             while (doc.getTextWidth(nome) > col.w - 3 && nome.length > 10) nome = nome.slice(0, -1);
-            if (nome !== row.produto) nome = nome.slice(0, -1) + '…';
-            doc.text(nome, cx + 2, cellY);
+            if (nome !== row.produto) nome = nome.slice(0, -1) + '...';
+            doc.text(nome, cx + 2.5, cellY);
           } else if (col.key === 'qtdPilhas') {
-            doc.setFillColor(...c.verde);
-            const bh = Math.min(rowH - 1.5, 4.5);
-            doc.roundedRect(cx + 5, y + (rowH - bh) / 2, col.w - 10, bh, 1.5, 1.5, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-            doc.setTextColor(255, 255, 255);
-            doc.text(String(row.qtdPilhas), cx + col.w / 2, y + rowH / 2 + 1.2, { align: 'center' });
+            // Badge compacto
+            const bh = Math.min(rowH - 1.8, 4.5);
+            doc.setFillColor(52, 199, 89);
+            doc.roundedRect(cx + (col.w - 14) / 2, y + (rowH - bh) / 2, 14, bh, 1.2, 1.2, 'F');
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(6.4); doc.setTextColor(255, 255, 255);
+            doc.text(String(row.qtdPilhas), cx + col.w / 2, y + rowH / 2 + 1.0, { align: 'center' });
           }
           cx += col.w;
         });
@@ -3527,19 +3720,24 @@ self.addEventListener('fetch', e => {
 
       drawFoot();
 
-      // Rodapé resumo compacto
-      if (y + 10 > maxY) { doc.addPage(); pageNum++; y = 12; }
-      y += 3;
-      doc.setFillColor(...c.cinzaBg);
+      if (y + 13 > maxY) { doc.addPage(); pageNum++; y = 12; }
+      y += 4;
+      doc.setFillColor(250, 252, 250);
       doc.roundedRect(10, y, pgW - 20, 9, 1.5, 1.5, 'F');
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6.5);
-      doc.setTextColor(...c.verdeEsc);
-      doc.text(`${rows.length} SKUs  ·  ${totalPilhas} pilhas totais`, pgW / 2, y + 5.8, { align: 'center' });
+      doc.setDrawColor(235, 240, 235); doc.setLineWidth(0.2);
+      doc.roundedRect(10, y, pgW - 20, 9, 1.5, 1.5, 'S');
+      doc.setFillColor(52, 199, 89);
+      doc.roundedRect(10, y, 2, 9, 0.8, 0.8, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(130, 130, 140);
+      doc.text('RESUMO', 15.5, y + 4.5);
+      doc.setTextColor(28, 28, 30);
+      doc.text(rows.length + ' SKUs  -  ' + totalPilhas + ' pilhas totais  -  Gerado ' + hoje, 30, y + 4.5);
 
       const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      doc.save(`Relatorio_Pilhas_${dataArq}.pdf`);
+      doc.save('Relatorio_Pilhas_' + dataArq + '.pdf');
     }
+
+
 
     // ══════════════════════════════════════════════════════════════════
     // PDF DATAS CURTAS — visual minimalista iOS
@@ -3567,12 +3765,12 @@ self.addEventListener('fetch', e => {
       if (itens.length === 0) return alert('Sem dados.');
 
       const statusDC = (prazo) => {
-        if (prazo < 0)   return { label: 'VENCIDO',      txt: c.branco, pill: [28,28,30],     accent: [28,28,30]     };
-        if (prazo < 10)  return { label: 'PRAZO LIMITE', txt: c.branco, pill: [139,69,19],    accent: [139,69,19]    };
-        if (prazo <= 19) return { label: 'URGENTE',      txt: c.branco, pill: [255,59,48],    accent: [255,59,48]    };
-        if (prazo <= 21) return { label: 'CRÍTICO',      txt: c.branco, pill: [255,149,0],    accent: [255,149,0]    };
-        if (prazo <= 23) return { label: 'ATENÇÃO',      txt: c.dark,   pill: [255,204,0],    accent: [180,140,0]    };
-        return                   { label: 'NORMAL',       txt: c.dark,   pill: [180,180,190],  accent: [130,130,140]  };
+        if (prazo < 0)   return { label: 'VENCIDO',      txt: c.branco, pill: [28,28,30],    accent: [28,28,30],    range: 'Vencido'      };
+        if (prazo < 10)  return { label: 'PRAZO LIMITE', txt: c.branco, pill: [139,69,19],   accent: [139,69,19],   range: '< 10 dias'    };
+        if (prazo <= 19) return { label: 'URGENTE',      txt: c.branco, pill: [255,59,48],   accent: [255,59,48],   range: '10 - 19 dias' };
+        if (prazo <= 21) return { label: 'CRITICO',      txt: c.branco, pill: [255,149,0],   accent: [255,149,0],   range: '20 - 21 dias' };
+        if (prazo <= 23) return { label: 'ATENCAO',      txt: c.dark,   pill: [255,204,0],   accent: [180,140,0],   range: '22 - 23 dias' };
+        return                   { label: 'NORMAL',       txt: c.dark,   pill: [180,180,190], accent: [130,130,140], range: '24 - 25 dias' };
       };
 
       const { jsPDF } = window.jspdf;
@@ -3581,151 +3779,113 @@ self.addEventListener('fetch', e => {
       const pgH = doc.internal.pageSize.getHeight();
       const hoje = new Date().toLocaleDateString('pt-BR');
 
-      const grupos = { VENCIDO:0, 'PRAZO LIMITE':0, URGENTE:0, 'CRÍTICO':0, 'ATENÇÃO':0, NORMAL:0 };
-      itens.forEach(it => { const s = statusDC(it.prazo); if (grupos[s.label] !== undefined) grupos[s.label]++; });
+      const kpiDefs = [
+        { label: 'VENCIDO',      pill: [28,28,30],    txt: c.branco, range: 'Vencido'      },
+        { label: 'PRAZO LIMITE', pill: [139,69,19],   txt: c.branco, range: '< 10 dias'    },
+        { label: 'URGENTE',      pill: [255,59,48],   txt: c.branco, range: '10 - 19 dias' },
+        { label: 'CRITICO',      pill: [255,149,0],   txt: c.branco, range: '20 - 21 dias' },
+        { label: 'ATENCAO',      pill: [255,204,0],   txt: c.dark,   range: '22 - 23 dias' },
+        { label: 'NORMAL',       pill: [180,180,190], txt: c.dark,   range: '24 - 25 dias' },
+      ];
+      const grupos = {};
+      kpiDefs.forEach(k => grupos[k.label] = { count: 0, vol: 0 });
+      itens.forEach(it => {
+        const s = statusDC(it.prazo);
+        if (grupos[s.label] !== undefined) { grupos[s.label].count++; grupos[s.label].vol += Math.round(it.qtd); }
+      });
       const totalItens = itens.length;
-      const totalVol   = Math.round(itens.reduce((s, it) => s + it.qtd, 0));
+      const totalVol = Math.round(itens.reduce((s, it) => s + it.qtd, 0));
 
-      // ── helper: adicionar logo no canto superior direito ──────────
       const _addLogo = (pageDoc) => {
         try {
           const logoEl = document.querySelector('img[src="assets/logo.png"]');
           if (logoEl && logoEl.complete && logoEl.naturalWidth > 0) {
             const canvas = document.createElement('canvas');
             const ratio = logoEl.naturalWidth / logoEl.naturalHeight;
-            canvas.width  = logoEl.naturalWidth;
-            canvas.height = logoEl.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(logoEl, 0, 0);
+            canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
+            canvas.getContext('2d').drawImage(logoEl, 0, 0);
             const imgData = canvas.toDataURL('image/png');
-            const logoH = 8, logoW = logoH * ratio;
-            pageDoc.addImage(imgData, 'PNG', pgW - 10 - logoW, 6, logoW, logoH);
+            const lH = 7, lW = lH * ratio;
+            pageDoc.addImage(imgData, 'PNG', pgW - 10 - lW, 5, lW, lH);
           }
         } catch(e) {}
       };
 
-      // ── CABEÇALHO MINIMALISTA ──────────────────────────────────────
-      // Barra de acento laranja fina no topo
+      // CABECALHO MINIMALISTA
       doc.setFillColor(255, 149, 0);
-      doc.rect(0, 0, pgW, 1.2, 'F');
-
-      // Área de cabeçalho limpa
+      doc.rect(0, 0, pgW, 1.5, 'F');
       doc.setFillColor(250, 250, 252);
-      doc.rect(0, 1.2, pgW, 30, 'F');
-
-      // Separador inferior do cabeçalho
+      doc.rect(0, 1.5, pgW, 28, 'F');
       doc.setDrawColor(235, 235, 240);
       doc.setLineWidth(0.3);
-      doc.line(0, 31.2, pgW, 31.2);
-
-      // Título principal
+      doc.line(0, 29.5, pgW, 29.5);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
+      doc.setFontSize(15);
       doc.setTextColor(28, 28, 30);
-      doc.text('Datas Curtas', 13, 16);
-
-      // Subtítulo
+      doc.text('Datas Curtas', 13, 15);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.5);
+      doc.setFontSize(7);
       doc.setTextColor(130, 130, 140);
-      doc.text('Produtos com vencimento em até 25 dias · Ordenados por urgência', 13, 22.5);
-
-      // Meta info (data, contagem) — alinhado à esquerda embaixo do subtítulo
+      doc.text('Produtos com vencimento em ate 25 dias - Ordenados por urgencia', 13, 22);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6.5);
+      doc.setFontSize(6);
       doc.setTextColor(175, 175, 185);
-      doc.text(`${totalItens} itens · ${totalVol.toLocaleString('pt-BR')} unidades · Gerado ${hoje} · CD Matriz Panutrir`, 13, 28.5);
-
-      // Logo canto superior direito
+      doc.text(totalItens + ' itens - ' + totalVol.toLocaleString('pt-BR') + ' un. - Gerado ' + hoje + ' - CD Matriz Panutrir', 13, 27.5);
       _addLogo(doc);
 
-      let y = 37;
+      let y = 35;
 
-      // ── KPI CARDS (6 status) ──────────────────────────────────────
-      const kpiList = [
-        { label: 'VENCIDO',      cor: c.dark,         val: grupos['VENCIDO']      },
-        { label: 'PRAZO LIMITE', cor: [139,69,19],     val: grupos['PRAZO LIMITE'] },
-        { label: 'URGENTE',      cor: c.vermelho,      val: grupos['URGENTE']      },
-        { label: 'CRÍTICO',      cor: c.laranja,       val: grupos['CRÍTICO']      },
-        { label: 'ATENÇÃO',      cor: [180,140,0],     val: grupos['ATENÇÃO']      },
-        { label: 'NORMAL',       cor: [130,130,140],   val: grupos['NORMAL']       },
-      ];
+      // KPI CARDS + LEGENDA INTEGRADA (card em cima, pill de cor abaixo)
       const kW = (pgW - 20 - 5 * 2) / 6;
-      const kH = 14;
-      kpiList.forEach((k, i) => {
+      const kCardH = 12; // altura do card de numero
+      const kLegH  = 6;  // altura da pill legenda abaixo
+      kpiDefs.forEach((k, i) => {
         const px = 10 + i * (kW + 2);
-        // Card fundo branco com sombra sutil
+        const gData = grupos[k.label] || { count: 0, vol: 0 };
+
+        // Card numero
         doc.setFillColor(255, 255, 255);
-        doc.roundedRect(px, y, kW, kH, 1.5, 1.5, 'F');
+        doc.roundedRect(px, y, kW, kCardH, 1.2, 1.2, 'F');
         doc.setDrawColor(235, 235, 240);
-        doc.setLineWidth(0.25);
-        doc.roundedRect(px, y, kW, kH, 1.5, 1.5, 'S');
-        // Indicador colorido à esquerda
-        doc.setFillColor(...k.cor);
-        doc.roundedRect(px, y, 2, kH, 0.8, 0.8, 'F');
-        // Número
+        doc.setLineWidth(0.2);
+        doc.roundedRect(px, y, kW, kCardH, 1.2, 1.2, 'S');
+        // Tira colorida lateral
+        doc.setFillColor(...k.pill);
+        doc.roundedRect(px, y, 2, kCardH, 0.8, 0.8, 'F');
+        // Numero de itens
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(k.val > 9 ? 11 : 12);
-        doc.setTextColor(...k.cor);
-        doc.text(String(k.val), px + kW / 2 + 1, y + 8.5, { align: 'center' });
-        // Label
-        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(gData.count > 99 ? 9 : 11);
+        doc.setTextColor(28, 28, 30);
+        doc.text(String(gData.count), px + kW / 2 + 1, y + 6.5, { align: 'center' });
+        // Volume
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(4.5);
-        doc.setTextColor(160, 160, 170);
-        doc.text(k.label, px + kW / 2 + 1, y + kH - 1.5, { align: 'center' });
-      });
-      y += kH + 5;
+        doc.setTextColor(150, 150, 160);
+        const volStr = gData.vol > 0 ? gData.vol.toLocaleString('pt-BR') + ' un.' : '';
+        if (volStr) doc.text(volStr, px + kW / 2 + 1, y + 10.5, { align: 'center' });
 
-      // ── LEGENDA ───────────────────────────────────────────────────
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(5.5);
-      doc.setTextColor(160, 160, 170);
-      doc.text('LEGENDA', 12, y + 3);
-
-      const legendas = [
-        { label: 'Normal (24-25d)',      pill: [180,180,190], txt: c.branco  },
-        { label: 'Atenção (22-23d)',     pill: [255,204,0],   txt: c.dark    },
-        { label: 'Crítico (20-21d)',     pill: [255,149,0],   txt: c.branco  },
-        { label: 'Urgente (10-19d)',     pill: [255,59,48],   txt: c.branco  },
-        { label: 'Prazo Limite (<10d)',  pill: [139,69,19],   txt: c.branco  },
-        { label: 'Vencido',             pill: [28,28,30],    txt: c.branco  },
-      ];
-      const legW = 26.5; const legStartX = 32;
-      legendas.forEach((leg, i) => {
-        const lx = legStartX + i * (legW + 1.5);
-        doc.setFillColor(...leg.pill);
-        doc.roundedRect(lx, y, legW, 5.5, 1.2, 1.2, 'F');
+        // Pill legenda colorida diretamente abaixo do card
+        const legY = y + kCardH + 1.5;
+        doc.setFillColor(...k.pill);
+        doc.roundedRect(px, legY, kW, kLegH, 1, 1, 'F');
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(4.8);
-        doc.setTextColor(...leg.txt);
-        doc.text(leg.label, lx + legW / 2, y + 3.4, { align: 'center' });
+        doc.setFontSize(4.2);
+        doc.setTextColor(...k.txt);
+        doc.text(k.label, px + kW / 2, legY + 2.4, { align: 'center' });
+        doc.setFontSize(3.8);
+        doc.text(k.range, px + kW / 2, legY + 5.0, { align: 'center' });
       });
+      y += kCardH + kLegH + 6;
 
-      // Legenda checkbox
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(5.5);
-      doc.setTextColor(160, 160, 170);
-      const legCheckX = legStartX + legendas.length * (legW + 1.5) + 4;
-      _drawCheckbox(doc, legCheckX, y + 0.5, 3.5);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(5.2);
-      doc.setTextColor(120, 120, 130);
-      doc.text('Presente', legCheckX + 4.5, y + 3.5);
-      _drawCheckbox(doc, legCheckX + 20, y + 0.5, 3.5);
-      doc.text('Ausente', legCheckX + 24.5, y + 3.5);
-
-      y += 10;
-
-      // ── CABEÇALHO DA TABELA ───────────────────────────────────────
+      // CABECALHO TABELA
       const colsAdj = [
-        { label: '✓',        w: 8,   key: 'check'    },
-        { label: 'CÓD',      w: 14,  key: 'cod'      },
-        { label: 'PRODUTO',  w: 72,  key: 'produto'  },
+        { label: 'COD',      w: 14,  key: 'cod'      },
+        { label: 'PRODUTO',  w: 80,  key: 'produto'  },
         { label: 'QTD',      w: 18,  key: 'qtd'      },
         { label: 'VALIDADE', w: 26,  key: 'validade' },
         { label: 'DIAS',     w: 12,  key: 'prazo'    },
         { label: 'STATUS',   w: 20,  key: 'status'   },
-      ]; // soma = 170 ✓
+      ];
 
       const drawTableHead = (yy) => {
         doc.setFillColor(242, 242, 247);
@@ -3743,116 +3903,88 @@ self.addEventListener('fetch', e => {
 
       y = drawTableHead(y);
 
-      // ── LINHAS DA TABELA ─────────────────────────────────────────
       const rowH = 6;
-      const maxY = pgH - 16;
+      const maxY = pgH - 14;
       let pageNum = 1;
       let lastStatus = null;
 
       const drawFoot = () => {
         doc.setDrawColor(235, 235, 240);
-        doc.setLineWidth(0.25);
+        doc.setLineWidth(0.2);
         doc.line(0, pgH - 10, pgW, pgH - 10);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(5.5);
         doc.setTextColor(175, 175, 185);
-        doc.text(`Página ${pageNum}`, 13, pgH - 6);
-        doc.text(`Relatório de Datas Curtas · ${hoje} · CD Matriz Panutrir`, pgW / 2, pgH - 6, { align: 'center' });
+        doc.text('Pagina ' + pageNum, 13, pgH - 6);
+        doc.text('Relatorio de Datas Curtas - ' + hoje + ' - CD Matriz Panutrir', pgW / 2, pgH - 6, { align: 'center' });
       };
 
       itens.forEach((item, idx) => {
         const st = statusDC(item.prazo);
 
-        // Separador de grupo de status
         if (st.label !== lastStatus) {
           if (y + 5 > maxY) {
             drawFoot(); doc.addPage(); pageNum++;
-            // Faixa de acento laranja no topo da nova página
-            doc.setFillColor(255, 149, 0);
-            doc.rect(0, 0, pgW, 1.2, 'F');
+            doc.setFillColor(255, 149, 0); doc.rect(0, 0, pgW, 1.5, 'F');
             _addLogo(doc);
             y = 8; y = drawTableHead(y);
           }
-          // Faixa de separação de grupo — minimalista
+          // Separador de grupo
           doc.setFillColor(250, 250, 252);
-          doc.rect(10, y, pgW - 20, 4.5, 'F');
+          doc.rect(10, y, pgW - 20, 5, 'F');
           doc.setFillColor(...st.pill);
-          doc.roundedRect(10, y + 1.5, 2.5, 1.5, 0.5, 0.5, 'F');
+          doc.roundedRect(10, y + 1.5, 2.5, 2, 0.5, 0.5, 'F');
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(5.5);
           doc.setTextColor(...st.accent);
-          const grpCount = itens.filter(x => statusDC(x.prazo).label === st.label).length;
-          doc.text(`${st.label}  ·  ${grpCount} ${grpCount === 1 ? 'item' : 'itens'}`, 15.5, y + 3.2);
-          // Linha fina abaixo do grupo label
-          doc.setDrawColor(235, 235, 240);
-          doc.setLineWidth(0.2);
-          doc.line(10, y + 4.5, pgW - 10, y + 4.5);
-          y += 5;
+          const grpCount = grupos[st.label] ? grupos[st.label].count : 0;
+          doc.text(st.label + '  -  ' + grpCount + (grpCount === 1 ? ' item' : ' itens'), 15.5, y + 3.5);
+          doc.setDrawColor(235, 235, 240); doc.setLineWidth(0.15);
+          doc.line(10, y + 5, pgW - 10, y + 5);
+          y += 5.5;
           lastStatus = st.label;
         }
 
         if (y + rowH > maxY) {
           drawFoot(); doc.addPage(); pageNum++;
-          doc.setFillColor(255, 149, 0);
-          doc.rect(0, 0, pgW, 1.2, 'F');
+          doc.setFillColor(255, 149, 0); doc.rect(0, 0, pgW, 1.5, 'F');
           _addLogo(doc);
           y = 8; y = drawTableHead(y); lastStatus = null;
         }
 
-        // Fundo zebrado limpo — branco ou off-white
-        doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252);
+        doc.setFillColor(idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 253);
         doc.rect(10, y, pgW - 20, rowH, 'F');
-
-        // Faixa de cor de status à esquerda (2px)
         doc.setFillColor(...st.pill);
         doc.rect(10, y, 1.8, rowH, 'F');
-
-        // Separador inferior sutil
-        doc.setDrawColor(240, 240, 244);
-        doc.setLineWidth(0.12);
+        doc.setDrawColor(242, 242, 246); doc.setLineWidth(0.12);
         doc.line(11.8, y + rowH, pgW - 10, y + rowH);
 
         const cellY = y + rowH * 0.67;
         let cx = 10;
         colsAdj.forEach(col => {
-          if (col.key === 'check') {
-            _drawCheckbox(doc, cx + 2, y + (rowH - 3.5) / 2, 3.5);
-          } else if (col.key === 'cod') {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(5.8);
-            doc.setTextColor(160, 160, 170);
+          if (col.key === 'cod') {
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(160, 160, 170);
             doc.text(String(item.cod), cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'produto') {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6);
-            doc.setTextColor(28, 28, 30);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(6); doc.setTextColor(28, 28, 30);
             let nome = item.produto;
             while (doc.getTextWidth(nome) > col.w - 4 && nome.length > 8) nome = nome.slice(0, -1);
-            if (nome !== item.produto) nome = nome.slice(0, -1) + '…';
+            if (nome !== item.produto) nome = nome.slice(0, -1) + '...';
             doc.text(nome, cx + 3, cellY);
           } else if (col.key === 'qtd') {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(6.5);
-            doc.setTextColor(28, 28, 30);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(28, 28, 30);
             doc.text(Math.round(item.qtd).toLocaleString('pt-BR'), cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'validade') {
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(6);
-            doc.setTextColor(80, 80, 90);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(80, 80, 90);
             doc.text(item.validade, cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'prazo') {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-            doc.setTextColor(...st.accent);
-            doc.text(`${item.prazo}d`, cx + col.w / 2, cellY, { align: 'center' });
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...st.accent);
+            doc.text(item.prazo + 'd', cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'status') {
-            // Pill de status compacto
             const pw = col.w - 2, ph = rowH - 2;
             doc.setFillColor(...st.pill);
             doc.roundedRect(cx + 1, y + 1, pw, ph, 1.2, 1.2, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(4.5);
-            doc.setTextColor(...st.txt);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(4.5); doc.setTextColor(...st.txt);
             doc.text(st.label, cx + col.w / 2, y + rowH / 2 + 0.8, { align: 'center' });
           }
           cx += col.w;
@@ -3862,29 +3994,23 @@ self.addEventListener('fetch', e => {
 
       drawFoot();
 
-      // ── RODAPÉ RESUMO ─────────────────────────────────────────────
-      if (y + 12 > maxY) { drawFoot(); doc.addPage(); pageNum++; y = 14; }
+      if (y + 11 > maxY) { drawFoot(); doc.addPage(); pageNum++; y = 14; }
       y += 5;
-
       doc.setFillColor(250, 250, 252);
-      doc.roundedRect(10, y, pgW - 20, 10, 2, 2, 'F');
-      doc.setDrawColor(235, 235, 240);
-      doc.setLineWidth(0.25);
-      doc.roundedRect(10, y, pgW - 20, 10, 2, 2, 'S');
-      // Accent bar
+      doc.roundedRect(10, y, pgW - 20, 9, 1.5, 1.5, 'F');
+      doc.setDrawColor(235, 235, 240); doc.setLineWidth(0.2);
+      doc.roundedRect(10, y, pgW - 20, 9, 1.5, 1.5, 'S');
       doc.setFillColor(255, 149, 0);
-      doc.roundedRect(10, y, 2, 10, 0.8, 0.8, 'F');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6);
-      doc.setTextColor(130, 130, 140);
-      doc.text('RESUMO', 16, y + 4.5);
+      doc.roundedRect(10, y, 2, 9, 0.8, 0.8, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(130, 130, 140);
+      doc.text('RESUMO', 15.5, y + 4.5);
       doc.setTextColor(28, 28, 30);
-      doc.text(`${totalItens} itens  ·  ${totalVol.toLocaleString('pt-BR')} unidades  ·  Gerado ${hoje}`, 34, y + 4.5);
+      doc.text(totalItens + ' itens  -  ' + totalVol.toLocaleString('pt-BR') + ' unidades  -  Gerado ' + hoje, 33, y + 4.5);
 
       const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      doc.save(`Datas_Curtas_${dataArq}.pdf`);
+      doc.save('Datas_Curtas_' + dataArq + '.pdf');
     }
+
 
   </script>
 </body>
