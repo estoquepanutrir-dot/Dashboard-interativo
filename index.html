@@ -1999,7 +1999,15 @@
           agrupado[i.cod]["Qtd Pilhas"] += 1;
         }
       });
-      const final = Object.values(agrupado).sort((a, b) => a['Nome do produto'].localeCompare(b['Nome do produto'], 'pt-BR'));
+      const _ordemProdutos = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
+      const final = Object.values(agrupado).sort((a, b) => {
+        const ia = _ordemProdutos.indexOf(Number(a['Codigo']));
+        const ib = _ordemProdutos.indexOf(Number(b['Codigo']));
+        if (ia === -1 && ib === -1) return 0;
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
       if (final.length === 0) return alert("Nenhuma etiqueta de pilha fechada encontrada.");
 
       const workbook = new ExcelJS.Workbook();
@@ -2036,6 +2044,8 @@
         const isFantasma = i.qtd < 30 && i.diff === minDiff;
 
         return {
+          "_COD":      i.cod,
+          "_VALIDADE": i.validade ? i.validade.getTime() : Infinity,
           "ETIQUETA": i.etiqueta || i.cod || "-",
           "DATA":     i.validade ? i.validade.toLocaleDateString('pt-BR') : "-",
           "NOME":     i.produto,
@@ -2046,7 +2056,15 @@
         };
       });
 
-      rows.sort((a,b) => a.NOME.localeCompare(b.NOME, 'pt-BR'));
+      const _ordemQuebras = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
+      rows.sort((a, b) => {
+        const ia = _ordemQuebras.indexOf(Number(a._COD));
+        const ib = _ordemQuebras.indexOf(Number(b._COD));
+        const posA = ia === -1 ? Infinity : ia;
+        const posB = ib === -1 ? Infinity : ib;
+        if (posA !== posB) return posA - posB;
+        return a._VALIDADE - b._VALIDADE;
+      });
 
       const workbook = new ExcelJS.Workbook();
       const ws = workbook.addWorksheet('Quebras');
@@ -3304,10 +3322,13 @@ self.addEventListener('fetch', e => {
       if (listaQuebras.length === 0) return alert('Nenhuma quebra encontrada.');
 
       const minDiff = Math.min(...listaQuebras.map(i => i.diff));
+      const _ordemQuebrasPDF = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
       const rows = listaQuebras.map(i => {
         const div = i.produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
         const upCx = i.lastro / div;
         return {
+          _cod:      i.cod,
+          _validade: i.validade ? i.validade.getTime() : Infinity,
           etiqueta: String(i.etiqueta || i.cod || '-'),
           data:     i.validade ? i.validade.toLocaleDateString('pt-BR') : '-',
           nome:     i.produto,
@@ -3316,7 +3337,14 @@ self.addEventListener('fetch', e => {
           total:    Math.round(i.qtd),
           obs:      (i.qtd < 30 && i.diff === minDiff) ? 'FANTASMA?' : '',
         };
-      }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      }).sort((a, b) => {
+        const ia = _ordemQuebrasPDF.indexOf(Number(a._cod));
+        const ib = _ordemQuebrasPDF.indexOf(Number(b._cod));
+        const posA = ia === -1 ? Infinity : ia;
+        const posB = ib === -1 ? Infinity : ib;
+        if (posA !== posB) return posA - posB;
+        return a._validade - b._validade;
+      });
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -3598,7 +3626,14 @@ self.addEventListener('fetch', e => {
           agrupado[i.cod].qtdPilhas += 1;
         }
       });
-      const rows = Object.values(agrupado).sort((a, b) => a.produto.localeCompare(b.produto, 'pt-BR'));
+      const _ordemPilhasPDF = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
+      const rows = Object.values(agrupado).sort((a, b) => {
+        const ia = _ordemPilhasPDF.indexOf(Number(a.cod));
+        const ib = _ordemPilhasPDF.indexOf(Number(b.cod));
+        const posA = ia === -1 ? Infinity : ia;
+        const posB = ib === -1 ? Infinity : ib;
+        return posA - posB;
+      });
       if (rows.length === 0) return alert('Nenhuma etiqueta de pilha fechada encontrada.');
 
       const { jsPDF } = window.jspdf;
