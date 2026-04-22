@@ -1990,6 +1990,60 @@
       document.getElementById('alerta-modal').classList.remove('open');
     }
 
+    const listaMestreSkus = [
+      { codigo: 669, nome: "BISNAGUINHA BISNUTRINHAS PANUTRIR® 300G" },
+      { codigo: 162272, nome: "BISNAGUINHA BISNUTRINHAS TRANSPARENTE 300G" },
+      { codigo: 162775, nome: "BISNAGUINHA MUFFATO 300G" },
+      { codigo: 85841, nome: "MUFFATO PAEZINHOS DE LEITE 400G" },
+      { codigo: 162800, nome: "MUFFATO PAO FORMA 450G" },
+      { codigo: 162802, nome: "MUFFATO PAO HAMBURGUER 500G" },
+      { codigo: 85181, nome: "MUFFATO PAO HOT DOG 400G" },
+      { codigo: 162767, nome: "MUFFATO INTEGRAL 450G" },
+      { codigo: 162801, nome: "MUFFATO PAO LEITE 450G" },
+      { codigo: 135231, nome: "PAEZINHOS LEITE TRANSPARENTE 400G" },
+      { codigo: 6, nome: "PAEZINHOS LEITE PANUTRINHA PANUTRIR® 400G" },
+      { codigo: 81581, nome: "PAO 100% INTEG 12 GRAOS ZERO PANUTRIR® 350G" },
+      { codigo: 11, nome: "PAO 100% INTEG CENTEIO FITNESS ZERO PANUTRIR® 350G" },
+      { codigo: 81591, nome: "PAO 100% INTEG CHIA MACADAMIA PANUTRIR® 400G" },
+      { codigo: 81571, nome: "PAO 100% INTEG SURPREENDENTE PANUTRIR® 500G" },
+      { codigo: 655, nome: "PAO 100% INTEGRAL 12 GRAOS PANUTRIR® 500G" },
+      { codigo: 16, nome: "PAO INTEG 7 GRAOS DAMASCO  HIBISCO ZERO PANUTRIR 350G" },
+      { codigo: 1224, nome: "PAO CASTANHA PARA E QUINOA INTEG PANUTRIR® 500G" },
+      { codigo: 135241, nome: "PAO FORMA TRANSPARENTE  450G" },
+      { codigo: 2, nome: "PAO FORMA PANUTRIR® 450G" },
+      { codigo: 81661, nome: "PAO FORMA  PLUF NUT450G" },
+      { codigo: 135211, nome: "PAO HAMBURGUER GOURMET TRANSPARENTE 500G" },
+      { codigo: 162275, nome: "PAO HAMBURGUER GOURMET TRANSPARENTE AVENIDA 330G" },
+      { codigo: 82051, nome: "PAO HAMBURGUER GOURMET PANUTRIR® 500G" },
+      { codigo: 135221, nome: "PAO HOT DOG TRANSPARENTE 400G" },
+      { codigo: 69251, nome: "PAO HOT DOG PANUTRIR® 400G" },
+      { codigo: 162276, nome: "PAO INTEGRAL TRANSPARENTE 450G " },
+      { codigo: 86151, nome: "PAO INTEGRAL PANUTRIR® 500G" },
+      { codigo: 5, nome: "PAO LEITE PANUTRIR® 450G" },
+      { codigo: 121811, nome: "US PAEZINHOS DE LEITE UNISABOR 400G" },
+      { codigo: 121821, nome: "US PAO 100% INTEG 12 GRAOS ZERO UNISABOR 350G" },
+      { codigo: 121861, nome: "US PAO FORMA UNISABOR 450G" },
+      { codigo: 121801, nome: "US PAO HAMBURGUER GOURMET UNISABOR 500G" },
+      { codigo: 121581, nome: "US PAO HOT DOG UNISABOR 400G" },
+      { codigo: 121871, nome: "US PAO LEITE UNISABOR 450G" },
+      { codigo: 162358, nome: "US PAO INTEGRAL UNISABOR 450G" },
+      { codigo: 162396, nome: "DEL GRANO CASEIRO" },
+      { codigo: 145521, nome: "DEL GRANO INTEGRAL" },
+      { codigo: 121831, nome: "US PÃO 12 GRAOS 450G UNISABOR" },
+      { codigo: 145511, nome: "DEL GRANO TRADICIONAL" },
+      { codigo: 121841, nome: "US PÃO CASTANHA UNISABOR" },
+      { codigo: 162783, nome: "US PAO ARTESANAL TRADICIONAL UNISABOR 500G" },
+      { codigo: 162784, nome: "US PAO ARTESANAL INTEGRAL UNISABOR 500G" },
+      { codigo: 141951, nome: "PÃO SIRIO TRADICIONAL 260G" },
+      { codigo: 141441, nome: "PÃO SIRIO TRADICIONAL 320G" },
+      { codigo: 152291, nome: "PÃO SIRIO INTEGRAL" },
+      { codigo: 2279, nome: "PAO CASEIRO " },
+      { codigo: 162923, nome: "PAO HAMBURGUER GOURMET GERGELIM 320G" },
+      { codigo: 162920, nome: "PAO HAMBURGUER GOURMET ARTESANAL 320G" },
+      { codigo: 162921, nome: "PAO HAMBURGUER GOURMET BRIOCHE 320G" },
+      { codigo: 162922, nome: "PAO HAMBURGUER GOURMET AUSTRALIANO 320G" }
+    ];
+
     async function exportarResumoPilhas() {
       if (db.length === 0) return alert("Sem dados.");
       const agrupado = {};
@@ -1999,16 +2053,17 @@
           agrupado[i.cod]["Qtd Pilhas"] += 1;
         }
       });
-      const _ordemProdutos = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
-      const final = Object.values(agrupado).sort((a, b) => {
-        const ia = _ordemProdutos.indexOf(Number(a['Codigo']));
-        const ib = _ordemProdutos.indexOf(Number(b['Codigo']));
-        if (ia === -1 && ib === -1) return 0;
-        if (ia === -1) return 1;
-        if (ib === -1) return -1;
-        return ia - ib;
+      const _ordemPilhas = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
+      const skuOrdenados = _ordemPilhas.map(cod => listaMestreSkus.find(s => s.codigo === cod)).filter(Boolean);
+      const skusExtras = listaMestreSkus.filter(s => !_ordemPilhas.includes(s.codigo));
+      const final = [...skuOrdenados, ...skusExtras].map(item => {
+        const atual = agrupado[item.codigo] || agrupado[String(item.codigo)];
+        return {
+          "Codigo": item.codigo,
+          "Nome do produto": (atual && atual["Nome do produto"]) || item.nome,
+          "Qtd Pilhas": (atual && atual["Qtd Pilhas"]) || 0
+        };
       });
-      if (final.length === 0) return alert("Nenhuma etiqueta de pilha fechada encontrada.");
 
       const workbook = new ExcelJS.Workbook();
       const ws = workbook.addWorksheet('Pilhas');
@@ -2056,7 +2111,7 @@
         };
       });
 
-      const _ordemQuebras = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
+      const _ordemQuebras = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
       rows.sort((a, b) => {
         const ia = _ordemQuebras.indexOf(Number(a._COD));
         const ib = _ordemQuebras.indexOf(Number(b._COD));
@@ -2496,21 +2551,30 @@
       const res = {};
 
       db.forEach(i => {
-        if (!res[i.cod]) {
+        const codKey = String(i.cod);
+        if (!res[codKey]) {
           const rawCod = getCodigoExcelValue(i.cod);
           const codNum = Number(rawCod);
-          res[i.cod] = {
+          res[codKey] = {
             A: isNaN(codNum) ? (rawCod || 0) : codNum,
             B: i.produto,
             C: 0
           };
         }
-        res[i.cod].C += i.qtd;
+        res[codKey].C += i.qtd;
       });
 
-      const itensOrdenados = Object.values(res).sort((a, b) =>
-        a.B.localeCompare(b.B, 'pt-BR', { sensitivity: 'base' })
-      );
+      const itensOrdenados = listaMestreSkus.map(item => {
+        const codKey = String(item.codigo);
+        const atual = res[codKey];
+        const rawCod = getCodigoExcelValue(item.codigo);
+        const codNum = Number(rawCod);
+        return {
+          A: isNaN(codNum) ? (rawCod || 0) : codNum,
+          B: (atual && atual.B) || item.nome,
+          C: (atual && atual.C) || 0
+        };
+      });
 
       const wb = new ExcelJS.Workbook();
       const ws = wb.addWorksheet('Estoque');
@@ -3322,7 +3386,7 @@ self.addEventListener('fetch', e => {
       if (listaQuebras.length === 0) return alert('Nenhuma quebra encontrada.');
 
       const minDiff = Math.min(...listaQuebras.map(i => i.diff));
-      const _ordemQuebrasPDF = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
+      const _ordemQuebrasPDF = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
       const rows = listaQuebras.map(i => {
         const div = i.produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
         const upCx = i.lastro / div;
@@ -3617,7 +3681,6 @@ self.addEventListener('fetch', e => {
     // ══════════════════════════════════════════════════════════════════
     function exportarPilhasPDF() {
       if (db.length === 0) return alert('Sem dados. Importe a base primeiro.');
-      const c = _pdfColors();
 
       const agrupado = {};
       db.forEach(i => {
@@ -3626,22 +3689,22 @@ self.addEventListener('fetch', e => {
           agrupado[i.cod].qtdPilhas += 1;
         }
       });
-      const _ordemPilhasPDF = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,669,162775,162272,141951,141441];
-      const rows = Object.values(agrupado).sort((a, b) => {
-        const ia = _ordemPilhasPDF.indexOf(Number(a.cod));
-        const ib = _ordemPilhasPDF.indexOf(Number(b.cod));
-        const posA = ia === -1 ? Infinity : ia;
-        const posB = ib === -1 ? Infinity : ib;
-        return posA - posB;
+      const _ordemPilhasPDF = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
+      const skuOrdenadosPDF = _ordemPilhasPDF.map(cod => listaMestreSkus.find(s => s.codigo === cod)).filter(Boolean);
+      const skusExtrasPDF = listaMestreSkus.filter(s => !_ordemPilhasPDF.includes(s.codigo));
+      const rows = [...skuOrdenadosPDF, ...skusExtrasPDF].map(item => {
+        const atual = agrupado[item.codigo] || agrupado[String(item.codigo)];
+        return {
+          cod: item.codigo,
+          produto: (atual && atual.produto) || item.nome,
+          qtdPilhas: (atual && atual.qtdPilhas) || 0
+        };
       });
-      if (rows.length === 0) return alert('Nenhuma etiqueta de pilha fechada encontrada.');
 
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pgW = doc.internal.pageSize.getWidth();
       const pgH = doc.internal.pageSize.getHeight();
-      const hoje = new Date().toLocaleDateString('pt-BR');
-      const totalPilhas = rows.reduce((s, r) => s + r.qtdPilhas, 0);
 
       const _addLogo = (pd) => {
         try {
@@ -3652,163 +3715,85 @@ self.addEventListener('fetch', e => {
             canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
             canvas.getContext('2d').drawImage(logoEl, 0, 0);
             const imgData = canvas.toDataURL('image/png');
-            const lH = 7, lW = lH * ratio;
-            pd.addImage(imgData, 'PNG', pgW - 10 - lW, 5, lW, lH);
+            const lH = 8.5, lW = lH * ratio;
+            pd.addImage(imgData, 'PNG', pgW - 10 - lW, 6, lW, lH);
           }
         } catch(e) {}
       };
 
-      // CABECALHO MINIMALISTA
-      doc.setFillColor(52, 199, 89);
-      doc.rect(0, 0, pgW, 1.5, 'F');
-      doc.setFillColor(250, 252, 250);
-      doc.rect(0, 1.5, pgW, 26, 'F');
-      doc.setDrawColor(235, 240, 235);
-      doc.setLineWidth(0.3);
-      doc.line(0, 27.5, pgW, 27.5);
-
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(15);
+      doc.setFontSize(16);
       doc.setTextColor(28, 28, 30);
-      doc.text('Pilhas', 13, 14);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(130, 130, 140);
-      doc.text('Pilhas fechadas (lastro completo) - CD Matriz Panutrir', 13, 21);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(6);
-      doc.setTextColor(175, 175, 185);
-      doc.text(rows.length + ' SKUs - ' + totalPilhas + ' pilhas - Gerado ' + hoje, 13, 26);
+      doc.text('PILHAS', 12, 13);
       _addLogo(doc);
 
-      let y = 32;
-
-      // KPI mini cards (2)
-      const kpis2 = [
-        { val: rows.length, lbl: 'SKUs DISTINTOS' },
-        { val: totalPilhas, lbl: 'TOTAL DE PILHAS' },
-      ];
-      const kW2 = 42;
-      kpis2.forEach((k, i) => {
-        const px = 10 + i * (kW2 + 3);
-        doc.setFillColor(255, 255, 255);
-        doc.roundedRect(px, y, kW2, 8, 1.2, 1.2, 'F');
-        doc.setDrawColor(235, 240, 235); doc.setLineWidth(0.2);
-        doc.roundedRect(px, y, kW2, 8, 1.2, 1.2, 'S');
-        doc.setFillColor(52, 199, 89);
-        doc.roundedRect(px, y, 2, 8, 0.8, 0.8, 'F');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(28, 28, 30);
-        doc.text(String(k.val), px + 14, y + 5.5);
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(4.5); doc.setTextColor(140, 140, 150);
-        doc.text(k.lbl, px + 14, y + 5.5 - 4);
-      });
-
-      // Instrucao de conferencia
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(160, 160, 170);
-      doc.text('Confirme a presenca de cada pilha usando as caixas de marcacao', 10 + 2 * (kW2 + 3) + 6, y + 3.5);
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
-      _drawCheckbox(doc, 10 + 2 * (kW2 + 3) + 6, y + 4.5, 3.5);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(5.2); doc.setTextColor(120, 120, 130);
-      doc.text('Presente', 10 + 2 * (kW2 + 3) + 11, y + 7.5);
-      _drawCheckbox(doc, 10 + 2 * (kW2 + 3) + 30, y + 4.5, 3.5);
-      doc.text('Ausente', 10 + 2 * (kW2 + 3) + 35, y + 7.5);
-
-      y += 12;
-
-      // TABELA
+      const chkW = 10; // coluna do checkbox
       const cols = [
-        { label: 'CONF.', w: 10, key: 'check'    },
-        { label: 'COD',   w: 22, key: 'cod'       },
-        { label: 'PRODUTO', w: 110, key: 'produto' },
-        { label: 'PILHAS', w: 28, key: 'qtdPilhas'},
+        { label: '✓', w: chkW, key: 'chk' },
+        { label: 'COD', w: 20, key: 'cod' },
+        { label: 'PRODUTO', w: 132, key: 'produto' },
+        { label: 'PILHAS', w: 28, key: 'qtdPilhas' }
       ];
 
       const drawHead = (yy) => {
-        doc.setFillColor(242, 242, 247);
+        doc.setFillColor(245, 245, 247);
         doc.roundedRect(10, yy, pgW - 20, 6.5, 1.2, 1.2, 'F');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); doc.setTextColor(120, 120, 130);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(6.6);
+        doc.setTextColor(105, 105, 115);
         let hx = 10;
         cols.forEach(col => {
-          doc.text(col.label, hx + col.w / 2, yy + 4.2, { align: 'center' });
+          doc.text(col.label, hx + col.w / 2, yy + 4.3, { align: 'center' });
           hx += col.w;
         });
-        return yy + 8;
+        return yy + 7.6;
       };
 
+      let y = 19.5;
       y = drawHead(y);
 
-      const availH = pgH - y - 16;
-      // Prioriza legibilidade: nunca comprime demais as linhas.
-      const minRowH = 4.8;
-      const targetRowH = availH / Math.max(rows.length, 1);
-      const rowH = Math.max(minRowH, Math.min(6.2, targetRowH));
-      // Aproveita melhor a folha antes de quebrar de pagina.
-      const maxY = pgH - 10.8;
-      let pageNum = 1;
-
-      const drawFoot = () => {
-        doc.setDrawColor(235, 235, 240); doc.setLineWidth(0.2);
-        doc.line(0, pgH - 10, pgW, pgH - 10);
-        doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); doc.setTextColor(175, 175, 185);
-        doc.text('Pagina ' + pageNum, 13, pgH - 6);
-        doc.text('Relatorio de Pilhas - ' + hoje + ' - CD Matriz Panutrir', pgW / 2, pgH - 6, { align: 'center' });
-      };
+      const maxY = pgH - 8.5;
+      const rowH = (maxY - y) / Math.max(rows.length, 1);
+      const chkSize = Math.min(rowH * 0.62, 3.8);
 
       rows.forEach((row, idx) => {
-        if (y + rowH + 0.3 > maxY) {
-          drawFoot(); doc.addPage(); pageNum++;
-          doc.setFillColor(52, 199, 89); doc.rect(0, 0, pgW, 1.5, 'F');
-          _addLogo(doc);
-          y = 8; y = drawHead(y);
-        }
-        // Zebra limpa
         doc.setFillColor(idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251);
         doc.rect(10, y, pgW - 20, rowH, 'F');
-        doc.setDrawColor(240, 242, 240); doc.setLineWidth(0.12);
-        doc.line(10, y + rowH, pgW - 10, y + rowH);
 
-        const cellY = y + rowH * 0.64;
+        const cellY = y + rowH * 0.68;
         let cx = 10;
         cols.forEach(col => {
-          if (col.key === 'check') {
-            const cbSize = Math.min(3.8, rowH - 1.2);
-            _drawCheckbox(doc, cx + 2.5, y + (rowH - cbSize) / 2, cbSize);
+          if (col.key === 'chk') {
+            // quadrado oco centralizado na célula
+            const boxX = cx + (col.w - chkSize) / 2;
+            const boxY = y + (rowH - chkSize) / 2;
+            doc.setDrawColor(160, 160, 170);
+            doc.setLineWidth(0.35);
+            doc.rect(boxX, boxY, chkSize, chkSize);
           } else if (col.key === 'cod') {
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(5.6); doc.setTextColor(130, 130, 140);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.2);
+            doc.setTextColor(95, 95, 105);
             doc.text(String(row.cod), cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'produto') {
-            doc.setFont('helvetica', 'normal'); doc.setFontSize(5.8); doc.setTextColor(28, 28, 30);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(6.4);
+            doc.setTextColor(28, 28, 30);
             let nome = row.produto;
             while (doc.getTextWidth(nome) > col.w - 3 && nome.length > 10) nome = nome.slice(0, -1);
             if (nome !== row.produto) nome = nome.slice(0, -1) + '...';
-            doc.text(nome, cx + 2.5, cellY);
+            doc.text(nome, cx + 2, cellY);
           } else if (col.key === 'qtdPilhas') {
-            // Badge compacto
-            const bh = Math.min(rowH - 1.8, 4.5);
-            doc.setFillColor(52, 199, 89);
-            doc.roundedRect(cx + (col.w - 14) / 2, y + (rowH - bh) / 2, 14, bh, 1.2, 1.2, 'F');
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(6.4); doc.setTextColor(255, 255, 255);
-            doc.text(String(row.qtdPilhas), cx + col.w / 2, y + rowH / 2 + 1.0, { align: 'center' });
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(6.5);
+            doc.setTextColor(28, 28, 30);
+            doc.text(String(row.qtdPilhas), cx + col.w / 2, cellY, { align: 'center' });
           }
           cx += col.w;
         });
+
         y += rowH;
       });
-
-      drawFoot();
-
-      if (y + 13 > maxY) { doc.addPage(); pageNum++; y = 12; }
-      y += 4;
-      doc.setFillColor(250, 252, 250);
-      doc.roundedRect(10, y, pgW - 20, 9, 1.5, 1.5, 'F');
-      doc.setDrawColor(235, 240, 235); doc.setLineWidth(0.2);
-      doc.roundedRect(10, y, pgW - 20, 9, 1.5, 1.5, 'S');
-      doc.setFillColor(52, 199, 89);
-      doc.roundedRect(10, y, 2, 9, 0.8, 0.8, 'F');
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(130, 130, 140);
-      doc.text('RESUMO', 15.5, y + 4.5);
-      doc.setTextColor(28, 28, 30);
-      doc.text(rows.length + ' SKUs  -  ' + totalPilhas + ' pilhas totais  -  Gerado ' + hoje, 30, y + 4.5);
 
       const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       doc.save('Relatorio_Pilhas_' + dataArq + '.pdf');
