@@ -843,6 +843,159 @@
     </div>
 
     <!-- CARD: ETIQUETAS POR DATA E STATUS -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- BASE DE ACURACIDADE — CONFRONTO DE CARGAS E ESTOQUE              -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="glass-card rounded-[2.5rem] p-7 mb-7" id="painelS7">
+
+      <!-- Cabeçalho -->
+      <div class="flex items-center justify-between mb-1 flex-wrap gap-3">
+        <h3 class="text-[11px] font-black text-black flex items-center gap-2.5 tracking-widest uppercase">
+          <span class="chart-title-dot" style="background:#5856D6;"></span>
+          Base de Acuracidade
+        </h3>
+        <span class="text-[9px] font-bold tracking-wide uppercase px-3 py-1 rounded-full"
+              style="background:rgba(88,86,214,0.10);color:#5856D6;">
+          Estoque Sistema + Cargas em Doca &rarr; Total S7
+        </span>
+      </div>
+      <p class="text-[10px] font-semibold text-gray-400 mb-5 leading-relaxed">
+        O estoque ja esta carregado no sistema. Preencha o <b>Localizador</b> e o <b>Destino</b> de cada carga, cole os dados abaixo — o relatorio
+        cruza pelo <b>COD</b>, soma <code style="background:rgba(0,0,0,0.05);padding:1px 6px;border-radius:5px;">Estoque + Cargas</code>
+        e exporta o confronto em <b>.xlsx</b>.
+      </p>
+
+      <!-- Grid 4 cargas -->
+      <div class="grid gap-5 mb-4" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+
+        <!-- Carga 1 -->
+        <div style="background:rgba(52,199,89,0.05);border:1px solid rgba(52,199,89,0.18);border-radius:1.5rem;padding:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#34C759;">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#34C759;margin-right:5px;vertical-align:middle;"></span>Carga 1
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C1loc" type="text" placeholder="Ex: 4771" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(52,199,89,0.25);" />
+            </div>
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C1dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(52,199,89,0.25);" />
+            </div>
+          </div>
+          <textarea id="s7C1" placeholder="Cole os dados da Carga 1 aqui... (6 campos por produto: Cod, Produto, Carga, Carregada, Faltante, %)" class="ios-input w-full"
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(52,199,89,0.20);"></textarea>
+          <p id="s7C1n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#34C759;min-height:14px;"></p>
+        </div>
+
+        <!-- Carga 2 -->
+        <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.18);border-radius:1.5rem;padding:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#FF9500;">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF9500;margin-right:5px;vertical-align:middle;"></span>Carga 2
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C2loc" type="text" placeholder="Ex: 4772" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,149,0,0.25);" />
+            </div>
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C2dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,149,0,0.25);" />
+            </div>
+          </div>
+          <textarea id="s7C2" placeholder="Cole os dados da Carga 2 aqui..." class="ios-input w-full"
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(255,149,0,0.20);"></textarea>
+          <p id="s7C2n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#FF9500;min-height:14px;"></p>
+        </div>
+
+        <!-- Carga 3 -->
+        <div style="background:rgba(255,59,48,0.04);border:1px solid rgba(255,59,48,0.16);border-radius:1.5rem;padding:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#FF3B30;">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF3B30;margin-right:5px;vertical-align:middle;"></span>Carga 3
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C3loc" type="text" placeholder="Ex: 4773" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,59,48,0.22);" />
+            </div>
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C3dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,59,48,0.22);" />
+            </div>
+          </div>
+          <textarea id="s7C3" placeholder="Cole os dados da Carga 3 aqui..." class="ios-input w-full"
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(255,59,48,0.18);"></textarea>
+          <p id="s7C3n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#FF3B30;min-height:14px;"></p>
+        </div>
+
+        <!-- Carga 4 -->
+        <div style="background:rgba(0,122,255,0.04);border:1px solid rgba(0,122,255,0.16);border-radius:1.5rem;padding:1rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#007AFF;">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#007AFF;margin-right:5px;vertical-align:middle;"></span>Carga 4
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C4loc" type="text" placeholder="Ex: 4774" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,122,255,0.22);" />
+            </div>
+            <div>
+              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C4dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,122,255,0.22);" />
+            </div>
+          </div>
+          <textarea id="s7C4" placeholder="Cole os dados da Carga 4 aqui..." class="ios-input w-full"
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(0,122,255,0.18);"></textarea>
+          <p id="s7C4n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#007AFF;min-height:14px;"></p>
+        </div>
+
+      </div>
+
+      <!-- Aviso: base nao carregada -->
+      <div id="s7DbWarning" class="hidden mb-4 px-4 py-2.5 rounded-2xl text-[10px] font-bold"
+           style="background:rgba(255,149,0,0.12);color:#B25E09;">
+        &#9888; Nenhuma base de estoque carregada. Importe a planilha principal primeiro.
+      </div>
+
+      <!-- Preview dinamico -->
+      <div id="s7Preview" class="hidden mb-4 px-4 py-2.5 rounded-2xl text-[10px] font-bold"
+           style="background:rgba(88,86,214,0.08);color:#5856D6;">
+        <span id="s7PreviewTxt"></span>
+      </div>
+
+      <!-- Separador de botoes -->
+      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.07),transparent);margin:0.5rem 0 1rem;"></div>
+      <p class="text-[9px] font-black tracking-widest uppercase mb-3" style="color:#aaa;">Exportar Planilhas</p>
+
+      <!-- Botoes principais -->
+      <div class="flex flex-wrap gap-3">
+        <button onclick="s7ExportarUnificado('carregados')" class="dl-btn text-[10px] rounded-full px-6 py-3"
+          style="background:#34C759;color:#fff;" title="Gera planilha com Cod | Produto | [Carga 1] | [Carga 2] | ... usando qtd Carregada">
+          &#11015; A &mdash; Unificado Carregados
+        </button>
+        <button onclick="s7ExportarUnificado('faltantes')" class="dl-btn text-[10px] rounded-full px-6 py-3"
+          style="background:#FF3B30;color:#fff;" title="Gera planilha com Cod | Produto | [Carga 1] | [Carga 2] | ... usando qtd Faltante">
+          &#11015; B &mdash; Unificado Faltantes
+        </button>
+        <button onclick="gerarRelatorioS7()" class="dl-btn text-[10px] rounded-full px-6 py-3"
+          style="background:#5856D6;color:#fff;" title="Cruza com estoque do sistema: Cod | Produto | Estoque Sistema | C1..C4 | Total Cargas | Total S7">
+          &#128202; C &mdash; Acuracidade S7
+        </button>
+        <button onclick="s7LimparTudo()" class="filter-btn text-[10px] rounded-full px-5 py-3 bg-white/60 text-gray-500">
+          Limpar Tudo
+        </button>
+      </div>
+
+    </div>
+    <!-- FIM: BASE DE ACURACIDADE -->
+
     <div id="etiquetasDataStatusSection" class="glass-card rounded-[2.5rem] p-7 mb-7 hidden">
       <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
         <h3 class="text-[11px] font-black text-black flex items-center gap-2.5 tracking-widest uppercase">
@@ -910,7 +1063,8 @@
       "2279": 190
     };
 
-    let db = [];
+    window.db = [];
+    let db = window.db; // db e window.db apontam pro MESMO array — nunca reatribuir db
     let charts = {};
     let currentQuickFilter = 'TODOS';
     let selectedCompareUniqueKey = null;
@@ -1169,7 +1323,7 @@
 
     function processData(rows) {
       const today = new Date(); today.setHours(0,0,0,0);
-      db = [];
+      db.length = 0; // limpa sem reatribuir, mantendo window.db apontando pro mesmo array
       selectedSkuFilter = null;
       document.getElementById('sku-filter-pill').style.display = 'none';
       document.getElementById('sku-historico-section').style.display = 'none';
@@ -3867,8 +4021,8 @@ self.addEventListener('fetch', e => {
             canvas.width = logoEl.naturalWidth; canvas.height = logoEl.naturalHeight;
             canvas.getContext('2d').drawImage(logoEl, 0, 0);
             const imgData = canvas.toDataURL('image/png');
-            const lH = 7, lW = lH * ratio;
-            pageDoc.addImage(imgData, 'PNG', pgW - 10 - lW, 5, lW, lH);
+            const lH = 20, lW = lH * ratio;
+            pageDoc.addImage(imgData, 'PNG', pgW - 10 - lW, 4, lW, lH);
           }
         } catch(e) {}
       };
@@ -3965,9 +4119,8 @@ self.addEventListener('fetch', e => {
 
       y = drawTableHead(y);
 
-      const rowH = 6;
+      const rowH = 8.5;
       const maxY = pgH - 14;
-      let pageNum = 1;
       let lastStatus = null;
 
       const drawFoot = () => {
@@ -4025,28 +4178,28 @@ self.addEventListener('fetch', e => {
         let cx = 10;
         colsAdj.forEach(col => {
           if (col.key === 'cod') {
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(5.8); doc.setTextColor(160, 160, 170);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(160, 160, 170);
             doc.text(String(item.cod), cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'produto') {
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(6); doc.setTextColor(28, 28, 30);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(28, 28, 30);
             let nome = item.produto;
             while (doc.getTextWidth(nome) > col.w - 4 && nome.length > 8) nome = nome.slice(0, -1);
             if (nome !== item.produto) nome = nome.slice(0, -1) + '...';
             doc.text(nome, cx + 3, cellY);
           } else if (col.key === 'qtd') {
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); doc.setTextColor(28, 28, 30);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(28, 28, 30);
             doc.text(Math.round(item.qtd).toLocaleString('pt-BR'), cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'validade') {
-            doc.setFont('helvetica', 'normal'); doc.setFontSize(6); doc.setTextColor(80, 80, 90);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(80, 80, 90);
             doc.text(item.validade, cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'prazo') {
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...st.accent);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...st.accent);
             doc.text(item.prazo + 'd', cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'status') {
             const pw = col.w - 2, ph = rowH - 2;
             doc.setFillColor(...st.pill);
             doc.roundedRect(cx + 1, y + 1, pw, ph, 1.2, 1.2, 'F');
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(4.5); doc.setTextColor(...st.txt);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(6); doc.setTextColor(...st.txt);
             doc.text(st.label, cx + col.w / 2, y + rowH / 2 + 0.8, { align: 'center' });
           }
           cx += col.w;
@@ -4072,6 +4225,398 @@ self.addEventListener('fetch', e => {
       const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
       doc.save('Datas_Curtas_' + dataArq + '.pdf');
     }
+
+
+    // ══════════════════════════════════════════════════════════════════
+    // BASE DE ACURACIDADE — CONFRONTO DE CARGAS E ESTOQUE
+    // ══════════════════════════════════════════════════════════════════
+
+    const S7_HEADERS = new Set([
+      'cod','produto','qt carga','qt carregada','qt faltante',
+      'perc','concluidos','pendentes','em producao','nao iniciados'
+    ]);
+
+    function _s7Norm(str) {
+      return str.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+    }
+
+    // Retorna o cabeçalho personalizado para cada carga segundo as regras:
+    // localizador + destino → "LOC DESTINO"
+    // apenas destino → "DESTINO"
+    // nenhum → "Carga N"
+    function _s7GetHeader(n) {
+      const loc  = (document.getElementById('s7C' + n + 'loc')  || {}).value || '';
+      const dest = (document.getElementById('s7C' + n + 'dest') || {}).value || '';
+      const l = loc.trim(), d = dest.trim();
+      if (l && d) return l + ' ' + d;
+      if (d)      return d;
+      return 'Carga ' + n;
+    }
+
+    // Parse de uma carga no formato 6-campos → Map<cod, {produto, carregada, faltante}>
+    // Campos por bloco: [0]=Cod [1]=Produto [2]=Carga [3]=Carregada [4]=Faltante [5]=%
+    function _s7ParseCargaFull(rawText) {
+      const map = new Map(); // cod → { produto, carregada, faltante }
+      if (!rawText || !rawText.trim()) return map;
+      const linhas = rawText.split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0)
+        .filter(l => !S7_HEADERS.has(_s7Norm(l)));
+      for (let i = 0; i + 5 < linhas.length; i += 6) {
+        const cod = linhas[i].trim();
+        if (!/^\d+$/.test(cod)) { i -= 5; continue; }
+        const produto    = linhas[i + 1] || '';
+        const carregada  = parseInt(linhas[i + 3], 10) || 0;
+        const faltante   = parseInt(linhas[i + 4], 10) || 0;
+        if (!map.has(cod)) {
+          map.set(cod, { produto, carregada: 0, faltante: 0 });
+        }
+        const entry = map.get(cod);
+        entry.carregada += carregada;
+        entry.faltante  += faltante;
+      }
+      return map;
+    }
+
+    // Retrocompat: retorna Map<cod, qtCarregada> (usado para contadores)
+    function _s7ParseCarga(rawText) {
+      const full = _s7ParseCargaFull(rawText);
+      const out  = new Map();
+      full.forEach((v, k) => out.set(k, v.carregada));
+      return out;
+    }
+
+    // Contador dinâmico embaixo de cada textarea
+    function _s7AtualizaContador(taId, ctId) {
+      const ta = document.getElementById(taId);
+      const ct = document.getElementById(ctId);
+      if (!ta || !ct) return;
+      ta.addEventListener('input', () => {
+        const m = _s7ParseCarga(ta.value);
+        ct.textContent = m.size > 0 ? m.size + ' produto(s) detectado(s)' : '';
+      });
+    }
+
+    // Limpa todos os campos
+    function s7LimparTudo() {
+      ['s7C1','s7C2','s7C3','s7C4'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      ['s7C1loc','s7C2loc','s7C3loc','s7C4loc',
+       's7C1dest','s7C2dest','s7C3dest','s7C4dest'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      ['s7C1n','s7C2n','s7C3n','s7C4n'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '';
+      });
+      const prev = document.getElementById('s7Preview');
+      if (prev) prev.classList.add('hidden');
+      const warn = document.getElementById('s7DbWarning');
+      if (warn) warn.classList.add('hidden');
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // BOTÃO A & B: Exporta planilha unificada Carregados ou Faltantes
+    // Estrutura: Cod | Produto | [Cab1] | [Cab2] | [Cab3] | [Cab4]
+    // Apenas cargas que tiverem dados são incluídas como colunas.
+    // ─────────────────────────────────────────────────────────────────
+    function s7ExportarUnificado(modo) {
+      // modo: 'carregados' | 'faltantes'
+      if (!window.XLSX) {
+        alert('Biblioteca XLSX nao encontrada. Verifique o CDN no cabecalho.');
+        return;
+      }
+
+      // Usa a variável `db` do dashboard (mesmo array compartilhado)
+      const inventoryData = db;
+
+
+      const estoqueMap = new Map();
+      inventoryData.forEach(item => {
+        const cod = String(item.cod).trim();
+        if (!estoqueMap.has(cod)) estoqueMap.set(cod, item.produto || '');
+      });
+
+      const cargasIds = [1, 2, 3, 4];
+      const cargasMaps = cargasIds.map(n =>
+        _s7ParseCargaFull(document.getElementById('s7C' + n).value)
+      );
+
+      // Filtra apenas cargas com dados
+      const cargasAtivas = cargasIds.filter((n, i) => cargasMaps[i].size > 0);
+
+      if (cargasAtivas.length === 0) {
+        alert('Cole os dados de pelo menos uma carga antes de exportar.');
+        return;
+      }
+
+      const headers = cargasAtivas.map(n => _s7GetHeader(n));
+
+      // Coleta todos os CODs de todas as cargas ativas
+      const todosCods = new Set();
+      cargasAtivas.forEach((n, i) => {
+        const idx = cargasIds.indexOf(n);
+        cargasMaps[idx].forEach((_, cod) => todosCods.add(cod));
+      });
+
+      // Monta linhas
+      const aoa = [['Cod', 'Produto', ...headers]];
+      const linhasVermelhas = []; // índices (1-based) que devem ficar vermelhos
+
+      const sortedCods = [...todosCods].sort((a, b) => {
+        const na = parseInt(a, 10), nb = parseInt(b, 10);
+        return isNaN(na) || isNaN(nb) ? a.localeCompare(b) : na - nb;
+      });
+
+      sortedCods.forEach(cod => {
+        // Tenta obter nome do produto da base ou da própria carga
+        let nomeProd = estoqueMap.get(cod) || '';
+        if (!nomeProd) {
+          // Busca nas cargas
+          cargasAtivas.forEach((n, i) => {
+            const idx = cargasIds.indexOf(n);
+            const entry = cargasMaps[idx].get(cod);
+            if (entry && entry.produto && !nomeProd) nomeProd = entry.produto;
+          });
+        }
+
+        const valores = cargasAtivas.map((n, i) => {
+          const idx = cargasIds.indexOf(n);
+          const entry = cargasMaps[idx].get(cod);
+          if (!entry) return '';
+          return modo === 'carregados' ? entry.carregada : entry.faltante;
+        });
+
+        aoa.push([cod, nomeProd, ...valores]);
+
+        // Verifica se o cod NÃO está na base de estoque → linha vermelha
+        if (!estoqueMap.has(cod) && inventoryData.length > 0) {
+          linhasVermelhas.push(aoa.length - 1); // índice 0-based da linha de dados
+        }
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+      // Estilo do cabeçalho
+      const headerFill = modo === 'carregados'
+        ? { fgColor: { rgb: '1D8A3F' } }
+        : { fgColor: { rgb: 'C0392B' } };
+
+      const nCols = 2 + cargasAtivas.length;
+      for (let c = 0; c < nCols; c++) {
+        const cellAddr = XLSX.utils.encode_cell({ r: 0, c });
+        if (!ws[cellAddr]) continue;
+        ws[cellAddr].s = {
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          fill: { patternType: 'solid', ...headerFill },
+          alignment: { horizontal: 'center' }
+        };
+      }
+
+      // Linhas vermelhas (itens não encontrados na base)
+      linhasVermelhas.forEach(rowIdx => {
+        for (let c = 0; c < nCols; c++) {
+          const cellAddr = XLSX.utils.encode_cell({ r: rowIdx, c });
+          if (!ws[cellAddr]) ws[cellAddr] = { t: 's', v: '' };
+          ws[cellAddr].s = {
+            fill: { patternType: 'solid', fgColor: { rgb: 'FFCCCC' } },
+            font: { bold: true, color: { rgb: 'CC0000' } }
+          };
+        }
+      });
+
+      // Larguras das colunas
+      ws['!cols'] = [
+        { wch: 12 },  // Cod
+        { wch: 50 },  // Produto
+        ...cargasAtivas.map(() => ({ wch: 22 }))
+      ];
+
+      const wb = XLSX.utils.book_new();
+      const sheetName = modo === 'carregados' ? 'Carregados' : 'Faltantes';
+      XLSX.utils.book_append_sheet(wb, ws, sheetName);
+
+      const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      const prefixo = modo === 'carregados' ? 'Unificado_Carregados_' : 'Unificado_Faltantes_';
+      XLSX.writeFile(wb, prefixo + dataArq + '.xlsx');
+
+      // Atualiza preview
+      const prevTxt = document.getElementById('s7PreviewTxt');
+      const preview = document.getElementById('s7Preview');
+      if (prevTxt && preview) {
+        const alertaVerm = linhasVermelhas.length > 0
+          ? ' &nbsp;|&nbsp; <span style="color:#FF3B30;">&#9888; ' + linhasVermelhas.length + ' item(ns) nao encontrados na base (vermelho)</span>'
+          : '';
+        prevTxt.innerHTML =
+          '<b>' + (aoa.length - 1) + '</b> produtos &nbsp;|&nbsp; ' +
+          '<b>' + cargasAtivas.length + '</b> carga(s) exportada(s)' + alertaVerm;
+        preview.classList.remove('hidden');
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // BOTÃO C: Relatório Acuracidade S7
+    // Cod | Produto | Estoque Sistema | C1..C4 | Total Cargas | Total S7
+    // ─────────────────────────────────────────────────────────────────
+    function gerarRelatorioS7() {
+      const warn    = document.getElementById('s7DbWarning');
+      const preview = document.getElementById('s7Preview');
+      const prevTxt = document.getElementById('s7PreviewTxt');
+
+      // Usa a variável `db` do dashboard (mesmo array compartilhado)
+      const inventoryData = db;
+
+
+
+      if (!inventoryData || inventoryData.length === 0) {
+        warn.classList.remove('hidden');
+        return;
+      }
+      warn.classList.add('hidden');
+
+      // 1. Agrega estoque do sistema por COD
+      const estoque = new Map(); // cod → { produto, qtd }
+      inventoryData.forEach(item => {
+        const cod = String(item.cod).trim();
+        if (!estoque.has(cod)) {
+          estoque.set(cod, { produto: item.produto || '', qtd: 0 });
+        }
+        estoque.get(cod).qtd += Math.round(item.qtd || 0);
+      });
+
+      // 2. Parseia as 4 cargas (usando qtCarregada, campo índice 3)
+      const cargasMaps = [1, 2, 3, 4].map(n =>
+        _s7ParseCargaFull(document.getElementById('s7C' + n).value)
+      );
+      const headers = [1, 2, 3, 4].map(n => _s7GetHeader(n));
+
+      // 3. União de todos os CODs
+      const todosCods = new Set([
+        ...estoque.keys(),
+        ...cargasMaps.flatMap(m => [...m.keys()])
+      ]);
+
+      if (todosCods.size === 0) {
+        alert('Nenhum dado encontrado. Importe a base e cole pelo menos uma carga.');
+        return;
+      }
+
+      // 4. Monta dados
+      const sortedCods = [...todosCods].sort((a, b) => {
+        const na = parseInt(a, 10), nb = parseInt(b, 10);
+        return isNaN(na) || isNaN(nb) ? a.localeCompare(b) : na - nb;
+      });
+
+      const cabecalho = [
+        'Cod', 'Produto', 'Estoque Sistema',
+        headers[0], headers[1], headers[2], headers[3],
+        'Total Cargas', 'Total S7 (Final)'
+      ];
+
+      const aoa = [cabecalho];
+      const linhasVermelhas = []; // itens em cargas mas ausentes no estoque
+
+      sortedCods.forEach(cod => {
+        const reg     = estoque.get(cod);
+        const qtdEst  = reg ? reg.qtd : 0;
+        let   nome    = reg ? reg.produto : '';
+
+        // Tenta obter nome das cargas se não está no estoque
+        if (!nome) {
+          cargasMaps.forEach(m => {
+            const e = m.get(cod);
+            if (e && e.produto && !nome) nome = e.produto;
+          });
+        }
+
+        const qtdC      = cargasMaps.map(m => { const e = m.get(cod); return e ? e.carregada : 0; });
+        const totalCarg = qtdC.reduce((a, b) => a + b, 0);
+        const totalS7   = qtdEst + totalCarg;
+
+        aoa.push([cod, nome, qtdEst, ...qtdC, totalCarg, totalS7]);
+
+        // Verifica se está nas cargas mas NÃO no estoque → linha vermelha
+        const estaEmCarga = cargasMaps.some(m => m.has(cod));
+        if (estaEmCarga && !estoque.has(cod)) {
+          linhasVermelhas.push(aoa.length - 1); // índice 0-based
+        }
+      });
+
+      // 5. Preview
+      const totalCargasProd = cargasMaps.reduce((s, m) => s + m.size, 0);
+      const alertaVerm = linhasVermelhas.length > 0
+        ? ' &nbsp;|&nbsp; <span style="color:#FF3B30;">&#9888; ' + linhasVermelhas.length + ' item(ns) nao no estoque (vermelho)</span>'
+        : '';
+      prevTxt.innerHTML =
+        '<b>' + estoque.size + '</b> SKUs no sistema &nbsp;|&nbsp; ' +
+        '<b>' + totalCargasProd + '</b> registros nas cargas &nbsp;|&nbsp; ' +
+        '<b>' + (aoa.length - 1) + '</b> linhas no relatorio' + alertaVerm;
+      preview.classList.remove('hidden');
+
+      // 6. Gera XLSX
+      if (!window.XLSX) {
+        alert('Biblioteca XLSX nao encontrada. Verifique o CDN no cabecalho.');
+        return;
+      }
+
+      const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+      // Estilo cabeçalho
+      const nCols = cabecalho.length;
+      for (let c = 0; c < nCols; c++) {
+        const addr = XLSX.utils.encode_cell({ r: 0, c });
+        if (!ws[addr]) continue;
+        ws[addr].s = {
+          font: { bold: true, color: { rgb: 'FFFFFF' } },
+          fill: { patternType: 'solid', fgColor: { rgb: '5856D6' } },
+          alignment: { horizontal: 'center' }
+        };
+      }
+
+      // Linhas vermelhas
+      linhasVermelhas.forEach(rowIdx => {
+        for (let c = 0; c < nCols; c++) {
+          const addr = XLSX.utils.encode_cell({ r: rowIdx, c });
+          if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+          ws[addr].s = {
+            fill: { patternType: 'solid', fgColor: { rgb: 'FFCCCC' } },
+            font: { bold: true, color: { rgb: 'CC0000' } }
+          };
+        }
+      });
+
+      ws['!cols'] = [
+        { wch: 12 },  // Cod
+        { wch: 55 },  // Produto
+        { wch: 22 },  // Qtd Estoque
+        { wch: 22 },  // C1
+        { wch: 22 },  // C2
+        { wch: 22 },  // C3
+        { wch: 22 },  // C4
+        { wch: 15 },  // Total Cargas
+        { wch: 16 },  // Total S7
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Base de Acuracidade');
+
+      const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      XLSX.writeFile(wb, 'Base_Acuracidade_S7_' + dataArq + '.xlsx');
+    }
+
+    // Ativa contadores dinâmicos quando o DOM estiver pronto
+    document.addEventListener('DOMContentLoaded', function () {
+      _s7AtualizaContador('s7C1', 's7C1n');
+      _s7AtualizaContador('s7C2', 's7C2n');
+      _s7AtualizaContador('s7C3', 's7C3n');
+      _s7AtualizaContador('s7C4', 's7C4n');
+    });
+
+    // ══ FIM: BASE DE ACURACIDADE ══════════════════════════════════════
 
 
   </script>
