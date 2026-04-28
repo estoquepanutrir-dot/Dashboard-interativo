@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestão de Estoque | CD MATRIZ PANUTRIR</title>
   <link rel="manifest" id="pwaManifest" />
-  <meta name="theme-color" content="#ECECF1" />
+  <meta name="theme-color" content="#F7F2FA" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Panutrir CD" />
 
@@ -17,164 +17,354 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
+    :root {
+      /* MD3 Light Tokens */
+      --md-primary: #6750A4;
+      --md-on-primary: #FFFFFF;
+      --md-primary-container: #EADDFF;
+      --md-on-primary-container: #21005D;
+      --md-secondary: #625B71;
+      --md-secondary-container: #E8DEF8;
+      --md-tertiary: #7D5260;
+      --md-tertiary-container: #FFD8E4;
+      --md-surface: #FFFBFE;
+      --md-surface-variant: #E7E0EC;
+      --md-on-surface: #1C1B1F;
+      --md-on-surface-variant: #49454F;
+      --md-outline: #79747E;
+      --md-outline-variant: #CAC4D0;
+      --md-error: #B3261E;
+      --md-error-container: #F9DEDC;
+      --md-shadow: rgba(0,0,0,0.08);
+      --md-scrim: rgba(0,0,0,0.32);
+    }
+
+    .dark {
+      --md-primary: #D0BCFF;
+      --md-on-primary: #381E72;
+      --md-primary-container: #4F378B;
+      --md-on-primary-container: #EADDFF;
+      --md-secondary: #CCC2DC;
+      --md-secondary-container: #4A4458;
+      --md-tertiary: #EFB8C8;
+      --md-tertiary-container: #633B48;
+      --md-surface: #1C1B1F;
+      --md-surface-variant: #49454F;
+      --md-on-surface: #E6E1E5;
+      --md-on-surface-variant: #CAC4D0;
+      --md-outline: #938F99;
+      --md-outline-variant: #49454F;
+      --md-error: #F2B8B5;
+      --md-error-container: #8C1D18;
+      --md-shadow: rgba(0,0,0,0.3);
+    }
+
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      background: #ECECF1;
-      background-image:
-        radial-gradient(ellipse 80% 60% at 20% -10%, rgba(120,120,200,0.07) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 85% 100%, rgba(52, 199, 89, 0.05) 0%, transparent 55%);
-      background-attachment: fixed;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--md-surface);
+      color: var(--md-on-surface);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      letter-spacing: -0.022em;
-      color: #1C1C1E;
       min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
-    .nav-bar {
-      background: rgba(242, 242, 247, 0.35);
-      backdrop-filter: saturate(140%) blur(12px);
-      -webkit-backdrop-filter: saturate(140%) blur(12px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.30);
-      box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 12px rgba(0,0,0,0.03);
+
+    /* Light mode body background */
+    body:not(.dark) {
+      background: #F7F2FA;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(103,80,164,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(125,82,96,0.05) 0%, transparent 55%);
+      background-attachment: fixed;
     }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.62);
+
+    /* Dark mode body */
+    .dark body, html.dark {
+      background: #141218;
+    }
+
+    /* ── NAVBAR MD3 ── */
+    .md3-nav {
+      background: rgba(247, 242, 250, 0.85);
+      backdrop-filter: saturate(180%) blur(20px);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      border-bottom: 1px solid var(--md-outline-variant);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    .dark .md3-nav {
+      background: rgba(28, 27, 31, 0.90);
+      border-bottom: 1px solid rgba(73,69,79,0.5);
+    }
+
+    /* ── MD3 SURFACE CARDS ── */
+    .md3-card {
+      background: rgba(255,255,255,0.72);
       backdrop-filter: blur(24px) saturate(160%);
       -webkit-backdrop-filter: blur(24px) saturate(160%);
-      border: 1px solid rgba(255, 255, 255, 0.55);
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.04),
-        0 8px 32px rgba(0,0,0,0.04),
-        inset 0 1px 0 rgba(255,255,255,0.8);
-      transition: box-shadow 0.25s ease, transform 0.2s ease;
+      border: 1px solid rgba(202,196,208,0.5);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04);
+      transition: box-shadow 0.25s ease, border-color 0.3s ease, background 0.3s ease;
     }
-    .glass-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07), 0 12px 40px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8); }
+    .md3-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+    }
+    .dark .md3-card {
+      background: rgba(36,33,42,0.88);
+      border: 1px solid rgba(73,69,79,0.5);
+      box-shadow: none;
+    }
+    .dark .md3-card:hover {
+      border-color: rgba(73,69,79,0.9);
+    }
 
+    /* ── KPI CARDS MD3 ── */
     .kpi-card {
-      background: rgba(255,255,255,0.70);
-      backdrop-filter: blur(20px) saturate(150%);
-      -webkit-backdrop-filter: blur(20px) saturate(150%);
-      border: 1px solid rgba(255,255,255,0.60);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(202,196,208,0.6);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
       border-radius: 2rem;
       padding: 1.5rem;
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease, background 0.3s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 8px 20px rgba(0,0,0,0.06);
     }
     .kpi-card::after {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    }
+    .dark .kpi-card {
+      background: rgba(36,33,42,0.88);
+      border: 1px solid rgba(73,69,79,0.5);
+      box-shadow: none;
+    }
+    .dark .kpi-card::after { display: none; }
+    .dark .kpi-card:hover {
+      border-color: rgba(103,80,164,0.4);
+      box-shadow: 0 0 0 1px rgba(103,80,164,0.2);
     }
     .kpi-dot {
       position: absolute;
-      bottom: -12px; right: -12px;
-      width: 60px; height: 60px;
+      bottom: -16px; right: -16px;
+      width: 72px; height: 72px;
       border-radius: 50%;
-      opacity: 0.08;
+      opacity: 0.07;
     }
+
+    /* ── LOADING OVERLAY ── */
     .loading-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(242, 242, 247, 0.55);
+      background: rgba(247, 242, 250, 0.75);
       z-index: 200;
       backdrop-filter: blur(32px) saturate(150%);
       -webkit-backdrop-filter: blur(32px) saturate(150%);
       align-items: center; justify-content: center; flex-direction: column;
     }
-    .spinner { width: 36px; height: 36px; border: 2.5px solid rgba(0,0,0,0.08); border-top-color: #1C1C1E; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .dark .loading-overlay {
+      background: rgba(20, 18, 24, 0.80);
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--md-outline-variant);
+      border-top-color: var(--md-primary);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .status-pilha  { background: #E2FBE7; color: #1D8A3F; }
-    .status-quebra { background: #FFF4E5; color: #B25E09; }
-    .status-doacao { background: #EEEEFF; color: #5856D6; }
-    .status-vencido { background: #1C1C1E; color: #FFFFFF; }
-    .status-prazolimite { background: #8B4513; color: #FFFFFF; }
-    .status-urgente { background: #FF3B30; color: #FFFFFF; }
-    .status-critico { background: #FF9500; color: #FFFFFF; }
-    .status-atencao { background: #FFCC00; color: #1C1C1E; }
-    .status-normal   { background: transparent; color: inherit; border: 1px solid #e5e7eb; }
-    .status-seguro  { background: #34C759; color: #FFFFFF; opacity: 0.5; }
+
+    /* ── STATUS BADGES ── */
+    .status-pilha  { background: #D4EDD8; color: #1A6B3C; }
+    .status-quebra { background: #FDE8C8; color: #92480A; }
+    .status-doacao { background: #E8DEF8; color: #4A3880; }
+    .status-vencido { background: #1C1B1F; color: #FFFFFF; }
+    .status-prazolimite { background: #6B2500; color: #FFFFFF; }
+    .status-urgente { background: #B3261E; color: #FFFFFF; }
+    .status-critico { background: #E77D1A; color: #FFFFFF; }
+    .status-atencao { background: #F5C842; color: #2D1F00; }
+    .status-normal  { background: transparent; color: inherit; border: 1px solid var(--md-outline-variant); }
+    .status-seguro  { background: #2E7D32; color: #FFFFFF; opacity: 0.65; }
+
+    .dark .status-pilha   { background: rgba(46,125,50,0.25); color: #81C784; }
+    .dark .status-quebra  { background: rgba(230,126,34,0.2); color: #FFAB40; }
+    .dark .status-doacao  { background: rgba(103,80,164,0.25); color: #D0BCFF; }
+    .dark .status-normal  { border-color: rgba(202,196,208,0.25); }
+
+    /* ── FILTER BUTTONS ── */
     .filter-btn {
-      transition: all 0.18s ease;
-      border: 1px solid rgba(0,0,0,0.07);
+      transition: all 0.2s cubic-bezier(0.2,0,0,1);
       font-weight: 700;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.025em;
+      border: 1px solid var(--md-outline-variant);
+      color: var(--md-on-surface-variant);
+      background: rgba(255,255,255,0.6);
     }
-    .filter-btn:active { transform: scale(0.97); }
+    .dark .filter-btn {
+      background: rgba(73,69,79,0.3);
+      border-color: rgba(73,69,79,0.5);
+      color: var(--md-on-surface-variant);
+    }
+    .filter-btn:active { transform: scale(0.96); }
     .filter-btn.active {
-      background: #1C1C1E !important;
-      color: #FFFFFF !important;
+      background: var(--md-primary) !important;
+      color: var(--md-on-primary) !important;
       border-color: transparent !important;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+      box-shadow: 0 2px 8px rgba(103,80,164,0.25);
     }
+
+    /* ── ACTION BUTTONS ── */
     .dl-btn {
-      transition: all 0.18s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.08);
-      font-weight: 800;
-      letter-spacing: 0.03em;
+      transition: all 0.2s cubic-bezier(0.2,0,0,1);
+      font-weight: 700;
+      letter-spacing: 0.04em;
     }
-    .dl-btn:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.14), 0 6px 18px rgba(0,0,0,0.10); }
+    .dl-btn:hover { opacity: 0.88; transform: translateY(-1px); }
     .dl-btn:active { transform: scale(0.97) translateY(0); }
-    .ios-input {
+
+    /* ── MD3 INPUTS ── */
+    .md3-input {
       appearance: none;
-      background: rgba(0,0,0,0.05);
+      background: rgba(231,224,236,0.4);
       border: none;
       border-radius: 9999px;
       padding: 0.65rem 2.5rem 0.65rem 1.25rem;
       font-size: 0.72rem;
       font-weight: 600;
-      color: #1C1C1E;
+      font-family: 'Outfit', sans-serif;
+      color: var(--md-on-surface);
       outline: none;
       width: 100%;
-      transition: background 0.15s ease, box-shadow 0.15s ease;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
     }
-    select.ios-input {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23aaa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    .dark .md3-input {
+      background: rgba(73,69,79,0.4);
+      color: var(--md-on-surface);
+    }
+    select.md3-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239389A0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 0.9rem center;
       background-size: 0.75rem;
     }
-    .ios-input:focus { background-color: rgba(0,0,0,0.08); box-shadow: 0 0 0 3px rgba(0,122,255,0.15); }
-    .ios-input.highlight { background: rgba(0,0,0,0.12); font-weight: 800; }
-    
-    .table-row { transition: background 0.12s ease; }
-    .table-row:hover { background: rgba(0,0,0,0.018); }
-    .chart-title-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    .md3-input:focus {
+      background-color: rgba(231,224,236,0.65);
+      box-shadow: 0 0 0 3px rgba(103,80,164,0.2);
+    }
+    .dark .md3-input:focus {
+      background-color: rgba(73,69,79,0.65);
+      box-shadow: 0 0 0 3px rgba(208,188,255,0.2);
+    }
+    .md3-input.highlight {
+      background: rgba(103,80,164,0.12);
+      font-weight: 800;
+      color: var(--md-primary);
+    }
+    .dark .md3-input.highlight {
+      background: rgba(208,188,255,0.15);
+    }
+
+    /* ── ios-input alias for backward compat ── */
+    .ios-input { 
+      appearance: none;
+      background: rgba(231,224,236,0.4);
+      border: none;
+      border-radius: 9999px;
+      padding: 0.65rem 2.5rem 0.65rem 1.25rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      color: var(--md-on-surface);
+      outline: none;
+      width: 100%;
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+    .dark .ios-input {
+      background: rgba(73,69,79,0.4);
+      color: var(--md-on-surface);
+    }
+    select.ios-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239389A0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      background-size: 0.75rem;
+    }
+    .ios-input:focus {
+      background-color: rgba(231,224,236,0.65);
+      box-shadow: 0 0 0 3px rgba(103,80,164,0.2);
+    }
+    .dark .ios-input:focus {
+      background-color: rgba(73,69,79,0.65);
+      box-shadow: 0 0 0 3px rgba(208,188,255,0.2);
+    }
+    .ios-input.highlight {
+      background: rgba(103,80,164,0.12);
+      font-weight: 800;
+      color: var(--md-primary);
+    }
+
+    /* ── TABLE ── */
+    .table-row { transition: background 0.15s ease; }
+    .table-row:hover { background: rgba(103,80,164,0.04); }
+    .dark .table-row:hover { background: rgba(208,188,255,0.06); }
+
+    /* ── CHART TITLE DOT ── */
+    .chart-title-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
-    .logo-nav { height: 40px; object-fit: contain; }
-    .logo-main { width: 11rem; opacity: 0.15; }
-    .section-sep { height: 1px; background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent); margin: 0.5rem 0; }
+    ::-webkit-scrollbar-thumb { background: var(--md-outline-variant); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--md-outline); }
+
+    /* ── LOGOS ── */
+    .logo-nav { height: 38px; object-fit: contain; }
+    .logo-main { width: 10rem; opacity: 0.12; }
+    .dark .logo-main { opacity: 0.08; filter: invert(1); }
+
+    /* ── SECTION SEPARATOR ── */
+    .section-sep { height: 1px; background: linear-gradient(90deg, transparent, var(--md-outline-variant), transparent); margin: 0.5rem 0; }
+
+    /* ── UPLOAD BUTTON ── */
     .upload-btn {
-      background: #1C1C1E;
-      color: #fff;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
       border-radius: 9999px;
       padding: 1rem 2.5rem;
-      font-size: 0.85rem;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.22);
-      transition: all 0.18s ease;
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 20px rgba(103,80,164,0.35);
+      transition: all 0.2s cubic-bezier(0.2,0,0,1);
       display: inline-block;
       cursor: pointer;
     }
-    .upload-btn:hover { background: #3a3a3c; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.28); }
+    .upload-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 28px rgba(103,80,164,0.4); }
     .upload-btn:active { transform: scale(0.98); }
     * { font-style: normal !important; text-decoration: none !important; }
-    
-    /* ── NOTIFICAÇÕES ──────────────────────────────── */
+
+    /* ── NOTIF BADGE ── */
     #notif-badge {
       position: absolute; top: -4px; right: -4px;
-      background: #FF3B30; color: #fff;
+      background: var(--md-error); color: #fff;
       font-size: 9px; font-weight: 900;
       border-radius: 99px; min-width: 17px; height: 17px;
       display: flex; align-items: center; justify-content: center;
@@ -182,59 +372,100 @@
       display: none;
     }
     #notif-btn { position: relative; cursor: pointer; }
+
+    /* ── MD3 ICON BUTTON ── */
+    .md3-icon-btn {
+      background: rgba(103,80,164,0.08);
+      border: none;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      color: var(--md-on-surface-variant);
+    }
+    .md3-icon-btn:hover { background: rgba(103,80,164,0.14); }
+    .dark .md3-icon-btn { background: rgba(208,188,255,0.08); color: var(--md-on-surface-variant); }
+    .dark .md3-icon-btn:hover { background: rgba(208,188,255,0.14); }
+
+    /* ── NOTIF DRAWER ── */
     #notif-drawer {
-      position: fixed; top: 0; right: -420px; width: 400px; height: 100vh;
-      background: rgba(248,248,252,0.97);
+      position: fixed; top: 0; right: -430px; width: 410px; height: 100vh;
+      background: rgba(247,242,250,0.97);
       backdrop-filter: blur(28px) saturate(180%);
       -webkit-backdrop-filter: blur(28px) saturate(180%);
-      border-left: 1px solid rgba(255,255,255,0.4);
+      border-left: 1px solid var(--md-outline-variant);
       box-shadow: -8px 0 40px rgba(0,0,0,0.10);
-      z-index: 300; transition: right 0.32s cubic-bezier(0.4,0,0.2,1);
+      z-index: 300; transition: right 0.32s cubic-bezier(0.2,0,0,1);
       display: flex; flex-direction: column;
+    }
+    .dark #notif-drawer {
+      background: rgba(28,27,31,0.97);
+      border-left-color: rgba(73,69,79,0.5);
     }
     #notif-drawer.open { right: 0; }
     #notif-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.12);
+      position: fixed; inset: 0; background: var(--md-scrim);
       z-index: 299; display: none; backdrop-filter: blur(2px);
     }
     #notif-overlay.open { display: block; }
-    .notif-item {
-      background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.6);
-      border-radius: 1.25rem; padding: 0.9rem 1.1rem; margin-bottom: 0.5rem;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-    }
-    .notif-item.vencido { border-left: 3px solid #1C1C1E; }
-    .notif-item.urgente { border-left: 3px solid #FF3B30; }
-    .notif-item.critico { border-left: 3px solid #AF52DE; }
 
-    /* ── HISTÓRICO / COMPARAÇÃO ───────────────────── */
+    .notif-item {
+      background: rgba(255,255,255,0.65);
+      border: 1px solid rgba(202,196,208,0.4);
+      border-radius: 1.25rem; padding: 0.9rem 1.1rem; margin-bottom: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .dark .notif-item {
+      background: rgba(54,50,64,0.7);
+      border-color: rgba(73,69,79,0.4);
+    }
+    .notif-item.vencido { border-left: 3px solid var(--md-on-surface); }
+    .notif-item.urgente { border-left: 3px solid var(--md-error); }
+    .notif-item.critico { border-left: 3px solid #7D5260; }
+
+    /* ── HISTÓRICO DRAWER ── */
     #historico-drawer {
-      position: fixed; top: 0; left: -460px; width: 440px; height: 100vh;
-      background: rgba(248,248,252,0.97);
+      position: fixed; top: 0; left: -470px; width: 450px; height: 100vh;
+      background: rgba(247,242,250,0.97);
       backdrop-filter: blur(28px) saturate(180%);
       -webkit-backdrop-filter: blur(28px) saturate(180%);
-      border-right: 1px solid rgba(255,255,255,0.4);
+      border-right: 1px solid var(--md-outline-variant);
       box-shadow: 8px 0 40px rgba(0,0,0,0.10);
-      z-index: 300; transition: left 0.32s cubic-bezier(0.4,0,0.2,1);
+      z-index: 300; transition: left 0.32s cubic-bezier(0.2,0,0,1);
       display: flex; flex-direction: column;
     }
+    .dark #historico-drawer {
+      background: rgba(28,27,31,0.97);
+      border-right-color: rgba(73,69,79,0.5);
+    }
     #historico-drawer.open { left: 0; }
-    .kpi-delta-up   { font-size: 9px; font-weight: 900; color: #34C759; margin-left: 4px; }
-    .kpi-delta-down { font-size: 9px; font-weight: 900; color: #FF3B30; margin-left: 4px; }
-    .kpi-delta-eq   { font-size: 9px; font-weight: 900; color: #aaa;    margin-left: 4px; }
 
-    /* ── ALERTA VENCIDOS ──────────────────────────── */
+    .kpi-delta-up   { font-size: 9px; font-weight: 900; color: #2E7D32; margin-left: 4px; }
+    .kpi-delta-down { font-size: 9px; font-weight: 900; color: var(--md-error); margin-left: 4px; }
+    .kpi-delta-eq   { font-size: 9px; font-weight: 900; color: var(--md-outline); margin-left: 4px; }
+    .dark .kpi-delta-up   { color: #81C784; }
+    .dark .kpi-delta-down { color: #F2B8B5; }
+
+    /* ── ALERTA MODAL ── */
     #alerta-modal {
       position: fixed; inset: 0; z-index: 400;
       display: none; align-items: center; justify-content: center;
-      background: rgba(0,0,0,0.45); backdrop-filter: blur(6px);
+      background: var(--md-scrim); backdrop-filter: blur(8px);
     }
     #alerta-modal.open { display: flex; }
     #alerta-box {
-      background: #fff; border-radius: 2rem; padding: 2rem;
+      background: var(--md-surface); border-radius: 2rem; padding: 2rem;
       max-width: 480px; width: 90%; max-height: 80vh;
       overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.22);
-      border-top: 4px solid #FF3B30;
+      border-top: 4px solid var(--md-error);
+      border: 1px solid var(--md-outline-variant);
+    }
+    .dark #alerta-box {
+      background: #2B2930;
+      border-color: rgba(73,69,79,0.6);
     }
     @keyframes shake {
       0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)}
@@ -242,268 +473,681 @@
     }
     .shake { animation: shake 0.45s ease; }
 
-    /* ── BUSCA HIGHLIGHT OTIMIZADO ──────────────────────────── */
+    /* ── SEARCH HIGHLIGHT ── */
     mark.hl {
-      background: #FFCC00; 
-      color: #1C1C1E;
-      border-radius: 3px; 
+      background: #F5C842;
+      color: #2D1F00;
+      border-radius: 3px;
       padding: 0.1em 0.25em;
       font-weight: 900;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
+    .dark mark.hl { background: rgba(245,200,66,0.3); color: #F5C842; }
 
-    /* ── TENDÊNCIA ────────────────────────────────── */
+    /* ── TENDÊNCIA ── */
     #tendencia-section { display: none; }
+    /* ── SKU HISTORICO ── */
+    #sku-historico-section { display: none; }
+    /* ── KPI FANTASMAS ── */
+    #kpi-fantasmas-section { display: none; }
 
-    /* ── AUTOCOMPLETE DROPDOWN ──────────────────── */
+    /* ── AUTOCOMPLETE DROPDOWN ── */
     #autocomplete-dropdown {
       position: fixed;
-      background: rgba(252,252,255,0.98);
+      background: rgba(252,249,255,0.98);
       backdrop-filter: blur(28px) saturate(180%);
       -webkit-backdrop-filter: blur(28px) saturate(180%);
-      border: 1px solid rgba(200,200,220,0.45);
+      border: 1px solid var(--md-outline-variant);
       border-radius: 1.25rem;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
       z-index: 99999;
       max-height: 320px;
       overflow-y: auto;
       display: none;
       animation: popoverIn 0.15s ease;
     }
+    .dark #autocomplete-dropdown {
+      background: rgba(36,33,42,0.98);
+      border-color: rgba(73,69,79,0.6);
+    }
     #autocomplete-dropdown.open { display: block; }
     .autocomplete-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.55rem 1rem;
-      cursor: pointer;
-      transition: background 0.1s;
-      gap: 8px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.55rem 1rem; cursor: pointer; transition: background 0.1s; gap: 8px;
     }
-    .autocomplete-item:hover, .autocomplete-item.focused { background: rgba(0,122,255,0.07); }
-    .autocomplete-item-name { font-size: 12px; font-weight: 800; color: #1C1C1E; }
-    .autocomplete-item-cod  { font-size: 10px; font-weight: 700; color: #aaa; white-space: nowrap; }
+    .autocomplete-item:hover, .autocomplete-item.focused { background: rgba(103,80,164,0.08); }
+    .dark .autocomplete-item:hover, .dark .autocomplete-item.focused { background: rgba(208,188,255,0.1); }
+    .autocomplete-item-name { font-size: 12px; font-weight: 800; color: var(--md-on-surface); }
+    .autocomplete-item-cod  { font-size: 10px; font-weight: 700; color: var(--md-on-surface-variant); white-space: nowrap; }
 
-    /* ── KPI FANTASMAS ──────────────────────────── */
-    #kpi-fantasmas-section {
-      display: none;
-    }
-    #fantasmas-expand-btn {
-      background: rgba(0,0,0,0.05);
-      border: none; border-radius: 99px;
-      padding: 4px 10px;
-      font-size: 9px; font-weight: 900;
-      color: #888; cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-      letter-spacing: 0.03em;
-    }
-    #fantasmas-expand-btn:hover { background: rgba(0,0,0,0.09); color: #1C1C1E; }
-    #fantasmas-detail { display: none; margin-top: 1rem; }
-
-    /* ── SKU HISTÓRICO CURVAS ───────────────────── */
-    #sku-historico-section { display: none; }
-    
-    /* ── SKU FILTER PILL ──────────────────────── */
+    /* ── SKU FILTER PILL ── */
     #sku-filter-pill {
-      display: none;
-      align-items: center;
-      gap: 6px;
-      background: rgba(0,122,255,0.10);
-      border: 1px solid rgba(0,122,255,0.25);
+      display: none; align-items: center; gap: 6px;
+      background: rgba(103,80,164,0.12);
+      border: 1px solid rgba(103,80,164,0.3);
       border-radius: 99px;
       padding: 4px 12px 4px 10px;
       font-size: 10px; font-weight: 900;
-      color: #007AFF;
-      cursor: pointer;
-      transition: background 0.15s;
+      color: var(--md-primary);
+      cursor: pointer; transition: background 0.15s;
     }
-    #sku-filter-pill:hover { background: rgba(0,122,255,0.16); }
+    #sku-filter-pill:hover { background: rgba(103,80,164,0.18); }
+    .dark #sku-filter-pill {
+      background: rgba(208,188,255,0.15);
+      border-color: rgba(208,188,255,0.3);
+      color: var(--md-primary);
+    }
 
-    /* ── KPI COMPARE SELECTOR ─────────────────────── */
+    /* ── KPI COMPARE BUTTON ── */
     .kpi-compare-btn {
-      position: absolute;
-      top: 10px; right: 12px;
-      background: rgba(0,0,0,0.06);
-      border: none;
-      border-radius: 99px;
+      position: absolute; top: 10px; right: 12px;
+      background: rgba(103,80,164,0.07);
+      border: none; border-radius: 99px;
       padding: 3px 8px 3px 6px;
-      font-size: 8px;
-      font-weight: 900;
-      color: #888;
+      font-size: 8px; font-weight: 900;
+      color: var(--md-on-surface-variant);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 3px;
+      display: flex; align-items: center; gap: 3px;
       transition: background 0.15s, color 0.15s;
-      letter-spacing: 0.03em;
-      z-index: 2;
+      letter-spacing: 0.03em; z-index: 2;
     }
-    .kpi-compare-btn:hover { background: rgba(0,122,255,0.10); color: #007AFF; }
-    .kpi-compare-btn.active-compare { background: rgba(0,122,255,0.12); color: #007AFF; }
+    .kpi-compare-btn:hover { background: rgba(103,80,164,0.14); color: var(--md-primary); }
+    .kpi-compare-btn.active-compare { background: rgba(103,80,164,0.14); color: var(--md-primary); }
+    .dark .kpi-compare-btn { background: rgba(208,188,255,0.08); }
+    .dark .kpi-compare-btn:hover, .dark .kpi-compare-btn.active-compare { background: rgba(208,188,255,0.15); }
 
+    /* ── KPI COMPARE POPOVER ── */
     .kpi-compare-popover {
-      position: fixed;
-      z-index: 9999;
-      background: rgba(252,252,255,0.98);
-      border: 1px solid rgba(200,200,220,0.5);
-      border-radius: 1.1rem;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
+      position: fixed; z-index: 9999;
+      background: rgba(252,249,255,0.98);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: 1.25rem;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
       backdrop-filter: blur(20px) saturate(160%);
       -webkit-backdrop-filter: blur(20px) saturate(160%);
-      padding: 0.6rem 0;
-      min-width: 240px;
-      max-width: 290px;
-      display: none;
-      animation: popoverIn 0.15s ease;
+      padding: 0.6rem 0; min-width: 240px; max-width: 290px;
+      display: none; animation: popoverIn 0.15s ease;
     }
+    .dark .kpi-compare-popover { background: rgba(36,33,42,0.98); border-color: rgba(73,69,79,0.6); }
     @keyframes popoverIn {
       from { opacity:0; transform: translateY(-4px) scale(0.97); }
       to   { opacity:1; transform: translateY(0) scale(1); }
     }
     .kpi-compare-popover.open { display: block; }
     .kpi-compare-popover-header {
-      font-size: 8px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: #aaa;
-      padding: 0 0.9rem 0.4rem;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      margin-bottom: 0.3rem;
+      font-size: 8px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--md-on-surface-variant);
+      padding: 0 0.9rem 0.4rem; border-bottom: 1px solid var(--md-outline-variant); margin-bottom: 0.3rem;
     }
     .kpi-compare-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.45rem 0.9rem;
-      cursor: pointer;
-      transition: background 0.1s;
-      gap: 8px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.45rem 0.9rem; cursor: pointer; transition: background 0.1s; gap: 8px;
     }
-    .kpi-compare-item:hover { background: rgba(0,122,255,0.06); }
-    .kpi-compare-item.selected { background: rgba(0,122,255,0.09); }
-    .kpi-compare-item-label {
-      font-size: 11px;
-      font-weight: 800;
-      color: #1C1C1E;
-      line-height: 1.2;
-    }
-    .kpi-compare-item-sub {
-      font-size: 9px;
-      color: #aaa;
-      font-weight: 600;
-    }
-    .kpi-compare-item-check {
-      color: #007AFF;
-      font-size: 11px;
-      font-weight: 900;
-      flex-shrink: 0;
-    }
+    .kpi-compare-item:hover { background: rgba(103,80,164,0.07); }
+    .kpi-compare-item.selected { background: rgba(103,80,164,0.1); }
+    .dark .kpi-compare-item:hover { background: rgba(208,188,255,0.08); }
+    .dark .kpi-compare-item.selected { background: rgba(208,188,255,0.12); }
+    .kpi-compare-item-label { font-size: 11px; font-weight: 800; color: var(--md-on-surface); line-height: 1.2; }
+    .kpi-compare-item-sub { font-size: 9px; color: var(--md-on-surface-variant); font-weight: 600; }
+    .kpi-compare-item-check { color: var(--md-primary); font-size: 11px; font-weight: 900; flex-shrink: 0; }
 
-    /* ── HISTÓRICO ITEMS ──────────────────────────── */
+    /* ── HISTÓRICO ITEMS ── */
     .hist-item {
-      background: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.65); border: 1px solid rgba(202,196,208,0.4);
       border-radius: 1rem; padding: 0.75rem 1rem; margin-bottom: 0.4rem;
       cursor: pointer; transition: background 0.15s;
       display: flex; align-items: center; justify-content: space-between;
     }
-    .hist-item:hover { background: rgba(255,255,255,0.95); }
-    .hist-item.active-hist { border: 1.5px solid #007AFF; }
+    .dark .hist-item { background: rgba(54,50,64,0.6); border-color: rgba(73,69,79,0.4); }
+    .hist-item:hover { background: rgba(255,255,255,0.9); }
+    .dark .hist-item:hover { background: rgba(54,50,64,0.9); }
+    .hist-item.active-hist { border: 1.5px solid var(--md-primary); }
+
+    /* ── FANTASMAS ── */
+    #fantasmas-expand-btn {
+      background: rgba(103,80,164,0.08); border: none; border-radius: 99px;
+      padding: 4px 10px; font-size: 9px; font-weight: 900;
+      color: var(--md-on-surface-variant); cursor: pointer;
+      transition: background 0.15s, color 0.15s; letter-spacing: 0.03em;
+    }
+    #fantasmas-expand-btn:hover { background: rgba(103,80,164,0.14); color: var(--md-primary); }
+    #fantasmas-detail { display: none; margin-top: 1rem; }
+
+    /* ── THEME TOGGLE ── */
+    #theme-toggle {
+      background: rgba(103,80,164,0.08);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: 99px;
+      padding: 6px 14px 6px 10px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 700;
+      color: var(--md-on-surface-variant);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    #theme-toggle:hover {
+      background: rgba(103,80,164,0.14);
+      color: var(--md-primary);
+      border-color: var(--md-primary);
+    }
+    .dark #theme-toggle {
+      background: rgba(208,188,255,0.08);
+      border-color: rgba(73,69,79,0.5);
+    }
+    .dark #theme-toggle:hover {
+      background: rgba(208,188,255,0.15);
+      color: var(--md-primary);
+    }
+
+    /* ── MODAL FALTANTES (dark) ── */
+    .dark #modalFaltantesCarga > div {
+      background: #2B2930 !important;
+      border-color: rgba(73,69,79,0.5) !important;
+      color: var(--md-on-surface) !important;
+    }
+
+    /* ── DRAWER HEADERS ── */
+    .drawer-header {
+      padding: 1.5rem 1.5rem 0.75rem;
+      border-bottom: 1px solid var(--md-outline-variant);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    /* ── NAV DATE BADGE ── */
+    .nav-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(103,80,164,0.08);
+      border: 1px solid rgba(103,80,164,0.2);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 9px; font-weight: 800;
+      color: var(--md-primary);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .dark .nav-badge {
+      background: rgba(208,188,255,0.1);
+      border-color: rgba(208,188,255,0.2);
+    }
+
+    /* ══════════════════════════════════════════════════
+       DARK MODE — CORREÇÕES DE CONTRASTE
+       Sobrescreve cores hardcoded ilegíveis no dark mode
+    ═══════════════════════════════════════════════════ */
+
+    /* ── KPI cards: números e labels ── */
+    .dark #kpiPilhas        { color: #81C784 !important; }
+    .dark #kpiQuebras       { color: #FFAB40 !important; }
+    .dark #kpiGradesOcupadas { color: #90CAF9 !important; }
+    .dark #kpiDataCurtaPerc { color: #FFB74D !important; }
+    .dark #kpiDoacao        { color: var(--md-primary) !important; }
+
+    /* ── KPI cards: borda esquerda adaptada ── */
+    .dark .kpi-card[style*="border-left:3px solid #2E7D32"] { border-left-color: #81C784 !important; }
+    .dark .kpi-card[style*="border-left:3px solid #92480A"] { border-left-color: #FFAB40 !important; }
+    .dark .kpi-card[style*="border-left:3px solid #1565C0"] { border-left-color: #90CAF9 !important; }
+
+    /* ── Filter buttons com cor hardcoded ── */
+    .dark .filter-btn[style*="color:#2E7D32"] { color: #81C784 !important; }
+    .dark .filter-btn[style*="color:#92480A"] { color: #FFAB40 !important; }
+
+    /* ── Botões de filtro comparação ── */
+    .dark #cfbtn-subiu { color: #81C784 !important; border-color: rgba(129,199,132,0.3) !important; }
+
+    /* ── Dropdowns (fundo branco vira escuro) ── */
+    .dark #dirDropdown,
+    .dark #dcDropdown,
+    .dark #pilhasDropdown,
+    .dark #quebrasDropdown {
+      background: rgba(36,33,42,0.98) !important;
+      border-color: rgba(73,69,79,0.6) !important;
+    }
+    .dark #dirDropdown button,
+    .dark #dcDropdown button,
+    .dark #pilhasDropdown button,
+    .dark #quebrasDropdown button {
+      color: var(--md-on-surface) !important;
+    }
+    .dark #dirDropdown button:first-child  { color: #81C784 !important; }
+    .dark #dcDropdown button               { color: #FFAB40 !important; }
+    .dark #pilhasDropdown button           { color: #81C784 !important; }
+    .dark #quebrasDropdown button          { color: var(--md-primary) !important; }
+
+    /* ── Seção S7: labels e contadores de carga ── */
+    .dark #s7C1n { color: #81C784 !important; }
+    .dark #s7C2n { color: #FFAB40 !important; }
+    .dark #s7C3n { color: #F2B8B5 !important; }
+    .dark #s7C4n { color: var(--md-primary) !important; }
+    .dark #s7DbWarning { background: rgba(231,125,26,0.15) !important; color: #FFAB40 !important; }
+    .dark #s7Preview   { background: rgba(103,80,164,0.15) !important; }
+
+    /* ── Cards gerados por JS (renderComparacao, renderKpiUrgencia) ── */
+    /* Padrão: cards com fundo branco translúcido e texto #1C1C1E */
+    .dark [style*="background:rgba(255,255,255,0.75)"],
+    .dark [style*="background: rgba(255,255,255,0.75)"],
+    .dark [style*="background:rgba(255,255,255,0.85)"],
+    .dark [style*="background: rgba(255,255,255,0.85)"] {
+      background: rgba(36,33,42,0.88) !important;
+      border-color: rgba(73,69,79,0.5) !important;
+    }
+
+    /* Texto #1C1C1E (preto) → branco no dark */
+    .dark [style*="color:#1C1C1E"],
+    .dark [style*="color: #1C1C1E"] {
+      color: var(--md-on-surface) !important;
+    }
+
+    /* Texto cinza claro (#aaa, #bbb, #ccc) → legível no dark */
+    .dark [style*="color:#aaa"],
+    .dark [style*="color: #aaa"] {
+      color: rgba(202,196,208,0.85) !important;
+    }
+    .dark [style*="color:#bbb"],
+    .dark [style*="color: #bbb"] {
+      color: rgba(202,196,208,0.65) !important;
+    }
+    .dark [style*="color:#ccc"],
+    .dark [style*="color: #ccc"] {
+      color: rgba(202,196,208,0.55) !important;
+    }
+
+    /* ── KPI Saúde do Estoque (Normal) — fundo quase invisível no dark ── */
+    .dark [style*="background:rgba(0,0,0,0.02)"],
+    .dark [style*="background: rgba(0,0,0,0.02)"],
+    .dark [style*="background:rgba(0,0,0,0.05)"],
+    .dark [style*="background: rgba(0,0,0,0.05)"] {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid rgba(202,196,208,0.15) !important;
+    }
+
+    /* ── Status cards (kpiStatusCountCards) ── */
+    /* Atenção: fundo amarelo brilhante com texto preto — manter legível */
+    .dark [style*="background:#FFCC00"] { background: rgba(255,204,0,0.85) !important; }
+    /* Normal: fundo escuro com texto preto inline — forçar texto branco */
+    .dark [style*="background:#1C1C1E"][style*="color:#FFFFFF"] { background: rgba(60,57,70,0.95) !important; }
+
+    /* ── Modal Faltantes: preview verde ── */
+    .dark #modalFaltPreview {
+      background: rgba(46,125,50,0.18) !important;
+      border-color: rgba(129,199,132,0.3) !important;
+      color: #81C784 !important;
+    }
+
+    /* ── Tabela comparação: header cinza ── */
+    .dark [style*="color:#bbb"][style*="grid-template-columns"] {
+      color: rgba(202,196,208,0.7) !important;
+    }
+
+    /* ── Etiquetas por Data & Status: texto das linhas ── */
+    /* Nome do produto (#444) */
+    .dark [style*="color:#444"] { color: var(--md-on-surface) !important; }
+    /* Nº da etiqueta (#555) */
+    .dark [style*="color:#555"] { color: rgba(202,196,208,0.9) !important; }
+    /* Data e Qtd (#1C1C1E) já coberto, mas reforça */
+    .dark [style*="color:#1C1c1E"],
+    .dark [style*="color:#1c1c1e"] { color: var(--md-on-surface) !important; }
+    /* Lote (#888) */
+    .dark [style*="color:#888"] { color: rgba(202,196,208,0.65) !important; }
+    /* Header da tabela (#b1b1ba) */
+    .dark [style*="color:#b1b1ba"] { color: rgba(202,196,208,0.75) !important; }
+    /* Separador horizontal rgba(0,0,0,0.05) → visível no dark */
+    .dark [style*="background:rgba(0,0,0,0.05)"] {
+      background: rgba(255,255,255,0.06) !important;
+    }
+    /* Linhas zebradas rgba(0,0,0,0.015) e 0.03 → sutil no dark */
+    .dark [style*="background:rgba(0,0,0,0.015)"] {
+      background: rgba(255,255,255,0.025) !important;
+    }
+    .dark [style*="background:rgba(0,0,0,0.03)"] {
+      background: rgba(255,255,255,0.045) !important;
+    }
+    /* Linha urgente na tabela comparação */
+    .dark [style*="background:rgba(255,59,48,0.04)"] {
+      background: rgba(255,59,48,0.12) !important;
+    }
+    .dark [style*="background:rgba(0,0,0,0.018)"] {
+      background: rgba(255,255,255,0.03) !important;
+    }
+
+    /* ── Todos os textos escuros hardcoded em qualquer elemento gerado por JS ── */
+    .dark span[style*="color:#444"],
+    .dark p[style*="color:#444"],
+    .dark div[style*="color:#444"]    { color: var(--md-on-surface) !important; }
+
+    .dark span[style*="color:#555"],
+    .dark p[style*="color:#555"],
+    .dark div[style*="color:#555"]    { color: rgba(202,196,208,0.9) !important; }
+
+    .dark span[style*="color:#888"],
+    .dark p[style*="color:#888"],
+    .dark div[style*="color:#888"]    { color: rgba(202,196,208,0.65) !important; }
+
+    .dark span[style*="color:#1C1C1E"],
+    .dark p[style*="color:#1C1C1E"],
+    .dark div[style*="color:#1C1C1E"] { color: var(--md-on-surface) !important; }
+
+    .dark span[style*="color:#ccc"],
+    .dark p[style*="color:#ccc"],
+    .dark div[style*="color:#ccc"]    { color: rgba(202,196,208,0.55) !important; }
+
+    .dark span[style*="color:#b1b1ba"],
+    .dark div[style*="color:#b1b1ba"] { color: rgba(202,196,208,0.75) !important; }
+
+    /* ── Cards de comparação e urgência: fundo branco translúcido → escuro ── */
+    .dark [style*="background:rgba(255,255,255,0.65)"],
+    .dark [style*="background: rgba(255,255,255,0.65)"] {
+      background: rgba(36,33,42,0.88) !important;
+      border-color: rgba(73,69,79,0.4) !important;
+    }
+
+    /* ── Classes de estilo inline de relatório de fantasmas ── */
+    .dark .brand-sub { color: rgba(202,196,208,0.65) !important; }
+    .dark .meta      { color: rgba(202,196,208,0.65) !important; }
+
+    /* ── Notificações: texto "Estoque dentro do prazo" ── */
+    .dark [style*="color:#34C759"] { color: #81C784 !important; }
+
+    /* ── Inputs dentro dos cards de carga S7 ── */
+    .dark .ios-input[style*="background:rgba(255,255,255"] {
+      background: rgba(73,69,79,0.4) !important;
+      border-color: rgba(73,69,79,0.6) !important;
+      color: var(--md-on-surface) !important;
+    }
+    .dark .ios-input[style*="background:rgba(255,255,255"]::placeholder {
+      color: rgba(202,196,208,0.5) !important;
+    }
+
+    /* ── Caixas de carga S7: fundos coloridos leves ── */
+    .dark [style*="background:rgba(46,125,50,0.06)"]   { background: rgba(46,125,50,0.12) !important; }
+    .dark [style*="background:rgba(231,125,26,0.05)"]  { background: rgba(231,125,26,0.10) !important; }
+    .dark [style*="background:rgba(179,38,30,0.04)"]   { background: rgba(179,38,30,0.10) !important; }
+    .dark [style*="background:rgba(103,80,164,0.04)"]  { background: rgba(103,80,164,0.10) !important; }
+
+    /* ── Tabela principal: fundo do thead ── */
+    .dark thead tr { background: rgba(103,80,164,0.08) !important; }
+    .dark thead th[style*="background:rgba(103,80,164,0.04)"] {
+      background: rgba(103,80,164,0.10) !important;
+    }
+
+    /* ── Botões de ação: legibilidade no dark mode ── */
+    /* IMPORTAR PEDIDOS: gradiente secondary→primary vira lilás escuro/saturado */
+    .dark #btnImportarPedidos {
+      background: linear-gradient(135deg, #7B6FA0, #6750A4) !important;
+      color: #fff !important;
+    }
+    /* QUEBRAS: var(--md-secondary) no dark é lilás claro sobre fundo claro */
+    .dark #quebrasDropdownWrap > .dl-btn {
+      background: #625B71 !important;
+      color: #fff !important;
+    }
+    /* PILHAS: verde escuro #2E7D32 fica muito escuro no dark */
+    .dark #pilhasDropdownWrap > .dl-btn {
+      background: #2E7D32 !important;
+      color: #fff !important;
+    }
+    /* DATAS CURTAS: laranja #E77D1A ok mas reforça branco */
+    .dark #dcDropdownWrap > .dl-btn {
+      background: #E77D1A !important;
+      color: #fff !important;
+    }
+    /* RELATÓRIO: azul escuro */
+    .dark .dl-btn[style*="background:linear-gradient(135deg,#1565C0"] {
+      background: linear-gradient(135deg,#1E88E5,#1565C0) !important;
+      color: #fff !important;
+    }
+    /* filter-btn quick: PILHAS e QUEBRAS com cor hardcoded ilegível */
+    .dark .filter-btn[data-quick="PILHA"]  { color: #81C784 !important; }
+    .dark .filter-btn[data-quick="QUEBRA"] { color: #FFAB40 !important; }
+    .dark .filter-btn[data-quick="DATA_CURTA"] { color: #FFB74D !important; }
+    .md3-icon-btn {
+      background: rgba(103,80,164,0.08);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: 99px;
+      padding: 7px 10px;
+      cursor: pointer;
+      color: var(--md-on-surface-variant);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .dark .md3-icon-btn {
+      background: rgba(208,188,255,0.08);
+      border-color: rgba(73,69,79,0.5);
+    }
+    .md3-icon-btn:hover { background: rgba(103,80,164,0.14); color: var(--md-primary); }
   </style>
 </head>
 <body>
+  <!-- ── ALERTA MODAL ─────────────────────────────────── -->
   <div id="alerta-modal">
     <div id="alerta-box">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
-        <div style="width:36px;height:36px;border-radius:50%;background:#FF3B30;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--md-error);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div>
-          <h2 style="font-size:14px;font-weight:900;color:#1C1C1E;margin:0;letter-spacing:-0.02em;">Atenção: produtos críticos</h2>
-          <p style="font-size:10px;color:#999;font-weight:600;margin:0;">Itens vencidos ou urgentes detectados nesta importação</p>
+          <h2 style="font-size:15px;font-weight:900;color:var(--md-on-surface);margin:0;letter-spacing:-0.02em;">Atenção: produtos críticos</h2>
+          <p style="font-size:11px;color:var(--md-on-surface-variant);font-weight:600;margin:0;">Itens vencidos ou urgentes detectados nesta importação</p>
         </div>
       </div>
       <div id="alerta-lista" style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem;"></div>
-      <button onclick="fecharAlerta()" style="width:100%;padding:0.75rem;background:#1C1C1E;color:#fff;border:none;border-radius:99px;font-size:12px;font-weight:900;cursor:pointer;letter-spacing:0.04em;">
+      <button onclick="fecharAlerta()" style="width:100%;padding:0.85rem;background:var(--md-primary);color:var(--md-on-primary);border:none;border-radius:99px;font-size:12px;font-weight:900;cursor:pointer;letter-spacing:0.06em;font-family:'Outfit',sans-serif;">
         ENTENDI
       </button>
     </div>
   </div>
 
+  <!-- ── NOTIF OVERLAY + DRAWER ─────────────────────── -->
   <div id="notif-overlay" onclick="toggleNotif()"></div>
   <div id="notif-drawer">
-    <div style="padding:1.5rem 1.5rem 0.75rem;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div class="drawer-header">
       <div>
-        <h2 style="font-size:13px;font-weight:900;margin:0;letter-spacing:-0.01em;">Alertas de Validade</h2>
-        <p id="notif-subtitle" style="font-size:10px;color:#999;font-weight:600;margin:0;"></p>
+        <h2 style="font-size:14px;font-weight:800;margin:0;color:var(--md-on-surface);letter-spacing:-0.01em;">Alertas de Validade</h2>
+        <p id="notif-subtitle" style="font-size:10px;color:var(--md-on-surface-variant);font-weight:600;margin:0;"></p>
       </div>
-      <button onclick="toggleNotif()" style="background:rgba(0,0,0,0.06);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <button onclick="toggleNotif()" class="md3-icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div id="notif-list" style="flex:1;overflow-y:auto;padding:1rem 1.25rem;"></div>
   </div>
 
-  <div id="hist-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.12);z-index:299;display:none;backdrop-filter:blur(2px);" onclick="toggleHistorico()"></div>
+  <!-- ── HISTÓRICO OVERLAY + DRAWER ─────────────────── -->
+  <div id="hist-overlay" style="position:fixed;inset:0;background:var(--md-scrim);z-index:299;display:none;backdrop-filter:blur(2px);" onclick="toggleHistorico()"></div>
   <div id="historico-drawer">
-    <div style="padding:1.5rem 1.5rem 0.75rem;border-bottom:1px solid rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div class="drawer-header">
       <div>
-        <h2 style="font-size:13px;font-weight:900;margin:0;letter-spacing:-0.01em;">Histórico de Importações</h2>
-        <p style="font-size:10px;color:#999;font-weight:600;margin:0;">Até 3 por dia (últimos 7 dias salvos)</p>
+        <h2 style="font-size:14px;font-weight:800;margin:0;color:var(--md-on-surface);letter-spacing:-0.01em;">Histórico de Importações</h2>
+        <p style="font-size:10px;color:var(--md-on-surface-variant);font-weight:600;margin:0;">Até 3 por dia (últimos 7 dias salvos)</p>
       </div>
-      <button onclick="toggleHistorico()" style="background:rgba(0,0,0,0.06);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <button onclick="toggleHistorico()" class="md3-icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div id="historico-list" style="flex:1;overflow-y:auto;padding:1rem 1.25rem;"></div>
-    <div style="padding:1rem 1.25rem;border-top:1px solid rgba(0,0,0,0.06);flex-shrink:0;">
-      <button onclick="limparHistorico()" style="width:100%;padding:0.6rem;background:transparent;border:1px solid rgba(0,0,0,0.1);border-radius:99px;font-size:10px;font-weight:900;cursor:pointer;color:#FF3B30;letter-spacing:0.04em;">
+    <div style="padding:1rem 1.25rem;border-top:1px solid var(--md-outline-variant);flex-shrink:0;">
+      <button onclick="limparHistorico()" style="width:100%;padding:0.6rem;background:transparent;border:1.5px solid rgba(179,38,30,0.35);border-radius:99px;font-size:10px;font-weight:900;cursor:pointer;color:var(--md-error);letter-spacing:0.04em;font-family:'Outfit',sans-serif;">
         LIMPAR HISTÓRICO
       </button>
     </div>
   </div>
 
-  <div id="loader" class="loading-overlay">
-    <div class="spinner mb-4"></div>
-    <p class="text-xs font-semibold text-gray-500 tracking-tight">Sincronizando dados…</p>
+  <!-- ── MODAL: FALTANTES DA CARGA ─────────────────── -->
+  <div id="modalFaltantesCarga"
+    style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;
+           background:var(--md-scrim);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+    <div style="background:var(--md-surface);border-radius:2rem;padding:2rem;max-width:600px;width:94%;
+                box-shadow:0 24px 80px rgba(0,0,0,0.22);border-top:4px solid #F59E0B;
+                border:1px solid var(--md-outline-variant);max-height:90vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#F59E0B,#EA580C);
+                      display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div>
+            <h2 style="font-size:15px;font-weight:900;color:var(--md-on-surface);margin:0;letter-spacing:-0.02em;">
+              Direcionamento de Faltantes da Carga
+            </h2>
+            <p style="font-size:10px;color:var(--md-on-surface-variant);font-weight:600;margin:0;">
+              Cole o relatório da carga para gerar o direcionamento FEFO
+            </p>
+          </div>
+        </div>
+        <button onclick="fecharModalFaltantes()" class="md3-icon-btn" style="flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="modalFaltWarning" class="hidden"
+        style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:1rem;
+               padding:0.75rem 1rem;margin-bottom:1rem;font-size:11px;font-weight:700;color:#92480A;">
+        ⚠️ Importe a base de estoque (Inflow) antes de usar esta funcionalidade.
+      </div>
+
+      <div style="display:flex;gap:12px;margin-bottom:1rem;">
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.12em;margin-left:4px;">Localizador</label>
+          <input id="inputLocFaltante" type="text" placeholder="Ex: LOC01"
+            style="appearance:none;background:rgba(231,224,236,0.4);border:none;border-radius:9999px;
+                   padding:0.6rem 1.1rem;font-size:12px;font-weight:700;color:var(--md-on-surface);
+                   outline:none;width:100%;font-family:'Outfit',sans-serif;transition:background 0.15s ease;"
+            onfocus="this.style.background='rgba(231,224,236,0.65)'"
+            onblur="this.style.background='rgba(231,224,236,0.4)'" />
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.12em;margin-left:4px;">Destino</label>
+          <input id="inputDestFaltante" type="text" placeholder="Ex: LOJA 5"
+            style="appearance:none;background:rgba(231,224,236,0.4);border:none;border-radius:9999px;
+                   padding:0.6rem 1.1rem;font-size:12px;font-weight:700;color:var(--md-on-surface);
+                   outline:none;width:100%;font-family:'Outfit',sans-serif;transition:background 0.15s ease;"
+            onfocus="this.style.background='rgba(231,224,236,0.65)'"
+            onblur="this.style.background='rgba(231,224,236,0.4)'" />
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:1rem;">
+        <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.12em;margin-left:4px;">
+          Relatório da Carga
+          <span style="font-weight:600;font-size:8px;margin-left:4px;color:var(--md-outline);">(Cole o conteúdo: Cod | Produto | qt carga | qt Carregada | qt Faltante | %)</span>
+        </label>
+        <textarea id="areaDadosCarga" rows="9" placeholder="Cole aqui os dados da carga..."
+          style="appearance:none;background:rgba(231,224,236,0.3);border:1.5px solid var(--md-outline-variant);
+                 border-radius:1.25rem;padding:0.9rem 1.1rem;font-size:11px;font-weight:600;
+                 color:var(--md-on-surface);outline:none;width:100%;resize:vertical;line-height:1.5;
+                 font-family:monospace;transition:border-color 0.15s ease,background 0.15s ease;"
+          onfocus="this.style.borderColor='rgba(103,80,164,0.5)';this.style.background='rgba(231,224,236,0.45)'"
+          onblur="this.style.borderColor='var(--md-outline-variant)';this.style.background='rgba(231,224,236,0.3)'">
+        </textarea>
+      </div>
+
+      <div id="modalFaltPreview" class="hidden"
+        style="background:rgba(46,125,50,0.1);border:1px solid rgba(46,125,50,0.3);border-radius:1rem;
+               padding:0.75rem 1rem;margin-bottom:1rem;font-size:11px;font-weight:700;color:#2E7D32;">
+        ✓ <span id="modalFaltPreviewTxt"></span>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:0.5rem;flex-wrap:wrap;">
+        <button onclick="fecharModalFaltantes()"
+          style="padding:0.7rem 1.5rem;background:transparent;border:1.5px solid var(--md-outline-variant);
+                 border-radius:9999px;font-size:11px;font-weight:900;cursor:pointer;color:var(--md-on-surface-variant);
+                 letter-spacing:0.04em;font-family:'Outfit',sans-serif;transition:background 0.15s;"
+          onmouseover="this.style.background='rgba(103,80,164,0.06)'"
+          onmouseout="this.style.background='transparent'">
+          FECHAR
+        </button>
+        <button onclick="processarFaltantesCarga('xlsx')"
+          style="padding:0.7rem 1.5rem;background:linear-gradient(135deg,#2E7D32,#1B5E20);
+                 border:none;border-radius:9999px;font-size:11px;font-weight:900;cursor:pointer;
+                 color:#fff;letter-spacing:0.04em;box-shadow:0 4px 16px rgba(46,125,50,0.30);
+                 display:flex;align-items:center;gap:7px;font-family:'Outfit',sans-serif;transition:opacity 0.15s,transform 0.15s;"
+          onmouseover="this.style.opacity='0.88';this.style.transform='translateY(-1px)'"
+          onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          GERAR EXCEL
+        </button>
+        <button onclick="processarFaltantesCarga('pdf')"
+          style="padding:0.7rem 1.5rem;background:linear-gradient(135deg,#6750A4,#4F378B);
+                 border:none;border-radius:9999px;font-size:11px;font-weight:900;cursor:pointer;
+                 color:#fff;letter-spacing:0.04em;box-shadow:0 4px 16px rgba(103,80,164,0.30);
+                 display:flex;align-items:center;gap:7px;font-family:'Outfit',sans-serif;transition:opacity 0.15s,transform 0.15s;"
+          onmouseover="this.style.opacity='0.88';this.style.transform='translateY(-1px)'"
+          onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          GERAR PDF P&B
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- KPI Compare Popover -->
+  <!-- ── LOADER ─────────────────────────────────────── -->
+  <div id="loader" class="loading-overlay">
+    <div class="spinner mb-4"></div>
+    <p style="font-size:11px;font-weight:700;color:var(--md-on-surface-variant);letter-spacing:0.02em;margin-top:12px;">Sincronizando dados…</p>
+  </div>
+
+  <!-- ── KPI COMPARE POPOVER ──────────────────────── -->
   <div id="kpi-compare-popover" class="kpi-compare-popover">
     <div class="kpi-compare-popover-header">Comparar com:</div>
     <div id="kpi-compare-list"></div>
   </div>
 
-  <nav class="nav-bar px-8 py-3.5 flex justify-between items-center sticky top-0 z-50">
-    <div class="flex items-center gap-5">
+  <!-- ══════════════════════════════════════════════════
+       NAVIGATION BAR — Material You
+  ═══════════════════════════════════════════════════ -->
+  <nav class="md3-nav px-6 py-3 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-4">
       <img src="assets/logo.png" alt="PANUTRIR" class="logo-nav"
            onerror="this.style.display='none'; document.getElementById('altNavLogo').classList.remove('hidden')">
-      <span id="altNavLogo" class="hidden font-black text-[1.15rem] tracking-tighter text-black">PANUTRIR</span>
-      <div class="h-5 w-px bg-black/10 mx-1"></div>
+      <span id="altNavLogo" class="hidden font-black text-[1.1rem] tracking-tighter" style="color:var(--md-on-surface);">PANUTRIR</span>
+      <div style="height:20px;width:1px;background:var(--md-outline-variant);margin:0 4px;"></div>
       <div>
-        <h1 class="text-[11px] font-black tracking-tight text-black leading-tight">Gestão de Estoque</h1>
-        <p class="text-[9px] text-gray-400 font-semibold tracking-wide uppercase">CD Matriz Panutrir</p>
+        <h1 style="font-size:12px;font-weight:800;color:var(--md-on-surface);letter-spacing:-0.01em;line-height:1.2;margin:0;">Gestão de Estoque</h1>
+        <p style="font-size:9px;color:var(--md-on-surface-variant);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin:0;">CD Matriz Panutrir</p>
       </div>
       <div id="nav-date-badge"></div>
     </div>
     <div class="flex items-center gap-2">
-      <button id="hist-btn" onclick="toggleHistorico()" title="Histórico de importações"
-        style="display:none;position:relative;background:rgba(0,0,0,0.05);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;align-items:center;justify-content:center;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <!-- Theme Toggle -->
+      <button id="theme-toggle" onclick="toggleTheme()" title="Alternar modo claro/escuro">
+        <svg id="theme-icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="hidden">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="theme-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <span id="theme-label">Escuro</span>
       </button>
+      <!-- Histórico button -->
+      <button id="hist-btn" onclick="toggleHistorico()" title="Histórico de importações"
+        class="md3-icon-btn"
+        style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </button>
+      <!-- Notif button -->
       <button id="notif-btn" onclick="toggleNotif()" title="Alertas de validade"
-        style="display:none;position:relative;background:rgba(0,0,0,0.05);border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;align-items:center;justify-content:center;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        class="md3-icon-btn"
+        style="display:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span id="notif-badge"></span>
       </button>
       <input type="file" id="fileUpload" accept=".csv, .xlsx, .xls" class="hidden" />
     </div>
   </nav>
 
+  <!-- ══════════════════════════════════════════════════
+       EMPTY VIEW
+  ═══════════════════════════════════════════════════ -->
   <div id="emptyView" class="flex flex-col items-center justify-center h-[85vh] text-center px-4">
     <img src="assets/logo.png" alt="PANUTRIR" class="logo-main mb-10 mx-auto grayscale">
-    <h2 class="text-[2rem] font-black text-black tracking-tighter leading-none mb-3">Aguardando base de dados Inflow.</h2>
-    <p class="text-gray-400 text-sm max-w-xs font-medium leading-relaxed">
+    <h2 style="font-size:2rem;font-weight:900;color:var(--md-on-surface);letter-spacing:-0.03em;line-height:1.1;margin-bottom:0.75rem;">Aguardando base de dados Inflow.</h2>
+    <p style="color:var(--md-on-surface-variant);font-size:0.9rem;max-width:20rem;font-weight:500;line-height:1.6;">
       Importe o relatório de etiquetas gerado pelo sistema Inflow para começar.
     </p>
     <div class="mt-10">
@@ -511,260 +1155,294 @@
     </div>
   </div>
 
-  <main id="mainContent" class="px-8 pt-8 pb-16 max-w-[1760px] mx-auto hidden">
+  <!-- ══════════════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════════════ -->
+  <main id="mainContent" class="px-6 pt-8 pb-16 max-w-[1760px] mx-auto hidden">
 
-    <div class="glass-card rounded-[2rem] p-3 mb-4 flex items-center gap-3 shadow-sm transition-all focus-within:ring-2 focus-within:ring-blue-500/20" style="position:relative;">
-      <div class="bg-[#1C1C1E] p-2.5 rounded-xl text-white flex-shrink-0">
+    <!-- BUSCA GLOBAL -->
+    <div class="md3-card rounded-3xl p-3 mb-5 flex items-center gap-3" style="position:relative;">
+      <div style="background:var(--md-primary);padding:10px;border-radius:14px;color:var(--md-on-primary);flex-shrink:0;">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
       </div>
-      <input id="topSearchInput" type="text" autocomplete="off" placeholder="Busca Global com Autocomplete: digite o código ou nome do SKU..." class="w-full bg-transparent border-none outline-none text-sm font-semibold text-gray-800 placeholder-gray-400 h-10 px-2" />
+      <input id="topSearchInput" type="text" autocomplete="off" placeholder="Busca Global com Autocomplete: digite o código ou nome do SKU..."
+        style="width:100%;background:transparent;border:none;outline:none;font-size:13px;font-weight:600;color:var(--md-on-surface);height:40px;padding:0 8px;font-family:'Outfit',sans-serif;" />
       <div id="sku-filter-pill">
         <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <span id="sku-filter-pill-label">SKU</span>
         <span onclick="clearSkuFilter()" style="opacity:0.7;font-size:11px;margin-left:2px;" title="Limpar filtro de SKU">✕</span>
       </div>
-      <button onclick="clearSkuFilter(); document.getElementById('topSearchInput').value=''; document.getElementById('searchInput').value='';" class="text-gray-400 hover:text-gray-600 px-3 hidden" id="clearSearchBtn">
+      <button onclick="clearSkuFilter(); document.getElementById('topSearchInput').value=''; document.getElementById('searchInput').value='';"
+        style="color:var(--md-on-surface-variant);background:transparent;border:none;cursor:pointer;padding:6px;border-radius:50%;display:none;" id="clearSearchBtn">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
     </div>
 
+    <!-- KPI CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 mb-6">
 
-
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-5 mb-7">
-
-      <div class="kpi-card border-l-[3px] border-l-black">
+      <div class="kpi-card" style="border-left:3px solid var(--md-primary);">
         <button class="kpi-compare-btn" id="kpi-compare-btn-total" onclick="openKpiCompareSelector(event, 'total')" title="Escolher base de comparação">
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           VS
         </button>
-        <div class="kpi-dot bg-black"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Estoque Total</p>
-        <h2 id="kpiTotal" class="text-[2.5rem] font-black text-black tracking-tighter leading-none">0</h2>
-        <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Unidades no CD</span>
+        <div class="kpi-dot" style="background:var(--md-primary);"></div>
+        <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Estoque Total</p>
+        <h2 id="kpiTotal" style="font-size:2.5rem;font-weight:900;color:var(--md-on-surface);letter-spacing:-0.04em;line-height:1;">0</h2>
+        <span style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Unidades no CD</span>
       </div>
 
-      <div class="kpi-card border-l-[3px] border-l-[#FF9500]">
+      <div class="kpi-card" style="border-left:3px solid #E77D1A;">
         <button class="kpi-compare-btn" id="kpi-compare-btn-datacurta" onclick="openKpiCompareSelector(event, 'percDataCurta')" title="Escolher base de comparação">
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           VS
         </button>
-        <div class="kpi-dot bg-[#FF9500]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">% Data Curta</p>
-        <h2 id="kpiDataCurtaPerc" class="text-[2.5rem] font-black text-[#FF9500] tracking-tighter leading-none">0%</h2>
-        <span id="kpiDataCurtaInfo" class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Vencimento próximo</span>
+        <div class="kpi-dot" style="background:#E77D1A;"></div>
+        <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">% Data Curta</p>
+        <h2 id="kpiDataCurtaPerc" style="font-size:2.5rem;font-weight:900;color:#E77D1A;letter-spacing:-0.04em;line-height:1;">0%</h2>
+        <span id="kpiDataCurtaInfo" style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Vencimento próximo</span>
       </div>
 
-      <div class="kpi-card border-l-[3px] border-l-[#34C759]">
-        <div class="kpi-dot bg-[#34C759]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Pilhas</p>
-        <h2 id="kpiPilhas" class="text-[2.5rem] font-black text-[#34C759] tracking-tighter leading-none">0</h2>
-        <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Quantidade de pilhas</span>
+      <div class="kpi-card" style="border-left:3px solid #2E7D32;">
+        <div class="kpi-dot" style="background:#2E7D32;"></div>
+        <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Pilhas</p>
+        <h2 id="kpiPilhas" style="font-size:2.5rem;font-weight:900;color:#2E7D32;letter-spacing:-0.04em;line-height:1;">0</h2>
+        <span style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Quantidade de pilhas</span>
       </div>
 
-      <div class="kpi-card border-l-[3px] border-l-[#FFCC00]">
-        <div class="kpi-dot bg-[#FFCC00]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Quebras</p>
-        <h2 id="kpiQuebras" class="text-[2.5rem] font-black text-[#B25E09] tracking-tighter leading-none">0</h2>
-        <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Qtd de quebras</span>
+      <div class="kpi-card" style="border-left:3px solid #92480A;">
+        <div class="kpi-dot" style="background:#F5C842;"></div>
+        <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Quebras</p>
+        <h2 id="kpiQuebras" style="font-size:2.5rem;font-weight:900;color:#92480A;letter-spacing:-0.04em;line-height:1;">0</h2>
+        <span style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Qtd de quebras</span>
       </div>
 
-      <div class="kpi-card border-l-[3px] border-l-[#5856D6]">
-        <div class="kpi-dot bg-[#5856D6]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Doação</p>
-        <h2 id="kpiDoacao" class="text-[2.5rem] font-black text-[#5856D6] tracking-tighter leading-none">0</h2>
-        <span id="kpiDoacaoInfo" class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Pilhas de doação</span>
+      <div class="kpi-card" style="border-left:3px solid var(--md-secondary);">
+        <div class="kpi-dot" style="background:var(--md-secondary);"></div>
+        <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Doação</p>
+        <h2 id="kpiDoacao" style="font-size:2.5rem;font-weight:900;color:var(--md-secondary);letter-spacing:-0.04em;line-height:1;">0</h2>
+        <span id="kpiDoacaoInfo" style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Pilhas de doação</span>
       </div>
 
-      <div class="kpi-card border-l-[3px] border-l-[#1778F2]">
+      <div class="kpi-card" style="border-left:3px solid #1565C0;">
         <button class="kpi-compare-btn" id="kpi-compare-btn-grades" onclick="openKpiCompareSelector(event, 'gradesOcupadas')" title="Escolher base de comparação">
           <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           VS
         </button>
-        <div class="kpi-dot bg-[#1778F2]"></div>
-        <p class="text-[10px] font-black text-gray-500 uppercase tracking-[0.14em] mb-1">Grades Ocupadas</p>
-        <h2 id="kpiGradesOcupadas" class="text-[2.5rem] font-black text-[#1778F2] tracking-tighter leading-none">0</h2>
-        <span class="text-[10px] text-gray-500 font-bold mt-1.5 block tracking-wide">Total grades ocupadas</span>
+        <div class="kpi-dot" style="background:#1565C0;"></div>
+        <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Grades Ocupadas</p>
+        <h2 id="kpiGradesOcupadas" style="font-size:2.5rem;font-weight:900;color:#1565C0;letter-spacing:-0.04em;line-height:1;">0</h2>
+        <span style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Total grades ocupadas</span>
       </div>
     </div>
 
-    <div id="kpiUrgenciaEtiquetasSection" class="glass-card rounded-[2.5rem] p-7 mb-7 hidden">
-      <h3 class="text-[11px] font-black text-black mb-5 flex items-center gap-2.5 tracking-widest uppercase">
-        <span class="chart-title-dot bg-[#FF3B30]"></span>Saúde do estoque
+    <!-- KPI URGÊNCIA ETIQUETAS -->
+    <div id="kpiUrgenciaEtiquetasSection" class="md3-card rounded-3xl p-7 mb-5 hidden">
+      <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin-bottom:1.25rem;display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;">
+        <span class="chart-title-dot" style="background:var(--md-error);"></span>Saúde do estoque
       </h3>
-      <!-- STATUS COUNT CARDS -->
       <div id="kpiStatusCountCards" class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-4"></div>
       <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
         <div id="kpiUrgenciaEtiquetasList" class="flex flex-col gap-1.5" style="min-width: 900px;"></div>
       </div>
     </div>
 
-
-
-    <!-- GRÁFICO HISTÓRICO SKU SELECIONADO -->
-    <div id="sku-historico-section" class="glass-card p-7 rounded-[2.5rem] mb-7">
-      <h3 class="text-[11px] font-black text-black mb-2 flex items-center gap-2.5 tracking-widest uppercase">
-        <span class="chart-title-dot bg-[#007AFF]"></span>Curva Histórica de Data Curta
-        <span id="sku-historico-label" class="text-[9px] text-gray-400 font-bold ml-auto tracking-wide normal-case px-3 py-1 rounded-full" style="background:rgba(0,0,0,0.04);"></span>
+    <!-- SKU HISTÓRICO -->
+    <div id="sku-historico-section" class="md3-card p-7 rounded-3xl mb-5">
+      <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin-bottom:8px;display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;">
+        <span class="chart-title-dot" style="background:var(--md-primary);"></span>Curva Histórica de Data Curta
+        <span id="sku-historico-label" style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;margin-left:auto;letter-spacing:0.04em;font-weight:bold;text-transform:none;padding:4px 12px;border-radius:99px;background:rgba(103,80,164,0.08);"></span>
       </h3>
-      <p style="font-size:10px;color:#aaa;font-weight:600;margin-bottom:1.25rem;">Histórico de entradas deste SKU em estado de data curta ao longo das importações — indicador de tendência de risco.</p>
+      <p style="font-size:10px;color:var(--md-on-surface-variant);font-weight:600;margin-bottom:1.25rem;">Histórico de entradas deste SKU em estado de data curta ao longo das importações — indicador de tendência de risco.</p>
       <div class="h-52"><canvas id="chartSkuHistorico"></canvas></div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-7">
-      <div class="glass-card p-7 rounded-[2.5rem]">
-        <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot bg-[#FF3B30]"></span>Saúde do Estoque
+    <!-- GRÁFICOS ROW -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
+      <div class="md3-card p-7 rounded-3xl">
+        <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;">
+          <span class="chart-title-dot" style="background:var(--md-error);"></span>Saúde do Estoque
         </h3>
         <div class="h-64"><div id="kpiSaudeEstoque" class="flex flex-col gap-1.5 justify-center h-full py-1"></div></div>
       </div>
-      <div class="glass-card p-7 rounded-[2.5rem]">
-        <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot bg-[#007AFF]"></span>Ranking de Datas Curtas
+      <div class="md3-card p-7 rounded-3xl">
+        <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;">
+          <span class="chart-title-dot" style="background:var(--md-primary);"></span>Ranking de Datas Curtas
         </h3>
         <div class="h-64"><canvas id="chartMarcaDataCurta"></canvas></div>
       </div>
-      <div class="glass-card p-7 rounded-[2.5rem]">
-        <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot bg-black"></span>Top 5 Volume (SKU)
+      <div class="md3-card p-7 rounded-3xl">
+        <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;">
+          <span class="chart-title-dot" style="background:var(--md-on-surface);"></span>Top 5 Volume (SKU)
         </h3>
         <div class="h-64"><canvas id="chartTopSku"></canvas></div>
       </div>
     </div>
 
-    <div id="tendencia-section" class="glass-card p-7 rounded-[2.5rem] mb-7">
-      <h3 class="text-[11px] font-black text-black mb-6 flex items-center gap-2.5 tracking-widest uppercase">
-        <span class="chart-title-dot bg-[#5856D6]"></span>Tendência de Datas Curtas (%)
-        <span class="text-[9px] text-gray-400 font-bold ml-auto tracking-wide normal-case">últimas importações</span>
+    <!-- TENDÊNCIA -->
+    <div id="tendencia-section" class="md3-card p-7 rounded-3xl mb-5">
+      <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;">
+        <span class="chart-title-dot" style="background:var(--md-secondary);"></span>Tendência de Datas Curtas (%)
+        <span style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;margin-left:auto;letter-spacing:0.04em;text-transform:none;">últimas importações</span>
       </h3>
       <div class="h-48"><canvas id="chartTendencia"></canvas></div>
     </div>
 
-    <div id="comparacao-section" class="glass-card p-7 rounded-[2.5rem] mb-7 hidden">
+    <!-- COMPARAÇÃO -->
+    <div id="comparacao-section" class="md3-card p-7 rounded-3xl mb-5 hidden">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:1.25rem;">
-        <h3 class="text-[11px] font-black text-black flex items-center gap-2.5 tracking-widest uppercase" style="margin:0;">
-          <span class="chart-title-dot bg-[#34C759]"></span>Comparativo entre importações
+        <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;margin:0;">
+          <span class="chart-title-dot" style="background:#2E7D32;"></span>Comparativo entre importações
         </h3>
-        <span id="comparacao-data-label" class="text-[9px] text-gray-500 font-bold tracking-wide px-3 py-1 rounded-full" style="background:rgba(0,0,0,0.05);"></span>
+        <span id="comparacao-data-label" style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;letter-spacing:0.04em;padding:4px 12px;border-radius:99px;background:rgba(103,80,164,0.08);"></span>
       </div>
 
-      <div id="comparacao-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+      <div id="comparacao-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5"></div>
 
-      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.07),transparent);margin-bottom:1.25rem;"></div>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,var(--md-outline-variant),transparent);margin-bottom:1.25rem;"></div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:0.75rem;">
-        <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:#aaa;margin:0;">Variação por produto</p>
+        <p style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;color:var(--md-on-surface-variant);margin:0;">Variação por produto</p>
         <div style="display:flex;gap:6px;align-items:center;">
-          <button onclick="filtroComparacao('TODOS')" id="cfbtn-todos" style="font-size:9px;font-weight:900;padding:4px 12px;border-radius:99px;border:1px solid rgba(0,0,0,0.12);background:#1C1C1E;color:#fff;cursor:pointer;letter-spacing:.04em;">TODOS</button>
-          <button onclick="filtroComparacao('SUBIU')" id="cfbtn-subiu" style="font-size:9px;font-weight:900;padding:4px 12px;border-radius:99px;border:1px solid rgba(52,199,89,0.3);background:transparent;color:#1D8A3F;cursor:pointer;letter-spacing:.04em;">▲ SUBIU</button>
-          <button onclick="filtroComparacao('CAIU')" id="cfbtn-caiu" style="font-size:9px;font-weight:900;padding:4px 12px;border-radius:99px;border:1px solid rgba(255,59,48,0.3);background:transparent;color:#FF3B30;cursor:pointer;letter-spacing:.04em;">▼ CAIU</button>
-          <button onclick="filtroComparacao('NOVO')" id="cfbtn-novo" style="font-size:9px;font-weight:900;padding:4px 12px;border-radius:99px;border:1px solid rgba(0,122,255,0.3);background:transparent;color:#007AFF;cursor:pointer;letter-spacing:.04em;">★ NOVO</button>
-          <button onclick="filtroComparacao('ZEROU')" id="cfbtn-zerou" style="font-size:9px;font-weight:900;padding:4px 12px;border-radius:99px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:#aaa;cursor:pointer;letter-spacing:.04em;">✕ ZEROU</button>
+          <button onclick="filtroComparacao('TODOS')" id="cfbtn-todos" style="font-size:9px;font-weight:900;padding:5px 12px;border-radius:99px;border:none;background:var(--md-primary);color:var(--md-on-primary);cursor:pointer;letter-spacing:.04em;font-family:'Outfit',sans-serif;">TODOS</button>
+          <button onclick="filtroComparacao('SUBIU')" id="cfbtn-subiu" style="font-size:9px;font-weight:900;padding:5px 12px;border-radius:99px;border:1px solid rgba(46,125,50,0.3);background:transparent;color:#2E7D32;cursor:pointer;letter-spacing:.04em;font-family:'Outfit',sans-serif;">▲ SUBIU</button>
+          <button onclick="filtroComparacao('CAIU')" id="cfbtn-caiu" style="font-size:9px;font-weight:900;padding:5px 12px;border-radius:99px;border:1px solid rgba(179,38,30,0.3);background:transparent;color:var(--md-error);cursor:pointer;letter-spacing:.04em;font-family:'Outfit',sans-serif;">▼ CAIU</button>
+          <button onclick="filtroComparacao('NOVO')" id="cfbtn-novo" style="font-size:9px;font-weight:900;padding:5px 12px;border-radius:99px;border:1px solid rgba(103,80,164,0.3);background:transparent;color:var(--md-primary);cursor:pointer;letter-spacing:.04em;font-family:'Outfit',sans-serif;">★ NOVO</button>
+          <button onclick="filtroComparacao('ZEROU')" id="cfbtn-zerou" style="font-size:9px;font-weight:900;padding:5px 12px;border-radius:99px;border:1px solid var(--md-outline-variant);background:transparent;color:var(--md-on-surface-variant);cursor:pointer;letter-spacing:.04em;font-family:'Outfit',sans-serif;">✕ ZEROU</button>
         </div>
       </div>
 
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
         <div id="comparacao-tabela" style="min-width:700px;"></div>
       </div>
-      <p id="comparacao-tabela-vazia" style="display:none;font-size:12px;color:#aaa;font-weight:700;text-align:center;padding:1.5rem 0;">Nenhum produto nesta categoria.</p>
+      <p id="comparacao-tabela-vazia" style="display:none;font-size:12px;color:var(--md-on-surface-variant);font-weight:700;text-align:center;padding:1.5rem 0;">Nenhum produto nesta categoria.</p>
     </div>
 
-    <div class="glass-card rounded-[2.5rem] p-7 mb-7">
-      <div class="flex flex-col gap-6">
+    <!-- FILTROS + EXPORTAÇÃO CARD -->
+    <div class="md3-card rounded-3xl p-7 mb-5">
+      <div class="flex flex-col gap-5">
 
+        <!-- Quick filters + action buttons -->
         <div class="flex flex-wrap gap-2 items-center">
-          <button class="filter-btn px-5 py-2 bg-white/60 text-gray-700 text-[10px] rounded-full active" data-quick="TODOS">TODOS</button>
-          <button class="filter-btn px-5 py-2 bg-white/60 text-[#FF9500] text-[10px] rounded-full" data-quick="DATA_CURTA">DATA CURTA</button>
-          <button class="filter-btn px-5 py-2 bg-white/60 text-[#34C759] text-[10px] rounded-full" data-quick="PILHA">PILHAS</button>
-          <button class="filter-btn px-5 py-2 bg-white/60 text-[#B25E09] text-[10px] rounded-full" data-quick="QUEBRA">QUEBRAS</button>
+          <button class="filter-btn px-5 py-2 text-[10px] rounded-full active" data-quick="TODOS">TODOS</button>
+          <button class="filter-btn px-5 py-2 text-[10px] rounded-full" data-quick="DATA_CURTA" style="color:#E77D1A;">DATA CURTA</button>
+          <button class="filter-btn px-5 py-2 text-[10px] rounded-full" data-quick="PILHA" style="color:#2E7D32;">PILHAS</button>
+          <button class="filter-btn px-5 py-2 text-[10px] rounded-full" data-quick="QUEBRA" style="color:#92480A;">QUEBRAS</button>
+
           <div class="flex gap-2 ml-auto flex-wrap items-center">
             <!-- Importar Pedidos -->
             <label id="btnImportarPedidos" title="Importe até 4 arquivos de pedidos (.xlsx/.xls/.csv) para cruzamento FEFO"
               class="dl-btn px-5 py-2 rounded-full text-white text-[10px] cursor-pointer flex items-center gap-1.5"
-              style="background:linear-gradient(135deg,#5856D6,#007AFF);">
+              style="background:linear-gradient(135deg,var(--md-secondary),var(--md-primary));">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               IMPORTAR PEDIDOS
               <input type="file" id="pedidosUpload" accept=".xlsx,.xls,.csv" multiple class="hidden" onchange="handlePedidosUpload(event)" />
             </label>
-            <!-- Badge de status dos pedidos -->
+            <!-- Faltantes da Carga -->
+            <button onclick="abrirModalFaltantes()"
+              class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5"
+              style="background:linear-gradient(135deg,#F59E0B,#EA580C);">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              FALTANTES DA CARGA
+            </button>
+            <!-- Pedidos badge -->
             <span id="pedidosBadge" class="hidden px-3 py-1 rounded-full text-[9px] font-black tracking-wide"
-              style="background:rgba(88,86,214,0.12);color:#5856D6;border:1px solid rgba(88,86,214,0.3);">
+              style="background:rgba(103,80,164,0.12);color:var(--md-primary);border:1px solid rgba(103,80,164,0.3);">
               <span id="pedidosBadgeText">0 pedidos</span>
               <button onclick="limparPedidos()" class="ml-1 opacity-60 hover:opacity-100" style="font-size:9px;">✕</button>
             </span>
-            <!-- Download com direcionamento -->
-            <button id="btnDirecionamento" onclick="exportarDataCurtaComDirecionamento()"
-              class="dl-btn px-5 py-2 rounded-full text-white text-[10px] hidden"
-              style="background:linear-gradient(135deg,#34C759,#007AFF);">
-              ↓ DATAS CURTAS COM DIRECIONAMENTO
-            </button>
-            <div class="w-px h-5 bg-black/10 mx-1"></div>
-            <!-- DATAS CURTAS: dropdown compacto -->
+            <!-- Direcionamento dropdown -->
+            <div id="btnDirecionamento" style="position:relative;display:none;" id="dirDropdownWrap">
+              <button onclick="toggleDirDropdown(event)"
+                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5"
+                style="background:linear-gradient(135deg,#2E7D32,var(--md-primary));">
+                ↓ DATAS CURTAS COM DIRECIONAMENTO
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="dirDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:9999;min-width:200px;overflow:hidden;backdrop-filter:blur(16px);">
+                <button onclick="exportarDataCurtaComDirecionamento(); closeDirDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#2E7D32;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(46,125,50,0.07)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  Excel (.xlsx)
+                </button>
+                <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
+                <button onclick="exportarDirecionamentoPDF(); closeDirDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:var(--md-primary);background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(103,80,164,0.07)'" onmouseout="this.style.background='none'">
+                  <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  PDF (imprimir P&B)
+                </button>
+              </div>
+            </div>
+            <div style="width:1px;height:20px;background:var(--md-outline-variant);margin:0 4px;"></div>
+            <!-- Datas Curtas dropdown -->
             <div style="position:relative;display:inline-block;" id="dcDropdownWrap">
               <button onclick="toggleDcDropdown(event)"
-                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#FF9500;">
+                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#E77D1A;">
                 DATAS CURTAS
                 <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div id="dcDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:9999;min-width:145px;overflow:hidden;backdrop-filter:blur(16px);">
-                <button onclick="exportarDataCurta(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#B25E09;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(255,149,0,0.08)'" onmouseout="this.style.background='none'">
+              <div id="dcDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:9999;min-width:145px;overflow:hidden;backdrop-filter:blur(16px);">
+                <button onclick="exportarDataCurta(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#92480A;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(231,125,26,0.07)'" onmouseout="this.style.background='none'">
                   <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                   Excel (.xlsx)
                 </button>
-                <div style="height:1px;background:rgba(0,0,0,0.06);margin:0 10px;"></div>
-                <button onclick="exportarDataCurtaPDF(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#B25E09;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(255,149,0,0.08)'" onmouseout="this.style.background='none'">
+                <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
+                <button onclick="exportarDataCurtaPDF(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#92480A;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(231,125,26,0.07)'" onmouseout="this.style.background='none'">
                   <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   PDF (imprimir)
                 </button>
               </div>
             </div>
-            <!-- PILHAS: dropdown compacto -->
+            <!-- Pilhas dropdown -->
             <div style="position:relative;display:inline-block;" id="pilhasDropdownWrap">
               <button onclick="togglePilhasDropdown(event)"
-                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#34C759;">
+                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#2E7D32;">
                 PILHAS
                 <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div id="pilhasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:9999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
-                <button onclick="exportarResumoPilhas(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#1D8A3F;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(52,199,89,0.08)'" onmouseout="this.style.background='none'">
+              <div id="pilhasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:9999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
+                <button onclick="exportarResumoPilhas(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#2E7D32;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(46,125,50,0.07)'" onmouseout="this.style.background='none'">
                   <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                   Excel (.xlsx)
                 </button>
-                <div style="height:1px;background:rgba(0,0,0,0.06);margin:0 10px;"></div>
-                <button onclick="exportarPilhasPDF(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#1D8A3F;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(52,199,89,0.08)'" onmouseout="this.style.background='none'">
+                <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
+                <button onclick="exportarPilhasPDF(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#2E7D32;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(46,125,50,0.07)'" onmouseout="this.style.background='none'">
                   <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   PDF (imprimir)
                 </button>
               </div>
             </div>
-            <!-- QUEBRAS: dropdown compacto -->
+            <!-- Quebras dropdown -->
             <div style="position:relative;display:inline-block;" id="quebrasDropdownWrap">
               <button onclick="toggleQuebrasDropdown(event)"
-                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:#5856D6;">
+                class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5" style="background:var(--md-secondary);">
                 QUEBRAS
                 <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div id="quebrasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);border:1px solid rgba(0,0,0,0.09);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:9999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
-                <button onclick="exportarListaQuebras(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#5856D6;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(88,86,214,0.08)'" onmouseout="this.style.background='none'">
+              <div id="quebrasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.12);z-index:9999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
+                <button onclick="exportarListaQuebras(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:var(--md-secondary);background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(98,91,113,0.07)'" onmouseout="this.style.background='none'">
                   <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                   Excel (.xlsx)
                 </button>
-                <div style="height:1px;background:rgba(0,0,0,0.06);margin:0 10px;"></div>
-                <button onclick="exportarQuebrasPDF(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:9px 14px;font-size:10px;font-weight:800;color:#5856D6;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;" onmouseover="this.style.background='rgba(88,86,214,0.08)'" onmouseout="this.style.background='none'">
+                <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
+                <button onclick="exportarQuebrasPDF(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:var(--md-secondary);background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Outfit',sans-serif;" onmouseover="this.style.background='rgba(98,91,113,0.07)'" onmouseout="this.style.background='none'">
                   <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   PDF (imprimir)
                 </button>
               </div>
             </div>
             <button onclick="exportarRelatorioTransferencia()"
-              class="dl-btn px-5 py-2 rounded-full bg-[#007AFF] text-white text-[10px]">RELATÓRIO</button>
+              class="dl-btn px-5 py-2 rounded-full text-white text-[10px]"
+              style="background:linear-gradient(135deg,#1565C0,#0D47A1);">RELATÓRIO</button>
           </div>
         </div>
+
         <div class="section-sep"></div>
+
+        <!-- SELECT FILTERS ROW -->
         <div class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3">
           <input id="searchInput" type="text" class="hidden" />
           <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Marca</label>
-            <select id="filterMarca" class="ios-input">
+            <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);margin-left:12px;letter-spacing:0.12em;text-transform:uppercase;">Marca</label>
+            <select id="filterMarca" class="md3-input">
               <option value="TODOS">Todas as marcas</option>
               <option value="PANUTRIR">Panutrir</option>
               <option value="UNISABOR">Unisabor / US</option>
@@ -774,24 +1452,24 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Operação</label>
-            <select id="filterOperation" class="ios-input">
+            <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);margin-left:12px;letter-spacing:0.12em;text-transform:uppercase;">Operação</label>
+            <select id="filterOperation" class="md3-input">
               <option value="TODOS">Todas</option>
               <option value="EXPEDICAO">Expedição</option>
               <option value="DOACAO">Doação</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Estado</label>
-            <select id="filterType" class="ios-input">
+            <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);margin-left:12px;letter-spacing:0.12em;text-transform:uppercase;">Estado</label>
+            <select id="filterType" class="md3-input">
               <option value="TODOS">Todos</option>
               <option value="PILHA">Pilha</option>
               <option value="QUEBRA">Quebra</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Validade</label>
-            <select id="filterValidity" class="ios-input">
+            <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);margin-left:12px;letter-spacing:0.12em;text-transform:uppercase;">Validade</label>
+            <select id="filterValidity" class="md3-input">
               <option value="TODOS">Todas</option>
               <option value="VENCIDO">Vencido</option>
               <option value="URGENTE">Urgente</option>
@@ -803,65 +1481,58 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Ordem</label>
-            <select id="sortBy" class="ios-input">
+            <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);margin-left:12px;letter-spacing:0.12em;text-transform:uppercase;">Ordem</label>
+            <select id="sortBy" class="md3-input">
               <option value="validadeAsc">Vencimento Próximo</option>
               <option value="validadeDesc">Vencimento Longe</option>
               <option value="qtdDesc">Maior Volume</option>
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[9px] font-black text-gray-500 ml-3 tracking-widest uppercase">Visualização</label>
-            <select id="groupByVal" class="ios-input highlight">
+            <label style="font-size:9px;font-weight:900;color:var(--md-on-surface-variant);margin-left:12px;letter-spacing:0.12em;text-transform:uppercase;">Visualização</label>
+            <select id="groupByVal" class="md3-input highlight">
               <option value="ETIQUETA">Por Etiqueta</option>
               <option value="DATA">Por Data (Agrupado)</option>
             </select>
           </div>
         </div>
-
       </div>
     </div>
 
-    <div class="glass-card rounded-[2.5rem] overflow-hidden">
+    <!-- TABELA PRINCIPAL -->
+    <div class="md3-card rounded-3xl overflow-hidden mb-5">
       <div class="overflow-auto">
         <table class="w-full text-left text-xs min-w-[1320px]">
           <thead>
-            <tr class="border-b border-black/5">
-              <th class="px-8 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Operação</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Tipo</th>
-              <th class="px-6 py-4 text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">SKU / Produto</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Código</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Qtd / Lastro</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Vencimento</th>
-              <th class="px-6 py-4 text-center text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Status</th>
-              <th class="px-8 py-4 text-right text-[9px] font-black text-gray-500 uppercase tracking-[0.15em] bg-black/[0.025]">Dias</th>
+            <tr style="border-bottom:1px solid var(--md-outline-variant);">
+              <th style="padding:16px 28px;text-align:center;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">Operação</th>
+              <th style="padding:16px 20px;text-align:center;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">Tipo</th>
+              <th style="padding:16px 20px;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">SKU / Produto</th>
+              <th style="padding:16px 20px;text-align:center;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">Código</th>
+              <th style="padding:16px 20px;text-align:center;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">Qtd / Lastro</th>
+              <th style="padding:16px 20px;text-align:center;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">Vencimento</th>
+              <th style="padding:16px 20px;text-align:center;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">Status</th>
+              <th style="padding:16px 28px;text-align:right;font-size:9px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.15em;background:rgba(103,80,164,0.04);">Dias</th>
             </tr>
           </thead>
-          <tbody id="tableBody" class="divide-y divide-gray-100/60 text-gray-700 font-medium"></tbody>
+          <tbody id="tableBody" style="color:var(--md-on-surface);"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- CARD: ETIQUETAS POR DATA E STATUS -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <!-- BASE DE ACURACIDADE — CONFRONTO DE CARGAS E ESTOQUE              -->
-    <!-- ══════════════════════════════════════════════════════════════════ -->
-    <div class="glass-card rounded-[2.5rem] p-7 mb-7" id="painelS7">
-
-      <!-- Cabeçalho -->
-      <div class="flex items-center justify-between mb-1 flex-wrap gap-3">
-        <h3 class="text-[11px] font-black text-black flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot" style="background:#5856D6;"></span>
-          Base de Acuracidade
+    <!-- BASE DE ACURACIDADE -->
+    <div class="md3-card rounded-3xl p-7 mb-5" id="painelS7">
+      <div class="flex items-center justify-between mb-2 flex-wrap gap-3">
+        <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;margin:0;">
+          <span class="chart-title-dot" style="background:var(--md-secondary);"></span>Base de Acuracidade
         </h3>
-        <span class="text-[9px] font-bold tracking-wide uppercase px-3 py-1 rounded-full"
-              style="background:rgba(88,86,214,0.10);color:#5856D6;">
-          Estoque Sistema + Cargas em Doca &rarr; Total S7
+        <span style="font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 14px;border-radius:99px;background:rgba(98,91,113,0.1);color:var(--md-secondary);">
+          Estoque Sistema + Cargas em Doca → Total S7
         </span>
       </div>
-      <p class="text-[10px] font-semibold text-gray-400 mb-5 leading-relaxed">
-        O estoque ja esta carregado no sistema. Preencha o <b>Localizador</b> e o <b>Destino</b> de cada carga, cole os dados abaixo — o relatorio
-        cruza pelo <b>COD</b>, soma <code style="background:rgba(0,0,0,0.05);padding:1px 6px;border-radius:5px;">Estoque + Cargas</code>
+      <p style="font-size:10px;font-weight:500;color:var(--md-on-surface-variant);margin-bottom:1.5rem;line-height:1.6;">
+        O estoque já está carregado no sistema. Preencha o <b>Localizador</b> e o <b>Destino</b> de cada carga, cole os dados abaixo — o relatório
+        cruza pelo <b>COD</b>, soma <code style="background:rgba(103,80,164,0.08);padding:1px 6px;border-radius:5px;color:var(--md-primary);">Estoque + Cargas</code>
         e exporta o confronto em <b>.xlsx</b>.
       </p>
 
@@ -869,159 +1540,148 @@
       <div class="grid gap-5 mb-4" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
 
         <!-- Carga 1 -->
-        <div style="background:rgba(52,199,89,0.05);border:1px solid rgba(52,199,89,0.18);border-radius:1.5rem;padding:1rem;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#34C759;">
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#34C759;margin-right:5px;vertical-align:middle;"></span>Carga 1
-            </label>
-          </div>
+        <div style="background:rgba(46,125,50,0.06);border:1px solid rgba(46,125,50,0.2);border-radius:1.5rem;padding:1rem;">
+          <label style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:#2E7D32;display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#2E7D32;display:inline-block;"></span>Carga 1
+          </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
-              <input id="s7C1loc" type="text" placeholder="Ex: 4771" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(52,199,89,0.25);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C1loc" type="text" placeholder="Ex: 4771" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(46,125,50,0.25);" />
             </div>
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
-              <input id="s7C1dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(52,199,89,0.25);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C1dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(46,125,50,0.25);" />
             </div>
           </div>
           <textarea id="s7C1" placeholder="Cole os dados da Carga 1 aqui... (6 campos por produto: Cod, Produto, Carga, Carregada, Faltante, %)" class="ios-input w-full"
-            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(52,199,89,0.20);"></textarea>
-          <p id="s7C1n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#34C759;min-height:14px;"></p>
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(46,125,50,0.20);"></textarea>
+          <p id="s7C1n" style="font-size:9px;font-weight:700;margin-top:6px;margin-left:4px;color:#2E7D32;min-height:14px;"></p>
         </div>
 
         <!-- Carga 2 -->
-        <div style="background:rgba(255,149,0,0.05);border:1px solid rgba(255,149,0,0.18);border-radius:1.5rem;padding:1rem;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#FF9500;">
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF9500;margin-right:5px;vertical-align:middle;"></span>Carga 2
-            </label>
-          </div>
+        <div style="background:rgba(231,125,26,0.05);border:1px solid rgba(231,125,26,0.2);border-radius:1.5rem;padding:1rem;">
+          <label style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:#E77D1A;display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#E77D1A;display:inline-block;"></span>Carga 2
+          </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
-              <input id="s7C2loc" type="text" placeholder="Ex: 4772" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,149,0,0.25);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C2loc" type="text" placeholder="Ex: 4772" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(231,125,26,0.25);" />
             </div>
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
-              <input id="s7C2dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,149,0,0.25);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C2dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(231,125,26,0.25);" />
             </div>
           </div>
           <textarea id="s7C2" placeholder="Cole os dados da Carga 2 aqui..." class="ios-input w-full"
-            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(255,149,0,0.20);"></textarea>
-          <p id="s7C2n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#FF9500;min-height:14px;"></p>
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(231,125,26,0.18);"></textarea>
+          <p id="s7C2n" style="font-size:9px;font-weight:700;margin-top:6px;margin-left:4px;color:#E77D1A;min-height:14px;"></p>
         </div>
 
         <!-- Carga 3 -->
-        <div style="background:rgba(255,59,48,0.04);border:1px solid rgba(255,59,48,0.16);border-radius:1.5rem;padding:1rem;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#FF3B30;">
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF3B30;margin-right:5px;vertical-align:middle;"></span>Carga 3
-            </label>
-          </div>
+        <div style="background:rgba(179,38,30,0.04);border:1px solid rgba(179,38,30,0.18);border-radius:1.5rem;padding:1rem;">
+          <label style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:var(--md-error);display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--md-error);display:inline-block;"></span>Carga 3
+          </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
-              <input id="s7C3loc" type="text" placeholder="Ex: 4773" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,59,48,0.22);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C3loc" type="text" placeholder="Ex: 4773" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(179,38,30,0.22);" />
             </div>
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
-              <input id="s7C3dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(255,59,48,0.22);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C3dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(179,38,30,0.22);" />
             </div>
           </div>
           <textarea id="s7C3" placeholder="Cole os dados da Carga 3 aqui..." class="ios-input w-full"
-            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(255,59,48,0.18);"></textarea>
-          <p id="s7C3n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#FF3B30;min-height:14px;"></p>
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(179,38,30,0.16);"></textarea>
+          <p id="s7C3n" style="font-size:9px;font-weight:700;margin-top:6px;margin-left:4px;color:var(--md-error);min-height:14px;"></p>
         </div>
 
         <!-- Carga 4 -->
-        <div style="background:rgba(0,122,255,0.04);border:1px solid rgba(0,122,255,0.16);border-radius:1.5rem;padding:1rem;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <label class="text-[9px] font-black tracking-widest uppercase" style="color:#007AFF;">
-              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#007AFF;margin-right:5px;vertical-align:middle;"></span>Carga 4
-            </label>
-          </div>
+        <div style="background:rgba(103,80,164,0.04);border:1px solid rgba(103,80,164,0.18);border-radius:1.5rem;padding:1rem;">
+          <label style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:var(--md-primary);display:flex;align-items:center;gap:6px;margin-bottom:10px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--md-primary);display:inline-block;"></span>Carga 4
+          </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
-              <input id="s7C4loc" type="text" placeholder="Ex: 4774" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,122,255,0.22);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
+              <input id="s7C4loc" type="text" placeholder="Ex: 4774" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(103,80,164,0.25);" />
             </div>
             <div>
-              <p style="font-size:8px;font-weight:900;color:#aaa;text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
-              <input id="s7C4dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,122,255,0.22);" />
+              <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
+              <input id="s7C4dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(103,80,164,0.25);" />
             </div>
           </div>
           <textarea id="s7C4" placeholder="Cole os dados da Carga 4 aqui..." class="ios-input w-full"
-            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(0,122,255,0.18);"></textarea>
-          <p id="s7C4n" class="text-[9px] font-bold mt-1.5 ml-1" style="color:#007AFF;min-height:14px;"></p>
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(103,80,164,0.18);"></textarea>
+          <p id="s7C4n" style="font-size:9px;font-weight:700;margin-top:6px;margin-left:4px;color:var(--md-primary);min-height:14px;"></p>
         </div>
-
       </div>
 
-      <!-- Aviso: base nao carregada -->
       <div id="s7DbWarning" class="hidden mb-4 px-4 py-2.5 rounded-2xl text-[10px] font-bold"
-           style="background:rgba(255,149,0,0.12);color:#B25E09;">
-        &#9888; Nenhuma base de estoque carregada. Importe a planilha principal primeiro.
+           style="background:rgba(231,125,26,0.1);color:#92480A;">
+        ⚠ Nenhuma base de estoque carregada. Importe a planilha principal primeiro.
       </div>
-
-      <!-- Preview dinamico -->
       <div id="s7Preview" class="hidden mb-4 px-4 py-2.5 rounded-2xl text-[10px] font-bold"
-           style="background:rgba(88,86,214,0.08);color:#5856D6;">
+           style="background:rgba(103,80,164,0.08);color:var(--md-primary);">
         <span id="s7PreviewTxt"></span>
       </div>
 
-      <!-- Separador de botoes -->
-      <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.07),transparent);margin:0.5rem 0 1rem;"></div>
-      <p class="text-[9px] font-black tracking-widest uppercase mb-3" style="color:#aaa;">Exportar Planilhas</p>
+      <div style="height:1px;background:linear-gradient(90deg,transparent,var(--md-outline-variant),transparent);margin:0.5rem 0 1rem;"></div>
+      <p style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.14em;color:var(--md-on-surface-variant);margin-bottom:12px;">Exportar Planilhas</p>
 
-      <!-- Botoes principais -->
       <div class="flex flex-wrap gap-3">
         <button onclick="s7ExportarUnificado('carregados')" class="dl-btn text-[10px] rounded-full px-6 py-3"
-          style="background:#34C759;color:#fff;" title="Gera planilha com Cod | Produto | [Carga 1] | [Carga 2] | ... usando qtd Carregada">
-          &#11015; A &mdash; Unificado Carregados
+          style="background:#2E7D32;color:#fff;" title="Gera planilha com Cod | Produto | [Carga 1] | [Carga 2] | ... usando qtd Carregada">
+          ⬇ A — Unificado Carregados
         </button>
         <button onclick="s7ExportarUnificado('faltantes')" class="dl-btn text-[10px] rounded-full px-6 py-3"
-          style="background:#FF3B30;color:#fff;" title="Gera planilha com Cod | Produto | [Carga 1] | [Carga 2] | ... usando qtd Faltante">
-          &#11015; B &mdash; Unificado Faltantes
+          style="background:var(--md-error);color:#fff;" title="Gera planilha com Cod | Produto | [Carga 1] | [Carga 2] | ... usando qtd Faltante">
+          ⬇ B — Unificado Faltantes
         </button>
         <button onclick="gerarRelatorioS7()" class="dl-btn text-[10px] rounded-full px-6 py-3"
-          style="background:#5856D6;color:#fff;" title="Cruza com estoque do sistema: Cod | Produto | Estoque Sistema | C1..C4 | Total Cargas | Total S7">
-          &#128202; C &mdash; Acuracidade S7
+          style="background:var(--md-secondary);color:#fff;" title="Cruza com estoque do sistema">
+          📊 C — Acuracidade S7
         </button>
-        <button onclick="s7LimparTudo()" class="filter-btn text-[10px] rounded-full px-5 py-3 bg-white/60 text-gray-500">
+        <button onclick="s7LimparTudo()" class="filter-btn text-[10px] rounded-full px-5 py-3">
           Limpar Tudo
         </button>
       </div>
-
     </div>
-    <!-- FIM: BASE DE ACURACIDADE -->
 
-    <div id="etiquetasDataStatusSection" class="glass-card rounded-[2.5rem] p-7 mb-7 hidden">
+    <!-- ETIQUETAS POR DATA E STATUS -->
+    <div id="etiquetasDataStatusSection" class="md3-card rounded-3xl p-7 mb-5 hidden">
       <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
-        <h3 class="text-[11px] font-black text-black flex items-center gap-2.5 tracking-widest uppercase">
-          <span class="chart-title-dot bg-[#5856D6]"></span>Etiquetas por Data &amp; Status
+        <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;margin:0;">
+          <span class="chart-title-dot" style="background:var(--md-secondary);"></span>Etiquetas por Data &amp; Status
         </h3>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <button onclick="filtroEtiquetasData('TODOS')" id="edbtn-todos" class="filter-btn active px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">TODOS</button>
-          <button onclick="filtroEtiquetasData('VENCIDO')" id="edbtn-vencido" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">VENCIDO</button>
-          <button onclick="filtroEtiquetasData('PRAZO_LIMITE')" id="edbtn-prazo_limite" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">PRAZO LIMITE</button>
-          <button onclick="filtroEtiquetasData('URGENTE')" id="edbtn-urgente" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">URGENTE</button>
-          <button onclick="filtroEtiquetasData('CRITICO')" id="edbtn-critico" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">CRÍTICO</button>
-          <button onclick="filtroEtiquetasData('ATENCAO')" id="edbtn-atencao" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">ATENÇÃO</button>
-          <button onclick="filtroEtiquetasData('NORMAL')" id="edbtn-normal" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">NORMAL</button>
-          <button onclick="filtroEtiquetasData('SEGURO')" id="edbtn-seguro" class="filter-btn px-4 py-1.5 rounded-full text-[9px] bg-white/60 text-gray-700">SEGURO</button>
+          <button onclick="filtroEtiquetasData('TODOS')" id="edbtn-todos" class="filter-btn active px-4 py-1.5 rounded-full text-[9px]">TODOS</button>
+          <button onclick="filtroEtiquetasData('VENCIDO')" id="edbtn-vencido" class="filter-btn px-4 py-1.5 rounded-full text-[9px]">VENCIDO</button>
+          <button onclick="filtroEtiquetasData('PRAZO_LIMITE')" id="edbtn-prazo_limite" class="filter-btn px-4 py-1.5 rounded-full text-[9px]">PRAZO LIMITE</button>
+          <button onclick="filtroEtiquetasData('URGENTE')" id="edbtn-urgente" class="filter-btn px-4 py-1.5 rounded-full text-[9px]">URGENTE</button>
+          <button onclick="filtroEtiquetasData('CRITICO')" id="edbtn-critico" class="filter-btn px-4 py-1.5 rounded-full text-[9px]">CRÍTICO</button>
+          <button onclick="filtroEtiquetasData('ATENCAO')" id="edbtn-atencao" class="filter-btn px-4 py-1.5 rounded-full text-[9px]">ATENÇÃO</button>
+          <button onclick="filtroEtiquetasData('NORMAL')" id="edbtn-normal" class="filter-btn px-4 py-1.5 rounded-full text-[9px]">NORMAL</button>
+          <button onclick="filtroEtiquetasData('SEGURO')" id="edbtn-seguro" class="filter-btn px-4 py-1.5 rounded-full text-[9px]">SEGURO</button>
         </div>
       </div>
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
         <div id="etiquetasDataStatusBody" style="min-width:940px;"></div>
       </div>
-      <p id="etiquetasDataStatusEmpty" style="display:none;font-size:12px;color:#aaa;font-weight:700;text-align:center;padding:1.5rem 0;">Nenhuma etiqueta nesta categoria.</p>
+      <p id="etiquetasDataStatusEmpty" style="display:none;font-size:12px;color:var(--md-on-surface-variant);font-weight:700;text-align:center;padding:1.5rem 0;">Nenhuma etiqueta nesta categoria.</p>
     </div>
 
   </main>
 
   <div id="autocomplete-dropdown"></div>
 
+
+  <!-- ══════════════════════════════════════════════════
+       MOTOR JAVASCRIPT (LÓGICA DE NEGÓCIOS)
+  ═══════════════════════════════════════════════════ -->
   <script>
     let currentImportDateStr = '';
     let currentImportLabel = '';
@@ -2477,13 +3137,10 @@
       if (totalLinhas > 0) {
         badgeText.textContent = `${totalLinhas} SKU(s) em ${numArquivos} pedido(s)`;
         badge.classList.remove('hidden');
-        btnDir.classList.remove('hidden');
-        // Animação de entrada
-        btnDir.style.animation = 'none';
-        setTimeout(() => { btnDir.style.animation = ''; }, 10);
+        btnDir.style.display = 'inline-block';
       } else {
         badge.classList.add('hidden');
-        btnDir.classList.add('hidden');
+        btnDir.style.display = 'none';
         alert('Nenhum SKU válido encontrado nos arquivos. Verifique se as colunas COD/CODIGO/SKU e QTD/QUANTIDADE estão presentes.');
       }
     }
@@ -2491,7 +3148,7 @@
     function limparPedidos() {
       pedidosDB = [];
       document.getElementById('pedidosBadge').classList.add('hidden');
-      document.getElementById('btnDirecionamento').classList.add('hidden');
+      document.getElementById('btnDirecionamento').style.display = 'none';
     }
 
     /**
@@ -2589,6 +3246,519 @@
       if (prazo <= 21) return { st: "CRÍTICO", col: "FFFF9500", textDark: false };
       if (prazo <= 23) return { st: "ATENÇÃO", col: "FFFFCC00", textDark: true };
       return             { st: "NORMAL",   col: "FFFFFFFF", textDark: true  };
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // PDF DIRECIONAMENTO DC — Paisagem, Preto & Branco, para impressão
+    // Fonte 100% maior que a versão anterior. Resumo narrativo ao final.
+    // ══════════════════════════════════════════════════════════════════
+    function exportarDirecionamentoPDF() {
+      if (db.length === 0) return alert('Importe a base de estoque primeiro.');
+      if (pedidosDB.length === 0) return alert('Importe pelo menos um arquivo de pedidos primeiro.');
+
+      const lotesFEFO = buildLotesFEFO();
+      if (lotesFEFO.length === 0) return alert('Sem dados de datas curtas na base atual.');
+
+      const resultado = cruzarPedidosFEFO(lotesFEFO);
+      if (!resultado || resultado.length === 0) return alert('Nenhum resultado para exportar.');
+
+      if (!window.jspdf || !window.jspdf.jsPDF) return alert('Biblioteca PDF não carregada. Recarregue a página.');
+      const { jsPDF } = window.jspdf;
+
+      const doc  = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pgW  = doc.internal.pageSize.getWidth();  // 297mm
+      const pgH  = doc.internal.pageSize.getHeight(); // 210mm
+      const mL   = 8;
+      const mR   = 8;
+      const cW   = pgW - mL - mR; // 281mm
+      const hoje   = new Date().toLocaleDateString('pt-BR');
+      const hojeTs = new Date().toLocaleString('pt-BR');
+
+      // ── PALETA P&B ───────────────────────────────────────────────
+      const K  = [0,   0,   0  ];
+      const G8 = [28,  28,  30 ];
+      const G6 = [88,  88,  92 ];
+      const G4 = [142, 142, 147];
+      const G2 = [200, 200, 204];
+      const G1 = [235, 235, 240];
+      const W  = [255, 255, 255];
+
+      function statusPB(prazo) {
+        if (prazo < 0)   return { label: 'VENCIDO'     };
+        if (prazo < 10)  return { label: 'PRAZO LIMITE'};
+        if (prazo <= 19) return { label: 'URGENTE'     };
+        if (prazo <= 21) return { label: 'CRITICO'     };
+        if (prazo <= 23) return { label: 'ATENCAO'     };
+        return                   { label: 'NORMAL'      };
+      }
+
+      // ── MÉTRICAS ─────────────────────────────────────────────────
+      const totalItens = resultado.length;
+      const totalVol   = resultado.reduce((s, r) => s + Math.round(r.QTD_TOTAL), 0);
+      const totalDir   = resultado.filter(r => r.DIRECIONAMENTO).length;
+      const totalZero  = resultado.filter(r => r._esgotado).length;
+      const urgCounts  = { 'VENCIDO': 0, 'PRAZO LIMITE': 0, 'URGENTE': 0, 'CRITICO': 0, 'ATENCAO': 0, 'NORMAL': 0 };
+      resultado.forEach(r => { const s = statusPB(r.PRAZO); if (urgCounts[s.label] !== undefined) urgCounts[s.label]++; });
+
+      // ── RESUMO NARRATIVO (montado antes de renderizar) ────────────
+      // Agrupa por destino: soma QTD_PEDIDA por (PRODUTO + DIRECIONAMENTO + VALIDADE)
+      const narrativaMap = new Map(); // chave: "COD|||DEST|||VALIDADE"
+      resultado.forEach(item => {
+        if (!item.DIRECIONAMENTO || item.QTD_PEDIDA <= 0) return;
+        const dests = item.DIRECIONAMENTO.split(' / ');
+        const valStr = item.VALIDADE || '';
+        dests.forEach(dest => {
+          const chave = item.COD + '|||' + dest.trim() + '|||' + valStr;
+          if (!narrativaMap.has(chave)) narrativaMap.set(chave, { cod: item.COD, produto: item.PRODUTO, dest: dest.trim(), qtd: 0, validade: valStr });
+          narrativaMap.get(chave).qtd += Math.round(item.QTD_PEDIDA / dests.length);
+        });
+      });
+      // Consolida por destino para gerar frases no formato pedido
+      const destinoMap = new Map(); // dest → [ {cod, produto, qtd, validade} ]
+      narrativaMap.forEach(({ cod, produto, dest, qtd, validade }) => {
+        if (!destinoMap.has(dest)) destinoMap.set(dest, []);
+        destinoMap.get(dest).push({ cod, produto, qtd, validade });
+      });
+      // Gera frases com data de validade e lastro (caixas + unidades avulsas)
+      const frases = [];
+      destinoMap.forEach((itens, dest) => {
+        itens.forEach(({ produto, qtd, validade, cod }) => {
+          // Capitaliza o nome do produto corretamente (tira caps lock excessivo)
+          const nomeFmt = produto.split(' ').map(w => {
+            if (w.length <= 2) return w;
+            return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+          }).join(' ');
+          const dataStr = validade ? ' data "' + validade + '"' : '';
+          // Calcula caixas e unidades avulsas usando lastroSkuDB
+          const lastro = lastroSkuDB[String(cod).trim()] || 190;
+          const divisor = produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
+          const unPorCx = lastro / divisor;
+          const cxs     = Math.floor(qtd / unPorCx);
+          const unds    = Math.round(qtd % unPorCx);
+          const lastroStr = cxs > 0 && unds > 0
+            ? '(' + cxs + ' CXS e ' + unds + ' UNDS)'
+            : cxs > 0
+              ? '(' + cxs + ' CXS)'
+              : '(' + unds + ' UNDS)';
+          frases.push(qtd.toLocaleString('pt-BR') + ' un. ' + lastroStr + ' de ' + nomeFmt + dataStr + ' devem ser direcionadas a ' + dest);
+        });
+      });
+
+      // ── COLUNAS — sem STATUS, labels abreviados ───────────────────
+      // A4 paisagem útil = 281mm
+      // COD(13) | PROD(90) | VLD(18) | DIAS(13) | DIR(78) | ESTQ(23) | PED(23) | REST(23)
+      // 13+90+18+13+78+23+23+23 = 281 ✓
+      const cols = [
+        { key: 'COD',            label: 'COD',   w: 13,  align: 'center' },
+        { key: 'PRODUTO',        label: 'PROD',  w: 90,  align: 'left'   },
+        { key: 'VALIDADE',       label: 'VLD',   w: 18,  align: 'center' },
+        { key: 'PRAZO',          label: 'DIAS',  w: 13,  align: 'center' },
+        { key: 'DIRECIONAMENTO', label: 'DIR',   w: 78,  align: 'left'   },
+        { key: 'QTD_TOTAL',      label: 'ESTQ',  w: 23,  align: 'center' },
+        { key: 'QTD_PEDIDA',     label: 'PED',   w: 23,  align: 'center' },
+        { key: 'QTD_RESTANTE',   label: 'REST',  w: 23,  align: 'center' },
+      ];
+
+      // ── FONTES (todas dobradas vs versão anterior) ────────────────
+      const FS = {
+        header:    13,   // cabeçalho da página
+        subheader:  9,   // meta info no cabeçalho
+        kpiNum:    18,   // número KPI grande
+        kpiSub:     8,   // label KPI
+        tblHead:   10,   // cabeçalho da tabela
+        band:      10,   // banda de grupo de status
+        cellCod:   10,   // coluna COD
+        cellMain:  11,   // coluna PRODUTO / DIRECIONAMENTO
+        cellNum:   12,   // números: DIAS, EST, PEDIDO, SALDO
+        cellPill:  9,    // texto dentro da pill de STATUS
+        footer:     8,   // rodapé
+        resumoTit: 11,   // título do resumo final
+        resumoSub:  9,   // subtítulo do resumo final
+        narr:      10,   // frases narrativas
+        legenda:    8,   // legenda
+      };
+
+      // Altura da linha proporcional à nova fonte
+      const hdrH  = 17; // cabeçalho da página
+      const tblHH = 10; // altura do cabeçalho da tabela
+      const bandH = 8;  // altura da banda de grupo
+      const maxY  = pgH - 12;
+
+      // ── PRÉ-CÁLCULO: comprime rowH se necessário para caber tudo em 1 página ──
+      // Espaço fixo: header + tableHeader + rodapé (sem kpiBar)
+      const sepH      = 2;
+      const footerH   = 12;
+      // Espaço para resumo + legenda
+      const resumoTitH  = 11;
+      const resumoLineH_base = 6;
+      const legendaH    = 10;
+      const resumoH     = resumoTitH + frases.length * resumoLineH_base + legendaH + 6;
+      // Contagem de bandas únicas
+      const numBandas = new Set(resultado.map(r => statusPB(r.PRAZO).label)).size;
+      const fixoH = hdrH + 3 + sepH + tblHH + 1 + numBandas * (bandH + 1) + footerH + resumoH + 4;
+      const disponivelParaLinhas = maxY - fixoH;
+      // rowH dinâmico: entre 5 (mínimo legível) e 8 (ideal)
+      let rowH = Math.min(8, Math.max(5, Math.floor(disponivelParaLinhas / resultado.length)));
+
+      let pageNum = 1;
+
+      // ── CABEÇALHO LIMPO (fundo branco, texto preto) ──────────────
+      const drawPageHeader = () => {
+        // Fundo branco
+        doc.setFillColor(255, 255, 255);
+        doc.rect(0, 0, pgW, hdrH, 'F');
+        // Linha separadora fina na base do cabeçalho
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.1);
+        doc.line(mL, hdrH, pgW - mR, hdrH);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(FS.header);
+        doc.setTextColor(0, 0, 0);
+        doc.text('DATAS CURTAS COM DIRECIONAMENTO', mL + 2, 11);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS.subheader);
+        doc.setTextColor(0, 0, 0);
+        doc.text('CD Matriz Panutrir  |  Emissao: ' + hojeTs, pgW - mR, 7, { align: 'right' });
+        doc.text('Pag. ' + pageNum, pgW - mR, 13, { align: 'right' });
+      };
+
+      // ── RODAPÉ ───────────────────────────────────────────────────
+      const drawPageFooter = () => {
+        doc.setDrawColor(...G2);
+        doc.setLineWidth(0.3);
+        doc.line(mL, pgH - 9, pgW - mR, pgH - 9);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(FS.footer);
+        doc.setTextColor(...G4);
+        doc.text('Relatorio de Datas Curtas com Direcionamento FEFO — ' + hoje + ' — CD Matriz Panutrir', pgW / 2, pgH - 5, { align: 'center' });
+        doc.text('Pag. ' + pageNum, pgW - mR, pgH - 5, { align: 'right' });
+      };
+
+      // ── KPI BAR ──────────────────────────────────────────────────
+      const drawKpiBar = (yy) => {
+        const cards = [
+          { label: 'TOTAL LOTES',  val: totalItens },
+          { label: 'DIRECIONADOS', val: totalDir   },
+          { label: 'ESGOTADOS',    val: totalZero  },
+          { label: 'VENCIDO',      val: urgCounts['VENCIDO']      },
+          { label: 'PRAZO LIMITE', val: urgCounts['PRAZO LIMITE'] },
+          { label: 'URGENTE',      val: urgCounts['URGENTE']      },
+          { label: 'CRITICO',      val: urgCounts['CRITICO']      },
+          { label: 'ATENCAO',      val: urgCounts['ATENCAO']      },
+        ];
+        const cardH = 19;
+        const gap   = 2;
+        const cardW = (cW - 7 * gap) / 8;
+        cards.forEach((card, i) => {
+          const x = mL + i * (cardW + gap);
+          doc.setDrawColor(...G2);
+          doc.setLineWidth(0.35);
+          doc.roundedRect(x, yy, cardW, cardH, 1.2, 1.2, 'S');
+          if (i < 3) {
+            doc.setFillColor(...G8);
+            doc.roundedRect(x, yy, cardW, 2, 0.8, 0.8, 'F');
+          }
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(i < 3 ? FS.kpiNum : FS.kpiNum - 4);
+          doc.setTextColor(...G8);
+          doc.text(String(card.val), x + cardW / 2, yy + 13, { align: 'center' });
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(FS.kpiSub);
+          doc.setTextColor(...G4);
+          doc.text(card.label, x + cardW / 2, yy + cardH - 2.5, { align: 'center' });
+        });
+        return yy + cardH + 3;
+      };
+
+      // ── CABEÇALHO DA TABELA (Google Sheets style) ─────────────────
+      const drawTableHeader = (yy) => {
+        doc.setFillColor(255, 255, 255);
+        doc.rect(mL, yy, cW, tblHH, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(FS.tblHead);
+        doc.setTextColor(0, 0, 0);
+        let cx = mL;
+        cols.forEach(col => {
+          const tx = col.align === 'center' ? cx + col.w / 2 : cx + 2.5;
+          doc.text(col.label, tx, yy + tblHH * 0.72, { align: col.align === 'center' ? 'center' : 'left' });
+          cx += col.w;
+        });
+        // Linha divisória fina abaixo do cabeçalho
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.1);
+        doc.line(mL, yy + tblHH, pgW - mR, yy + tblHH);
+        return yy + tblHH + 1;
+      };
+
+      // ── BANDA DE GRUPO (Google Sheets style) ──────────────────────
+      const drawStatusBand = (yy, label) => {
+        // Fundo branco, sem linhas — separação já vem da linha do item anterior
+        doc.setFillColor(255, 255, 255);
+        doc.rect(mL, yy, cW, bandH, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(FS.band);
+        doc.setTextColor(0, 0, 0);
+        doc.text('>> ' + label, mL + 4, yy + bandH * 0.72);
+        return yy + bandH + 1;
+      };
+
+      // ── RENDERIZAÇÃO DA TABELA ────────────────────────────────────
+      drawPageHeader();
+      let y = hdrH + 3;
+      y = drawTableHeader(y);
+
+      let lastStatus = null;
+
+      resultado.forEach((item, idx) => {
+        const sp = statusPB(item.PRAZO);
+
+        if (sp.label !== lastStatus) {
+          if (y + bandH + 2 > maxY) {
+            drawPageFooter(); doc.addPage(); pageNum++;
+            drawPageHeader(); y = hdrH + 2; y = drawTableHeader(y);
+          }
+          y = drawStatusBand(y, sp.label + (urgCounts[sp.label] ? '  (' + urgCounts[sp.label] + ' lotes)' : ''));
+          lastStatus = sp.label;
+        }
+
+        if (y + rowH > maxY) {
+          drawPageFooter(); doc.addPage(); pageNum++;
+          drawPageHeader(); y = hdrH + 2; y = drawTableHeader(y);
+          lastStatus = null;
+        }
+
+        const isDir   = !!item.DIRECIONAMENTO;
+        const isEsgot = item._esgotado;
+
+        // Fundo branco para todas as linhas
+        doc.setFillColor(255, 255, 255);
+        doc.rect(mL, y, cW, rowH, 'F');
+
+        // Linha divisória 2mm abaixo do texto (evita cruzar o texto com rowH pequeno)
+        const cellY = y + rowH * 0.72;
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.1);
+        doc.line(mL, cellY + 2, pgW - mR, cellY + 2);
+        let cx = mL;
+
+        cols.forEach(col => {
+          const tx     = col.align === 'center' ? cx + col.w / 2 : cx + 2.5;
+          const talign = col.align === 'center' ? 'center' : 'left';
+
+          if (col.key === 'COD') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(FS.cellCod);
+            doc.setTextColor(0, 0, 0);
+            doc.text(String(item.COD), tx, cellY, { align: talign });
+
+          } else if (col.key === 'PRODUTO') {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(FS.cellMain);
+            doc.setTextColor(0, 0, 0);
+            let nome = String(item.PRODUTO || '');
+            while (doc.getTextWidth(nome) > col.w - 5 && nome.length > 6) nome = nome.slice(0, -1);
+            if (nome !== item.PRODUTO) nome = nome.slice(0, -1) + '...';
+            doc.text(nome, tx, cellY, { align: talign });
+
+          } else if (col.key === 'VALIDADE') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(FS.cellMain);
+            doc.setTextColor(0, 0, 0);
+            // Formata DD/MM apenas (corta o /AAAA)
+            let valStr = String(item.VALIDADE || '—');
+            const mDt = valStr.match(/^(\d{2}\/\d{2})\//);
+            if (mDt) valStr = mDt[1];
+            doc.text(valStr, tx, cellY, { align: talign });
+
+          } else if (col.key === 'PRAZO') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(FS.cellNum);
+            doc.setTextColor(0, 0, 0);
+            doc.text(item.PRAZO + 'd', tx, cellY, { align: talign });
+
+          } else if (col.key === 'DIRECIONAMENTO') {
+            if (item.DIRECIONAMENTO) {
+              doc.setFont('helvetica', 'bold');
+              doc.setFontSize(FS.cellMain);
+              doc.setTextColor(0, 0, 0);
+              let dir = String(item.DIRECIONAMENTO);
+              while (doc.getTextWidth(dir) > col.w - 5 && dir.length > 6) dir = dir.slice(0, -1);
+              if (dir !== item.DIRECIONAMENTO) dir = dir.slice(0, -1) + '...';
+              doc.text(dir, tx, cellY, { align: talign });
+            } else {
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(FS.cellMain);
+              doc.setTextColor(0, 0, 0);
+              doc.text('—', tx, cellY, { align: talign });
+            }
+
+          } else if (col.key === 'QTD_TOTAL') {
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(FS.cellNum);
+            doc.setTextColor(0, 0, 0);
+            doc.text(Math.round(item.QTD_TOTAL).toLocaleString('pt-BR'), tx, cellY, { align: talign });
+
+          } else if (col.key === 'QTD_PEDIDA') {
+            const val = item.QTD_PEDIDA > 0 ? item.QTD_PEDIDA : 0;
+            doc.setFont('helvetica', val > 0 ? 'bold' : 'normal');
+            doc.setFontSize(FS.cellNum);
+            doc.setTextColor(0, 0, 0);
+            doc.text(val > 0 ? val.toLocaleString('pt-BR') : '—', tx, cellY, { align: talign });
+
+          } else if (col.key === 'QTD_RESTANTE') {
+            const saldo = isEsgot ? 0 : (item.DIRECIONAMENTO ? item.QTD_RESTANTE : Math.round(item.QTD_TOTAL));
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(FS.cellNum);
+            doc.setTextColor(0, 0, 0);
+            doc.text(saldo.toLocaleString('pt-BR'), tx, cellY, { align: talign });
+          }
+
+          cx += col.w;
+        });
+
+        y += rowH;
+      });
+
+      // ── RESUMO NARRATIVO ──────────────────────────────────────────
+      // Ocupa o espaço que sobrar na última página, ou nova página se necessário
+      const resumoLineH = resumoLineH_base;
+
+      if (y + resumoH > maxY) {
+        // Não cabe: vai para nova página (fallback se pré-cálculo falhar)
+        drawPageFooter(); doc.addPage(); pageNum++;
+        drawPageHeader(); y = hdrH + 4;
+      } else {
+        y += 2;
+      }
+
+      // Título do bloco resumo — linha fina + texto preto
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.1);
+      doc.line(mL, y, pgW - mR, y);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text('RESUMO: O QUE PRECISA SER SEPARADO AGORA', mL, y + resumoTitH * 0.72);
+      // Meta-info à direita
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      doc.text(
+        totalDir + ' itens direcionados  |  Gerado em ' + hojeTs,
+        pgW - mR, y + resumoTitH * 0.72, { align: 'right' }
+      );
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.1);
+      doc.line(mL, y + resumoTitH, pgW - mR, y + resumoTitH);
+      y += resumoTitH + 2;
+
+      if (frases.length === 0) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...G4);
+        doc.text('Nenhum item com direcionamento e quantidade pedida registrados.', mL + 4, y + 5);
+        y += 8;
+      } else {
+        frases.forEach((frase, fi) => {
+          if (y + resumoLineH > maxY) {
+            drawPageFooter(); doc.addPage(); pageNum++;
+            drawPageHeader(); y = hdrH + 2;
+          }
+          // Fundo branco + linha divisória fina
+          doc.setFillColor(255, 255, 255);
+          doc.rect(mL, y, cW, resumoLineH, 'F');
+          doc.setDrawColor(0, 0, 0);
+          doc.setLineWidth(0.1);
+          doc.line(mL, y + resumoLineH, pgW - mR, y + resumoLineH);
+
+          // Número da frase
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.setTextColor(0, 0, 0);
+          doc.text(String(fi + 1) + '.', mL + 3, y + resumoLineH * 0.72);
+
+          // Quebra a frase em duas partes: info do produto | destino
+          // "Xun. (Y CXS e Z UNDS) de PRODUTO data 'DD/MM' >> DESTINO"
+          const matchDir = frase.match(/^(.*?) devem ser direcionadas a (.+)$/);
+          if (matchDir) {
+            let parteEsq = matchDir[1]; // "Xun. (Y CXS e Z UNDS) de PRODUTO data ..."
+            const parteDest = matchDir[2]; // "CAMPO MOURAO"
+            const seta = '  >>  '; // ASCII puro — sem Unicode
+
+            // Parte esquerda: fonte normal compacta
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            // Calcula largura máxima para parte esquerda (reserva espaço pro destino em negrito)
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            const largDest = doc.getTextWidth(parteDest);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            const maxEsqW = cW - 14 - doc.getTextWidth(seta) - largDest - 2;
+            let textoEsq = parteEsq + seta;
+            while (doc.getTextWidth(textoEsq) > maxEsqW + doc.getTextWidth(seta) && parteEsq.length > 10) {
+              parteEsq = parteEsq.slice(0, -1);
+              textoEsq = parteEsq + '...' + seta;
+            }
+            doc.setTextColor(0, 0, 0);
+            doc.text(textoEsq, mL + 10, y + resumoLineH * 0.72);
+
+            // Destino: negrito, ligeiramente maior, bem destacado
+            const largEsq = doc.getTextWidth(textoEsq);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            doc.text(parteDest, mL + 10 + largEsq, y + resumoLineH * 0.72);
+          } else {
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(0, 0, 0);
+            let fr = frase;
+            while (doc.getTextWidth(fr) > cW - 14 && fr.length > 10) fr = fr.slice(0, -1);
+            if (fr !== frase) fr = fr.slice(0, -1) + '...';
+            doc.text(fr, mL + 10, y + resumoLineH * 0.72);
+          }
+          y += resumoLineH;
+        });
+        y += 2;
+      }
+
+      // ── LEGENDA COMPACTA ─────────────────────────────────────────
+      if (y + 8 > maxY) {
+        drawPageFooter(); doc.addPage(); pageNum++;
+        drawPageHeader(); y = hdrH + 2;
+      }
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.1);
+      doc.line(mL, y, pgW - mR, y);
+      y += 2;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(0, 0, 0);
+      doc.text('GUIA RAPIDO DE LEITURA:', mL, y + 4);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(0, 0, 0);
+      const legsTexto = [
+        'SALDO ZERO = produto ja separado',
+        'URGENTE/VENCIDO = separar PRIMEIRO',
+        '>> = para onde o produto vai',
+        'DIAS = quantos dias ate vencer',
+      ];
+      const legW = (cW - 18) / legsTexto.length;
+      legsTexto.forEach((lt, li) => {
+        doc.text('• ' + lt, mL + 18 + li * legW, y + 4);
+      });
+
+      drawPageFooter();
+
+      const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+      try {
+        doc.save('DC_Direcionamento_PB_' + dataArq + '.pdf');
+      } catch(e) {
+        alert('Erro ao salvar PDF: ' + e.message);
+      }
     }
 
     async function exportarDataCurtaComDirecionamento() {
@@ -3791,6 +4961,16 @@ self.addEventListener('fetch', e => {
     }
 
 
+    // Dropdown Datas Curtas com Direcionamento
+    function toggleDirDropdown(e) {
+      e.stopPropagation();
+      const d = document.getElementById('dirDropdown');
+      if (d) d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    }
+    function closeDirDropdown() {
+      const d = document.getElementById('dirDropdown');
+      if (d) d.style.display = 'none';
+    }
     // Dropdown Datas Curtas
     function toggleDcDropdown(e) {
       e.stopPropagation();
@@ -3823,9 +5003,11 @@ self.addEventListener('fetch', e => {
       const wp = document.getElementById('pilhasDropdownWrap');
       const wq = document.getElementById('quebrasDropdownWrap');
       const wd = document.getElementById('dcDropdownWrap');
+      const wdr = document.getElementById('btnDirecionamento'); // dir dropdown container
       if (wp && !wp.contains(e.target)) closePilhasDropdown();
       if (wq && !wq.contains(e.target)) closeQuebrasDropdown();
       if (wd && !wd.contains(e.target)) closeDcDropdown();
+      if (wdr && !wdr.contains(e.target)) closeDirDropdown();
     });
 
     // ══════════════════════════════════════════════════════════════════
@@ -3883,10 +5065,10 @@ self.addEventListener('fetch', e => {
 
       const chkW = 10; // coluna do checkbox
       const cols = [
-        { label: '✓', w: chkW, key: 'chk' },
         { label: 'COD', w: 20, key: 'cod' },
         { label: 'PRODUTO', w: 132, key: 'produto' },
-        { label: 'PILHAS', w: 28, key: 'qtdPilhas' }
+        { label: 'PILHAS', w: 28, key: 'qtdPilhas' },
+        { label: '✓', w: chkW, key: 'chk' }
       ];
 
       const drawHead = (yy) => {
@@ -3989,10 +5171,14 @@ self.addEventListener('fetch', e => {
         return                   { label: 'NORMAL',       txt: c.dark,   pill: [180,180,190], accent: [130,130,140], range: '24 - 25 dias' };
       };
 
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pgW = doc.internal.pageSize.getWidth();
-      const pgH = doc.internal.pageSize.getHeight();
+      if (!window.jspdf || !window.jspdf.jsPDF) return alert('Biblioteca PDF não carregada. Recarregue a página.');
+      let doc, pgW, pgH;
+      try {
+        const { jsPDF } = window.jspdf;
+        doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        pgW = doc.internal.pageSize.getWidth();
+        pgH = doc.internal.pageSize.getHeight();
+      } catch(e) { return alert('Erro ao iniciar PDF: ' + e.message); }
       const hoje = new Date().toLocaleDateString('pt-BR');
 
       const kpiDefs = [
@@ -4122,6 +5308,7 @@ self.addEventListener('fetch', e => {
       const rowH = 8.5;
       const maxY = pgH - 14;
       let lastStatus = null;
+      let pageNum = 1;
 
       const drawFoot = () => {
         doc.setDrawColor(235, 235, 240);
@@ -4223,7 +5410,7 @@ self.addEventListener('fetch', e => {
       doc.text(totalItens + ' itens  -  ' + totalVol.toLocaleString('pt-BR') + ' unidades  -  Gerado ' + hoje, 33, y + 4.5);
 
       const dataArq = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-      doc.save('Datas_Curtas_' + dataArq + '.pdf');
+      try { doc.save('Datas_Curtas_' + dataArq + '.pdf'); } catch(e) { alert('Erro ao salvar PDF: ' + e.message); }
     }
 
 
@@ -4616,9 +5803,154 @@ self.addEventListener('fetch', e => {
       _s7AtualizaContador('s7C4', 's7C4n');
     });
 
-    // ══ FIM: BASE DE ACURACIDADE ══════════════════════════════════════
+    // ══════════════════════════════════════════════════════════════════
+    // MODAL: FALTANTES DA CARGA — funções de controle
+    // ══════════════════════════════════════════════════════════════════
+    function abrirModalFaltantes() {
+      const modal = document.getElementById('modalFaltantesCarga');
+      if (modal) { modal.style.display = 'flex'; }
+    }
+    function fecharModalFaltantes() {
+      const modal = document.getElementById('modalFaltantesCarga');
+      if (modal) { modal.style.display = 'none'; }
+      // Limpa os campos ao fechar
+      const loc  = document.getElementById('inputLocFaltante');
+      const dest = document.getElementById('inputDestFaltante');
+      const area = document.getElementById('areaDadosCarga');
+      const prev = document.getElementById('modalFaltPreview');
+      const warn = document.getElementById('modalFaltWarning');
+      if (loc)  loc.value  = '';
+      if (dest) dest.value = '';
+      if (area) area.value = '';
+      if (prev) prev.classList.add('hidden');
+      if (warn) warn.classList.add('hidden');
+    }
+    // Fecha o modal ao clicar no overlay externo
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('modalFaltantesCarga');
+      if (modal && e.target === modal) fecharModalFaltantes();
+    });
 
+    async function processarFaltantesCarga(formato) {
+      const warn    = document.getElementById('modalFaltWarning');
+      const preview = document.getElementById('modalFaltPreview');
+      const prevTxt = document.getElementById('modalFaltPreviewTxt');
+
+      // Valida se há base de estoque carregada
+      if (!db || db.length === 0) {
+        warn.classList.remove('hidden');
+        return;
+      }
+      warn.classList.add('hidden');
+
+      const rawTexto = document.getElementById('areaDadosCarga').value;
+      if (!rawTexto.trim()) return alert('Cole os dados da carga no campo de texto.');
+
+      // ── PARSING ──────────────────────────────────────────────────
+      const parsed = _s7ParseCargaFull(rawTexto);
+      if (parsed.size === 0) {
+        return alert('Nenhum produto detectado. Verifique o formato colado\n(6 campos por linha: Cod, Produto, Carga, Carregada, Faltante, %).');
+      }
+
+      // Filtra apenas itens com qt Faltante > 0
+      const faltantes = [];
+      parsed.forEach((v, cod) => {
+        if (v.faltante > 0) {
+          faltantes.push({ cod, qtFaltante: v.faltante });
+        }
+      });
+
+      if (faltantes.length === 0) {
+        return alert('Nenhum faltante encontrado (qt Faltante = 0 em todos os itens).');
+      }
+
+      // ── MONTA DIRECIONAMENTO ────────────────────────────────────
+      const loc  = (document.getElementById('inputLocFaltante')  || {}).value || '';
+      const dest = (document.getElementById('inputDestFaltante') || {}).value || '';
+      const l = loc.trim(), d = dest.trim();
+      const direcionamentoLabel = (l && d) ? l + ' ' + d : (d || l || 'FALTANTE CARGA');
+
+      // ── INTEGRA AO pedidosDB (push temporário) ───────────────────
+      const pedidosAdicionados = faltantes.map(f => ({
+        cod: f.cod,
+        qtdPedida: f.qtFaltante,
+        direcionamento: direcionamentoLabel
+      }));
+      pedidosDB.push(...pedidosAdicionados);
+
+      // Preview informativo
+      prevTxt.innerHTML =
+        '<b>' + faltantes.length + '</b> faltante(s) adicionado(s) &nbsp;|&nbsp;' +
+        ' Localizador: <b>' + direcionamentoLabel + '</b>';
+      preview.classList.remove('hidden');
+
+      // Garante que o botão de direcionamento apareça
+      const btnDir = document.getElementById('btnDirecionamento');
+      if (btnDir) btnDir.style.display = 'inline-block';
+
+      // ── DESPACHA PARA O FORMATO CORRETO ──────────────────────────
+      try {
+        if (formato === 'pdf') {
+          exportarDirecionamentoPDF();
+        } else {
+          await exportarDataCurtaComDirecionamento();
+        }
+      } finally {
+        // Remove apenas os faltantes temporários (mantém pedidos normais)
+        pedidosDB.splice(pedidosDB.length - pedidosAdicionados.length, pedidosAdicionados.length);
+        // Fecha e limpa o modal
+        fecharModalFaltantes();
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════
 
   </script>
+
+  <!-- ══════════════════════════════════════════════════
+       THEME TOGGLE SCRIPT
+  ═══════════════════════════════════════════════════ -->
+  <script>
+    // Initialize theme
+    (function() {
+      const saved = localStorage.getItem('panutrir_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.body.classList.add('dark');
+      }
+    })();
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const body = document.body;
+      const isDark = html.classList.contains('dark');
+      html.classList.toggle('dark', !isDark);
+      body.classList.toggle('dark', !isDark);
+      localStorage.setItem('panutrir_theme', isDark ? 'light' : 'dark');
+      updateThemeToggle(!isDark);
+    }
+
+    function updateThemeToggle(isDark) {
+      const sun = document.getElementById('theme-icon-sun');
+      const moon = document.getElementById('theme-icon-moon');
+      const label = document.getElementById('theme-label');
+      if (isDark) {
+        sun.classList.remove('hidden');
+        moon.classList.add('hidden');
+        label.textContent = 'Claro';
+      } else {
+        sun.classList.add('hidden');
+        moon.classList.remove('hidden');
+        label.textContent = 'Escuro';
+      }
+    }
+
+    // Set initial state
+    document.addEventListener('DOMContentLoaded', () => {
+      updateThemeToggle(document.documentElement.classList.contains('dark'));
+    });
+  </script>
+
 </body>
 </html>
