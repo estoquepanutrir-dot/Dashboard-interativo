@@ -919,6 +919,57 @@
   </style>
 </head>
 <body>
+  <!-- ── MODAL ATUALIZAÇÃO VENDAS SEMANAIS ────────────── -->
+  <div id="modal-vendas-semanais" style="display:none;position:fixed;inset:0;z-index:500;background:var(--md-scrim);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;">
+    <div style="background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:2rem;padding:2rem;max-width:540px;width:calc(100% - 2rem);box-shadow:0 8px 48px rgba(0,0,0,0.18);max-height:80vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;">
+        <div style="width:40px;height:40px;border-radius:50%;background:rgba(103,80,164,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--md-primary)" stroke-width="2.5" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+        </div>
+        <div>
+          <h2 style="font-size:14px;font-weight:900;color:var(--md-on-surface);margin:0;letter-spacing:-0.02em;">Atualizar Vendas Diárias por SKU</h2>
+          <p style="font-size:10px;color:var(--md-on-surface-variant);font-weight:600;margin:0;">Cole os novos valores no formato: COD=VALOR (um por linha)</p>
+        </div>
+        <button onclick="fecharModalVendasSemanais()" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--md-on-surface-variant);padding:4px;border-radius:50%;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div style="background:rgba(103,80,164,0.06);border:1px solid rgba(103,80,164,0.15);border-radius:1rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:10px;font-weight:600;color:var(--md-on-surface-variant);line-height:1.6;">
+        <b style="color:var(--md-primary);">Formato esperado:</b> um SKU por linha<br>
+        <code style="font-size:9px;opacity:0.9;">2=10046.8<br>5=7013.4<br>81661=14647.2</code>
+      </div>
+      <textarea id="inputVendasSemanais" placeholder="Cole aqui os novos valores de venda diária..." style="width:100%;min-height:180px;border:1.5px solid var(--md-outline-variant);border-radius:1rem;padding:0.85rem 1rem;font-size:11px;font-family:'Outfit',monospace;font-weight:600;color:var(--md-on-surface);background:rgba(231,224,236,0.2);outline:none;resize:vertical;line-height:1.7;"></textarea>
+      <p id="vendas-parse-preview" style="font-size:10px;font-weight:700;color:var(--md-on-surface-variant);margin:8px 4px 0;min-height:16px;"></p>
+      <div style="display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap;">
+        <button onclick="aplicarVendasSemanais()" style="flex:1;padding:0.85rem;background:var(--md-primary);color:var(--md-on-primary);border:none;border-radius:99px;font-size:11px;font-weight:900;cursor:pointer;letter-spacing:0.06em;font-family:'Outfit',sans-serif;">
+          Aplicar Atualização
+        </button>
+        <button onclick="fecharModalVendasSemanais()" style="padding:0.85rem 1.5rem;background:rgba(103,80,164,0.08);color:var(--md-on-surface-variant);border:1px solid var(--md-outline-variant);border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ALERTA SEMANAL (segunda-feira) ────────────────── -->
+  <div id="modal-alerta-semanal" style="display:none;position:fixed;inset:0;z-index:499;background:rgba(0,0,0,0.2);backdrop-filter:blur(3px);align-items:flex-end;justify-content:center;padding:1.5rem;">
+    <div style="background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:1.75rem;padding:1.25rem 1.5rem;max-width:480px;width:100%;box-shadow:0 4px 32px rgba(0,0,0,0.14);display:flex;align-items:center;gap:12px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:rgba(231,125,26,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E77D1A" stroke-width="2.5" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <p style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin:0 0 2px;letter-spacing:-0.01em;">Lembrete semanal</p>
+        <p style="font-size:10px;font-weight:600;color:var(--md-on-surface-variant);margin:0;line-height:1.4;">Hoje é segunda-feira — hora de atualizar a lista de <b>vendas diárias por SKU</b>.</p>
+      </div>
+      <button onclick="abrirModalVendasSemanais(); fecharAlertaSemanal()" style="padding:6px 14px;background:var(--md-primary);color:var(--md-on-primary);border:none;border-radius:99px;font-size:9px;font-weight:900;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;letter-spacing:0.04em;">
+        Atualizar
+      </button>
+      <button onclick="fecharAlertaSemanal()" style="background:none;border:none;cursor:pointer;color:var(--md-on-surface-variant);padding:4px;margin-left:-4px;flex-shrink:0;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
   <!-- ── ALERTA MODAL ─────────────────────────────────── -->
   <div id="alerta-modal">
     <div id="alerta-box">
@@ -1123,6 +1174,13 @@
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
         <span id="theme-label">Escuro</span>
+      </button>
+      <!-- Botão discreto: atualizar vendas semanais -->
+      <button onclick="abrirModalVendasSemanais()" title="Atualizar lista de vendas diárias por SKU"
+        class="md3-icon-btn" id="btn-atualizar-vendas"
+        style="width:auto;border-radius:99px;padding:6px 12px;gap:5px;font-size:9px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;display:flex;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+        <span class="hidden sm:inline">Vendas</span>
       </button>
       <!-- Histórico button -->
       <button id="hist-btn" onclick="toggleHistorico()" title="Histórico de importações"
@@ -1910,14 +1968,139 @@
       if (p.includes('NOSSA PADARIA')) return 'NOSSA PADARIA';
       return 'PANUTRIR';
     }
-    function getValidityStatus(diff) {
-      if (diff < 0) return 'VENCIDO';
-      if (diff < 10) return 'PRAZO_LIMITE';
-      if (diff <= 19) return 'URGENTE';
-      if (diff <= 21) return 'CRITICO';
-      if (diff <= 23) return 'ATENCAO';
-      if (diff <= 25) return 'NORMAL';
-      return 'SEGURO';
+    // ── Vendas diárias por SKU (unidades/dia) — BASE DE CÁLCULO GLOBAL ──
+    const vendasDiariasPorSKU = {
+  "2": 10046.8,
+  "5": 7013.4,
+  "6": 1962.6,
+  "11": 865.4,
+  "16": 520.4,
+  "655": 1962.8,
+  "669": 1420.4,
+  "1224": 3038,
+  "2279": 190,
+  "69251": 4067,
+  "81571": 669.4,
+  "81581": 1970.8,
+  "81591": 490,
+  "81661": 14647.2,
+  "82051": 7338.4,
+  "85181": 753.6,
+  "85841": 863.8,
+  "86151": 6678.2,
+  "121581": 184.4,
+  "121801": 261.4,
+  "121811": 162.4,
+  "121821": 64.2,
+  "121831": 48.4,
+  "121841": 89,
+  "121861": 1298.8,
+  "121871": 436.4,
+  "135211": 1737.6,
+  "135221": 1821,
+  "135231": 2139.2,
+  "135241": 1435,
+  "141441": 380.8,
+  "141951": 30.2,
+  "145511": 869.6,
+  "145521": 3356.2,
+  "162272": 191.6,
+  "162275": 536.6,
+  "162276": 261.6,
+  "162358": 306.6,
+  "162396": 1647.4,
+  "162767": 953.2,
+  "162775": 127.6,
+  "162783": 144.6,
+  "162784": 170.2,
+  "162800": 2960.4,
+  "162801": 1689,
+  "162802": 762.8,
+  "162920": 528.6,
+  "162921": 2045,
+  "162922": 262.4,
+  "162923": 1148.4,
+};
+
+    /**
+     * Calcula o status de validade com base no giro de estoque.
+     * @param {number} diff       - Dias restantes até o vencimento
+     * @param {number} qtd        - Quantidade em estoque do lote
+     * @param {string} cod        - Código do SKU
+     * @returns {string} status
+     *
+     * Regra de negócio:
+     *   Meta inegociável: produto não pode chegar ao consumidor com < 20 dias.
+     *   Logo, o CD tem apenas (diff - 20) dias para escoar o estoque.
+     *
+     *   diasCobertura = qtd / vendasDiarias   (tempo para escoar ao ritmo atual)
+     *   diasParaEscoar = diff - 20            (prazo disponível no CD)
+     *
+     *   CRÍTICO  : diff <= 20  OU  diasCobertura > diasParaEscoar  (já furou ou vai furar)
+     *   URGENTE  : diasCobertura >= (diasParaEscoar - 1)  (margem ≤ 1 dia — risco alto)
+     *   ATENÇÃO  : diasCobertura < diasParaEscoar com boa folga  (no radar, mas sob controle)
+     *   NORMAL   : < 25 dias mas sem vendas mapeadas  (fallback conservador)
+     *   SEGURO   : diff > 25
+     */
+    /**
+     * Matriz de Risco por Giro — Hierarquia de Status de Validade
+     * Meta inegociável: produto NÃO pode chegar ao consumidor com < 15 dias de prazo.
+     * Prazo Limite      : diff <= 15  (produto já está na zona de perda)
+     * Janela Útil       : diff - 15   (dias disponíveis no CD para escoar)
+     * Dias de Cobertura : qtd / vendasDiarias
+     *
+     * Prioridade (ordem de avaliação):
+     *   VENCIDO       : diff < 0
+     *   PRAZO_LIMITE  : diff <= 15           — produto não sai mais com prazo seguro
+     *   URGENTE       : diasCobertura > janelaUtil   — giro não comporta, vai vencer no CD
+     *   CRITICO       : (janelaUtil - diasCobertura) <= 1  — folga de apenas 1 dia ou menos
+     *   ATENCAO       : no radar (diff <= 25) com folga > 1 dia
+     *   SEGURO        : diff > 25
+     *   NORMAL        : fallback sem dados de venda mapeados
+     */
+    function getValidityStatus(diff, qtd, cod) {
+      if (diff < 0)  return 'VENCIDO';
+
+      // Fora do radar de data curta — seguro
+      if (diff > 25) return 'SEGURO';
+
+      // PRAZO LIMITE: produto não pode mais sair com prazo seguro ao consumidor
+      if (diff <= 15) return 'PRAZO_LIMITE';
+
+      // A partir daqui: diff está entre 16 e 25 dias (zona de radar)
+      const vendasDiarias = vendasDiariasPorSKU[String(cod).trim()];
+
+      // Se não há venda mapeada, usa a regra clássica por prazo (fallback conservador)
+      if (!vendasDiarias || vendasDiarias <= 0) {
+        if (diff <= 17) return 'CRITICO';
+        if (diff <= 20) return 'URGENTE';
+        if (diff <= 23) return 'ATENCAO';
+        return 'NORMAL';
+      }
+
+      const diasCobertura = (qtd || 0) / vendasDiarias; // dias para escoar ao ritmo atual
+
+      // URGENTE: cobertura > 3 dias — giro não comporta o estoque no prazo restante
+      if (diasCobertura > 3) return 'URGENTE';
+
+      // CRÍTICO: cobertura > 1,5 dias — risco elevado de perda
+      if (diasCobertura > 1.5) return 'CRITICO';
+
+      // ATENÇÃO: cobertura > 1 dia — no radar, mas controlável
+      if (diasCobertura > 1) return 'ATENCAO';
+
+      // NORMAL: cobertura <= 1 dia — giro absorve o estoque com folga
+      return 'NORMAL';
+    }
+
+    /**
+     * Retorna a venda diária e os dias de cobertura de um item do db.
+     * Útil para Excel gerencial e KPIs.
+     */
+    function getGiroInfo(cod, qtd) {
+      const vd = vendasDiariasPorSKU[String(cod).trim()];
+      if (!vd || vd <= 0) return { vendaDiaria: null, diasCobertura: null };
+      return { vendaDiaria: vd, diasCobertura: +(qtd / vd).toFixed(1) };
     }
     function getValidityBadgeClass(s) {
       return ({ VENCIDO:'status-vencido', URGENTE:'status-urgente', CRITICO:'status-critico', ATENCAO:'status-atencao', SEGURO:'status-seguro' })[s] || 'status-seguro';
@@ -2005,7 +2188,7 @@
           marca: getMarca(produto),
           operacao: cod === DONATION_CODE ? 'DOACAO' : 'EXPEDICAO',
           isDataCurta: diff <= 25,
-          validadeStatus: getValidityStatus(diff)
+          validadeStatus: getValidityStatus(diff, qtd, cod)
         });
       });
 
@@ -2099,16 +2282,29 @@
       
       const containerKpi = document.getElementById('kpiSaudeEstoque');
       if (containerKpi) {
-        const items = [
-          { label: 'Normal (24-25 dias)', val: s.valMap.NORMAL || 0, bg: 'rgba(0,0,0,0.02)', fg: '#1C1C1E', border: '1px solid #eee' },
-          { label: 'Atenção (22-23 dias)', val: s.valMap.ATENCAO || 0, bg: '#FFCC00', fg: '#1C1C1E' },
-          { label: 'Crítico (20-21 dias)', val: s.valMap.CRITICO || 0, bg: '#FF9500', fg: '#FFFFFF' },
-          { label: 'Urgente (10-19 dias)', val: s.valMap.URGENTE || 0, bg: '#FF3B30', fg: '#FFFFFF' },
-          { label: 'Prazo Limite (Menos de 10 dias)', val: s.valMap.PRAZO_LIMITE || 0, bg: '#8B4513', fg: '#FFFFFF' },
-          { label: 'Vencido', val: s.valMap.VENCIDO || 0, bg: '#1C1C1E', fg: '#FFFFFF' }
+        // Saúde do Estoque: penalizada pelo volume em URGENTE e CRÍTICO (risco real de perda)
+        const totalGeral  = list.reduce((acc, i) => acc + i.qtd, 0);
+        const qtdUrgente  = s.valMap.URGENTE  || 0;
+        const qtdCritico  = s.valMap.CRITICO  || 0;
+        const qtdRisco    = qtdUrgente + qtdCritico;
+        const percSaude   = totalGeral > 0 ? Math.max(0, ((totalGeral - qtdRisco) / totalGeral) * 100) : 100;
+        const saudeColor  = percSaude >= 90 ? '#34C759' : percSaude >= 70 ? '#FF9500' : '#FF3B30';
+
+        const statusItems = [
+          { label: 'Normal — Giro com folga',          val: s.valMap.NORMAL || 0,       bg: 'rgba(0,0,0,0.02)', fg: '#1C1C1E', border: '1px solid #eee' },
+          { label: 'Atenção — Giro Saudável',          val: s.valMap.ATENCAO || 0,      bg: '#FFCC00',          fg: '#1C1C1E' },
+          { label: 'Crítico — Folga ≤ 1 dia',         val: s.valMap.CRITICO || 0,      bg: '#FF9500',          fg: '#FFFFFF' },
+          { label: 'Urgente — Cobertura > 3 dias',       val: s.valMap.URGENTE || 0,      bg: '#FF3B30',          fg: '#FFFFFF' },
+          { label: 'Prazo Limite (≤ 15 dias)',         val: s.valMap.PRAZO_LIMITE || 0, bg: '#8B4513',          fg: '#FFFFFF' },
+          { label: 'Vencido',                          val: s.valMap.VENCIDO || 0,      bg: '#1C1C1E',          fg: '#FFFFFF' }
         ];
-        containerKpi.innerHTML = items.map(i => `
-          <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.45rem 0.8rem; border-radius: 10px; background: ${i.bg}; color: ${i.fg}; border: ${i.border || 'none'};">
+        containerKpi.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.8rem 0.65rem;border-radius:12px;background:rgba(0,0,0,0.025);margin-bottom:2px;border:1px solid rgba(0,0,0,0.06);">
+            <span style="font-weight:900;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#666;">Saúde do Estoque</span>
+            <span style="font-weight:900;font-size:1.4rem;letter-spacing:-0.03em;color:${saudeColor};">${percSaude.toFixed(1)}%</span>
+          </div>` +
+          statusItems.map(i => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.4rem 0.8rem; border-radius: 10px; background: ${i.bg}; color: ${i.fg}; border: ${i.border || 'none'};">
             <span style="font-weight: 800; font-size: 10px; text-transform: uppercase; letter-spacing: 0.03em;">${i.label}</span>
             <span style="font-weight: 900; font-size: 14px;">${Math.round(i.val).toLocaleString('pt-BR')}</span>
           </div>
@@ -2117,9 +2313,12 @@
     
 
       const brands = ['PANUTRIR','UNISABOR','MUFFATO','DEL GRANO','NOSSA PADARIA'];
+      // Total geral de itens em data curta de TODAS as marcas
+      const totalGeralDC = brands.reduce((acc, b) => acc + (s.brandShort[b] || 0), 0);
       const brandPercs = brands.map(b => ({
         label: b,
-        val: s.brandTotal[b] > 0 ? ((s.brandShort[b]||0) / s.brandTotal[b] * 100) : 0
+        // % que esta marca representa do total GERAL de datas curtas do CD
+        val: totalGeralDC > 0 ? ((s.brandShort[b] || 0) / totalGeralDC * 100) : 0
       })).sort((a,b) => b.val - a.val);
 
       
@@ -2192,7 +2391,7 @@
               bodyFont: { size: 10, weight: '600', family: 'Inter' },
               callbacks: {
                 label: (ctx) => id === 'chartMarcaDataCurta'
-                  ? `${ctx.label}  ${ctx.parsed.y}%`
+                  ? `${ctx.label}  ${ctx.parsed.y.toFixed(1)}% do total de DCs`
                   : `${ctx.label}: ${(ctx.parsed.y || ctx.parsed).toLocaleString('pt-BR')}`
               }
             }
@@ -2981,9 +3180,14 @@
       const workbook = new ExcelJS.Workbook();
       const ws = workbook.addWorksheet('Datas Curtas');
       ws.columns = [
-        {header:'COD',key:'COD',width:10},{header:'PRODUTO',key:'PRODUTO',width:40},
-        {header:'QTD',key:'QTD_TOTAL',width:10},{header:'VALIDADE',key:'VALIDADE',width:15},
-        {header:'DIAS',key:'PRAZO',width:10},{header:'STATUS',key:'STATUS',width:20}
+        {header:'COD',           key:'COD',           width:10},
+        {header:'PRODUTO',       key:'PRODUTO',        width:40},
+        {header:'QTD',           key:'QTD_TOTAL',      width:10},
+        {header:'VENDA DIÁRIA',  key:'VENDA_DIARIA',   width:14},
+        {header:'COBERTURA (dias)',key:'DIAS_COBERTURA',width:16},
+        {header:'VALIDADE',      key:'VALIDADE',       width:15},
+        {header:'DIAS',          key:'PRAZO',          width:10},
+        {header:'STATUS',        key:'STATUS',         width:20}
       ];
       ws.getRow(1).eachCell(cell => { 
         cell.font = { bold:true, color:{ argb:'FF1C1C1E' } }; 
@@ -2995,11 +3199,21 @@
       if (itens.length === 0) return alert("Sem dados.");
       
       itens.forEach(item => {
-        let st, col;
-        const statusInfo = getStatusCorDC(item.PRAZO);
-        st = statusInfo.st; col = statusInfo.col;
+        const statusInfo = getStatusCorDC(item.PRAZO, item.QTD_TOTAL, item.COD);
+        const { st, col } = statusInfo;
+        const giro = getGiroInfo(item.COD, item.QTD_TOTAL);
 
-        const r = ws.addRow({...item, STATUS: st});
+        const r = ws.addRow({
+          ...item,
+          VENDA_DIARIA:    giro.vendaDiaria !== null ? giro.vendaDiaria : '—',
+          DIAS_COBERTURA:  giro.diasCobertura !== null ? giro.diasCobertura : '—',
+          STATUS: st
+        });
+        // Centraliza colunas numéricas para evitar confusão com a coluna de validade
+        r.getCell('DIAS_COBERTURA').alignment = { horizontal: 'center' };
+        r.getCell('VENDA_DIARIA').alignment   = { horizontal: 'center' };
+        r.getCell('QTD_TOTAL').alignment      = { horizontal: 'center' };
+        r.getCell('PRAZO').alignment           = { horizontal: 'center' };
         
         if (col && col !== "FFFFFFFF") {
           r.eachCell(c => {
@@ -3012,15 +3226,15 @@
       });
       // Linha de legenda ao final
       ws.addRow([]);
-      const legendRow = ws.addRow(['LEGENDA:','','','','','']);
+      const legendRow = ws.addRow(['LEGENDA:','','','','','','','']);
       legendRow.getCell(1).font = { bold: true, size: 8, color: { argb: 'FF888888' } };
 
       const legendas = [
-        ['FFFFFFFF', 'FF1C1C1E', 'Normal (24 e 25 dias)'],
-        ['FFFFCC00', 'FF1C1C1E', 'Atenção (22-23 dias)'],
-        ['FFFF9500', 'FFFFFFFF', 'Crítico (20-21 dias)'],
-        ['FFFF3B30', 'FFFFFFFF', 'Urgente (10-19 dias)'],
-        ['FF8B4513', 'FFFFFFFF', 'Prazo Limite (<10 dias)'],
+        ['FFFFFFFF', 'FF1C1C1E', 'Normal — Cobertura <= 1 dia (giro absorve o estoque)'],
+        ['FFFFCC00', 'FF1C1C1E', 'Atenção — Cobertura > 1 dia (no radar, controlável)'],
+        ['FFFF9500', 'FFFFFFFF', 'Crítico — Cobertura > 1,5 dias (risco de perda elevado)'],
+        ['FFFF3B30', 'FFFFFFFF', 'Urgente — Cobertura > 3 dias (giro não comporta o estoque)'],
+        ['FF8B4513', 'FFFFFFFF', 'Prazo Limite (<= 15 dias — produto não sai com prazo seguro)'],
         ['FF1C1C1E', 'FFFFFFFF', 'Vencido (<0 dias)'],
       ];
       legendas.forEach(([bg, fg, texto]) => {
@@ -3239,13 +3453,33 @@
       return resultado;
     }
 
-    function getStatusCorDC(prazo) {
-      if (prazo < 0) return { st: "VENCIDO", col: "FF1C1C1E", textDark: false };
-      if (prazo < 10) return { st: "PRAZO LIMITE", col: "FF8B4513", textDark: false };
-      if (prazo <= 19) return { st: "URGENTE", col: "FFFF3B30", textDark: false };
-      if (prazo <= 21) return { st: "CRÍTICO", col: "FFFF9500", textDark: false };
-      if (prazo <= 23) return { st: "ATENÇÃO", col: "FFFFCC00", textDark: true };
-      return             { st: "NORMAL",   col: "FFFFFFFF", textDark: true  };
+    /**
+     * getStatusCorDC — versão com Matriz de Giro.
+     * Aceita (prazo, qtd, cod) para aplicar a lógica de giro quando disponível.
+     * Retorna { st, col, textDark } para uso no Excel e PDF.
+     */
+    function getStatusCorDC(prazo, qtd, cod) {
+      // Determina o status real via matriz de giro (quando qtd e cod disponíveis)
+      let status;
+      if (qtd !== undefined && cod !== undefined) {
+        status = getValidityStatus(prazo, qtd, cod);
+      } else {
+        // Fallback clássico para chamadas legadas sem qtd/cod (respeita prazo de 15 dias)
+        if (prazo < 0)    status = 'VENCIDO';
+        else if (prazo <= 15) status = 'PRAZO_LIMITE';
+        else if (prazo <= 17) status = 'CRITICO';
+        else if (prazo <= 20) status = 'URGENTE';
+        else if (prazo <= 23) status = 'ATENCAO';
+        else status = 'NORMAL';
+      }
+      switch (status) {
+        case 'VENCIDO':      return { st: 'VENCIDO',      col: 'FF1C1C1E', textDark: false };
+        case 'PRAZO_LIMITE': return { st: 'PRAZO LIMITE', col: 'FF8B4513', textDark: false };
+        case 'CRITICO':      return { st: 'CRÍTICO',      col: 'FFFF9500', textDark: false };
+        case 'URGENTE':      return { st: 'URGENTE',      col: 'FFFF3B30', textDark: false };
+        case 'ATENCAO':      return { st: 'ATENÇÃO',      col: 'FFFFCC00', textDark: true  };
+        default:             return { st: 'NORMAL',       col: 'FFFFFFFF', textDark: true  };
+      }
     }
 
     // ══════════════════════════════════════════════════════════════════
@@ -3284,12 +3518,12 @@
       const W  = [255, 255, 255];
 
       function statusPB(prazo) {
-        if (prazo < 0)   return { label: 'VENCIDO'     };
-        if (prazo < 10)  return { label: 'PRAZO LIMITE'};
-        if (prazo <= 19) return { label: 'URGENTE'     };
-        if (prazo <= 21) return { label: 'CRITICO'     };
-        if (prazo <= 23) return { label: 'ATENCAO'     };
-        return                   { label: 'NORMAL'      };
+        if (prazo < 0)   return { label: 'VENCIDO'      };
+        if (prazo < 10)  return { label: 'PRAZO LIMITE' };
+        if (prazo <= 20) return { label: 'CRITICO'      };
+        if (prazo <= 21) return { label: 'URGENTE'      };
+        if (prazo <= 23) return { label: 'ATENCAO'      };
+        return                   { label: 'NORMAL'       };
       }
 
       // ── MÉTRICAS ─────────────────────────────────────────────────
@@ -3774,15 +4008,17 @@
       const ws = workbook.addWorksheet('DC com Direcionamento');
 
       ws.columns = [
-        { header: 'COD',           key: 'COD',           width: 12 },
-        { header: 'PRODUTO',       key: 'PRODUTO',        width: 42 },
-        { header: 'QTD ESTOQUE',   key: 'QTD_TOTAL',     width: 13 },
-        { header: 'VALIDADE',      key: 'VALIDADE',       width: 14 },
-        { header: 'DIAS',          key: 'PRAZO',          width: 8  },
-        { header: 'STATUS',        key: 'STATUS',         width: 12 },
-        { header: 'DIRECIONAMENTO',key: 'DIRECIONAMENTO', width: 28 },
-        { header: 'QTD PEDIDA',    key: 'QTD_PEDIDA',    width: 13 },
-        { header: 'QTD RESTANTE',  key: 'QTD_RESTANTE',  width: 14 },
+        { header: 'COD',              key: 'COD',           width: 12 },
+        { header: 'PRODUTO',          key: 'PRODUTO',        width: 42 },
+        { header: 'QTD ESTOQUE',      key: 'QTD_TOTAL',     width: 13 },
+        { header: 'VALIDADE',         key: 'VALIDADE',       width: 14 },
+        { header: 'DIAS',             key: 'PRAZO',          width: 8  },
+        { header: 'STATUS',           key: 'STATUS',         width: 12 },
+        { header: 'VENDA DIÁRIA',     key: 'VENDA_DIARIA',  width: 14 },
+        { header: 'COBERTURA (DIAS)', key: 'COBERTURA',     width: 16 },
+        { header: 'DIRECIONAMENTO',   key: 'DIRECIONAMENTO', width: 28 },
+        { header: 'QTD PEDIDA',       key: 'QTD_PEDIDA',    width: 13 },
+        { header: 'QTD RESTANTE',     key: 'QTD_RESTANTE',  width: 14 },
       ];
 
       // Header row
@@ -3796,7 +4032,7 @@
       });
 
       resultado.forEach(item => {
-        const { st, col, textDark } = getStatusCorDC(item.PRAZO);
+        const { st, col, textDark } = getStatusCorDC(item.PRAZO, item.QTD_TOTAL, item.COD);
         const textArgb = textDark ? 'FF1C1C1E' : 'FFFFFFFF';
 
         // Se não tem direcionamento, QTD_RESTANTE = QTD_TOTAL (estoque intacto)
@@ -3814,10 +4050,19 @@
           VALIDADE:      item.VALIDADE,
           PRAZO:         item.PRAZO,
           STATUS:        statusFinal,
+          VENDA_DIARIA:  (() => { const vd = vendasDiariasPorSKU[String(item.COD).trim()]; return vd ? +vd.toFixed(1) : '—'; })(),
+          COBERTURA:     (() => { const vd = vendasDiariasPorSKU[String(item.COD).trim()]; return vd && vd > 0 ? +(item.QTD_TOTAL / vd).toFixed(1) : '—'; })(),
           DIRECIONAMENTO:item.DIRECIONAMENTO || '—',
           QTD_PEDIDA:    item.QTD_PEDIDA  > 0 ? item.QTD_PEDIDA  : '',
           QTD_RESTANTE:  qtdRestante,
         });
+        // Centraliza colunas numéricas para evitar confusão com a coluna de validade
+        r.getCell('COBERTURA').alignment    = { horizontal: 'center' };
+        r.getCell('VENDA_DIARIA').alignment = { horizontal: 'center' };
+        r.getCell('QTD_TOTAL').alignment    = { horizontal: 'center' };
+        r.getCell('PRAZO').alignment        = { horizontal: 'center' };
+        r.getCell('QTD_PEDIDA').alignment   = { horizontal: 'center' };
+        r.getCell('QTD_RESTANTE').alignment = { horizontal: 'center' };
 
         if (item._esgotado) {
           // Lote zerado pelo pedido → fundo VERDE para destacar esgotamento
@@ -3849,11 +4094,11 @@
       legendRow.getCell(1).font = { bold: true, size: 8, color: { argb: 'FF888888' } };
       
       const legendas = [
-        ['FFFFFFFF', 'FF1C1C1E', 'Normal (24 e 25 dias)'],
-        ['FFFFCC00', 'FF1C1C1E', 'Atenção (22-23 dias)'],
-        ['FFFF9500', 'FFFFFFFF', 'Crítico (20-21 dias)'],
-        ['FFFF3B30', 'FFFFFFFF', 'Urgente (10-19 dias)'],
-        ['FF8B4513', 'FFFFFFFF', 'Prazo Limite (<10 dias)'],
+        ['FFFFFFFF', 'FF1C1C1E', 'Normal — Cobertura <= 1 dia (giro absorve o estoque)'],
+        ['FFFFCC00', 'FF1C1C1E', 'Atenção — Cobertura > 1 dia (no radar, controlável)'],
+        ['FFFF9500', 'FFFFFFFF', 'Crítico — Cobertura > 1,5 dias (risco de perda elevado)'],
+        ['FFFF3B30', 'FFFFFFFF', 'Urgente — Cobertura > 3 dias (giro não comporta o estoque)'],
+        ['FF8B4513', 'FFFFFFFF', 'Prazo Limite (<= 15 dias — produto não sai com prazo seguro)'],
         ['FF1C1C1E', 'FFFFFFFF', 'Vencido (<0 dias)'],
         ['FF34C759', 'FFFFFFFF', 'TOTALMENTE DIRECIONADO'],
       ];
@@ -4316,12 +4561,12 @@
       // STATUS COUNT CARDS WITH LEGEND BELOW
       if (countCardsEl) {
         const statusDefs = [
-          { key: 'VENCIDO',      bg: '#1C1C1E', fg: '#FFFFFF', label: 'Vencido',      range: 'Expirado'       },
-          { key: 'PRAZO_LIMITE', bg: '#8B4513', fg: '#FFFFFF', label: 'Prazo Limite', range: '< 10 dias'      },
-          { key: 'URGENTE',      bg: '#FF3B30', fg: '#FFFFFF', label: 'Urgente',      range: '10 – 19 dias'   },
-          { key: 'CRITICO',      bg: '#FF9500', fg: '#FFFFFF', label: 'Crítico',      range: '20 – 21 dias'   },
-          { key: 'ATENCAO',      bg: '#FFCC00', fg: '#1C1C1E', label: 'Atenção',      range: '22 – 23 dias'   },
-          { key: 'NORMAL',       bg: 'rgba(0,0,0,0.05)', fg: '#1C1C1E', label: 'Normal', range: '24 – 25 dias' },
+          { key: 'VENCIDO',      bg: '#1C1C1E', fg: '#FFFFFF', label: 'Vencido',      range: 'Expirado'              },
+          { key: 'PRAZO_LIMITE', bg: '#8B4513', fg: '#FFFFFF', label: 'Prazo Limite', range: '< 10 dias'             },
+          { key: 'CRITICO',      bg: '#FF9500', fg: '#FFFFFF', label: 'Crítico',      range: 'Giro Não Comporta'     },
+          { key: 'URGENTE',      bg: '#FF3B30', fg: '#FFFFFF', label: 'Urgente',      range: 'Margem ≤ 1 dia'        },
+          { key: 'ATENCAO',      bg: '#FFCC00', fg: '#1C1C1E', label: 'Atenção',      range: 'Giro Saudável'         },
+          { key: 'NORMAL',       bg: 'rgba(0,0,0,0.05)', fg: '#1C1C1E', label: 'Normal', range: '24 – 25 dias'      },
         ];
         const countMap = {};
         statusDefs.forEach(s => countMap[s.key] = 0);
@@ -5163,12 +5408,12 @@ self.addEventListener('fetch', e => {
       if (itens.length === 0) return alert('Sem dados.');
 
       const statusDC = (prazo) => {
-        if (prazo < 0)   return { label: 'VENCIDO',      txt: c.branco, pill: [28,28,30],    accent: [28,28,30],    range: 'Vencido'      };
-        if (prazo < 10)  return { label: 'PRAZO LIMITE', txt: c.branco, pill: [139,69,19],   accent: [139,69,19],   range: '< 10 dias'    };
-        if (prazo <= 19) return { label: 'URGENTE',      txt: c.branco, pill: [255,59,48],   accent: [255,59,48],   range: '10 - 19 dias' };
-        if (prazo <= 21) return { label: 'CRITICO',      txt: c.branco, pill: [255,149,0],   accent: [255,149,0],   range: '20 - 21 dias' };
-        if (prazo <= 23) return { label: 'ATENCAO',      txt: c.dark,   pill: [255,204,0],   accent: [180,140,0],   range: '22 - 23 dias' };
-        return                   { label: 'NORMAL',       txt: c.dark,   pill: [180,180,190], accent: [130,130,140], range: '24 - 25 dias' };
+        if (prazo < 0)   return { label: 'VENCIDO',      txt: c.branco, pill: [28,28,30],    accent: [28,28,30],    range: 'Vencido'           };
+        if (prazo <= 15) return { label: 'PRAZO LIMITE', txt: c.branco, pill: [139,69,19],   accent: [139,69,19],   range: '<= 15 dias'        };
+        if (prazo <= 20) return { label: 'URGENTE',      txt: c.branco, pill: [255,59,48],   accent: [255,59,48],   range: 'Dias<=20 e Cob>3'  };
+        if (prazo <= 23) return { label: 'CRITICO',      txt: c.branco, pill: [255,149,0],   accent: [255,149,0],   range: 'Cobertura > 1,5d'  };
+        if (prazo <= 24) return { label: 'ATENCAO',      txt: c.dark,   pill: [255,204,0],   accent: [180,140,0],   range: 'Cobertura > 1d'    };
+        return                   { label: 'NORMAL',       txt: c.dark,   pill: [180,180,190], accent: [130,130,140], range: 'Cobertura <= 1d'   };
       };
 
       if (!window.jspdf || !window.jspdf.jsPDF) return alert('Biblioteca PDF não carregada. Recarregue a página.');
@@ -5182,12 +5427,12 @@ self.addEventListener('fetch', e => {
       const hoje = new Date().toLocaleDateString('pt-BR');
 
       const kpiDefs = [
-        { label: 'VENCIDO',      pill: [28,28,30],    txt: c.branco, range: 'Vencido'      },
-        { label: 'PRAZO LIMITE', pill: [139,69,19],   txt: c.branco, range: '< 10 dias'    },
-        { label: 'URGENTE',      pill: [255,59,48],   txt: c.branco, range: '10 - 19 dias' },
-        { label: 'CRITICO',      pill: [255,149,0],   txt: c.branco, range: '20 - 21 dias' },
-        { label: 'ATENCAO',      pill: [255,204,0],   txt: c.dark,   range: '22 - 23 dias' },
-        { label: 'NORMAL',       pill: [180,180,190], txt: c.dark,   range: '24 - 25 dias' },
+        { label: 'VENCIDO',      pill: [28,28,30],    txt: c.branco, range: 'Vencido'           },
+        { label: 'PRAZO LIMITE', pill: [139,69,19],   txt: c.branco, range: '<= 15 dias'        },
+        { label: 'URGENTE',      pill: [255,59,48],   txt: c.branco, range: 'Dias<=20 e Cob>3'  },
+        { label: 'CRITICO',      pill: [255,149,0],   txt: c.branco, range: 'Cobertura > 1,5d'  },
+        { label: 'ATENCAO',      pill: [255,204,0],   txt: c.dark,   range: 'Cobertura > 1d'    },
+        { label: 'NORMAL',       pill: [180,180,190], txt: c.dark,   range: 'Cobertura <= 1d'   },
       ];
       const grupos = {};
       kpiDefs.forEach(k => grupos[k.label] = { count: 0, vol: 0 });
@@ -5905,6 +6150,98 @@ self.addEventListener('fetch', e => {
 
     // ══════════════════════════════════════════════════════════════════
 
+    // ╔══════════════════════════════════════════════════════════════════╗
+    // ║  PATCH — NOVA LÓGICA DE STATUS POR COBERTURA (Data Curta)       ║
+    // ║  Inserido como bloco isolado. NÃO altera getValidityStatus.     ║
+    // ║                                                                  ║
+    // ║  Cobertura = QTD / VENDA_DIARIA                                  ║
+    // ║  URGENTE      : dias <= 20 E cobertura > 3                       ║
+    // ║  CRITICO      : cobertura > 1.5                                  ║
+    // ║  ATENCAO      : cobertura > 1                                    ║
+    // ║  NORMAL       : cobertura <= 1                                   ║
+    // ║  Regras fixas mantidas: VENCIDO, PRAZO_LIMITE, SEGURO            ║
+    // ╚══════════════════════════════════════════════════════════════════╝
+
+    /**
+     * calcularNovoStatus — Nova classificação baseada em COBERTURA.
+     * @param {number} diff   - Dias restantes até o vencimento
+     * @param {number} qtd    - Quantidade em estoque do lote
+     * @param {string} cod    - Código do SKU
+     * @returns {string} status
+     *
+     * Mantém o comportamento original para: VENCIDO, PRAZO_LIMITE, SEGURO.
+     * Se não houver venda diária mapeada: retorna null (usa original).
+     */
+    function calcularNovoStatus(diff, qtd, cod) {
+      // Regras fixas — inalteradas
+      if (diff < 0)   return 'VENCIDO';
+      if (diff > 25)  return 'SEGURO';
+      if (diff <= 15) return 'PRAZO_LIMITE';
+
+      // Tenta obter venda diária
+      var codStr = String(cod == null ? '' : cod).trim();
+      var vd = (typeof vendasDiariasPorSKU !== 'undefined')
+               ? vendasDiariasPorSKU[codStr]
+               : null;
+
+      // Sem venda mapeada: sinaliza para usar lógica original
+      if (!vd || vd <= 0) return null;
+
+      var cobertura = (qtd || 0) / vd;
+
+      // Nova classificação por cobertura (diff entre 16 e 25)
+      if (cobertura > 3)   return 'URGENTE';
+      if (cobertura > 1.5) return 'CRITICO';
+      if (cobertura > 1)   return 'ATENCAO';
+      return 'NORMAL';
+    }
+
+    /**
+     * Override seguro de getValidityStatus:
+     * Guarda a função original, substitui por wrapper que tenta a nova lógica primeiro.
+     * Se a nova lógica retornar null (sem dados de venda), usa a original.
+     */
+    (function _patchGetValidityStatus() {
+      var _original = getValidityStatus;
+      getValidityStatus = function(diff, qtd, cod) {
+        try {
+          var novoStatus = calcularNovoStatus(diff, qtd, cod);
+          if (novoStatus !== null) return novoStatus;
+        } catch (e) {
+          // fallback silencioso em caso de erro inesperado
+        }
+        return _original(diff, qtd, cod);
+      };
+    })();
+
+    /**
+     * Recalcula validadeStatus em todos os itens do db após o patch.
+     * Garante que KPIs e tabelas usem a nova lógica mesmo para dados já carregados.
+     * Chamado após o DOM estar pronto.
+     */
+    function _patchRecalcularValidadeStatus() {
+      if (!Array.isArray(db) || db.length === 0) return;
+      db.forEach(function(item) {
+        try {
+          item.validadeStatus = getValidityStatus(item.diff, item.qtd, item.cod);
+        } catch (e) { /* item inválido, ignora */ }
+      });
+      // Se há dados filtrados visíveis, força re-render de KPIs e tabela
+      if (typeof applyFilters === 'function') {
+        try { applyFilters(); } catch (e) {}
+      }
+    }
+
+    // Aplica recálculo quando o DOM estiver pronto.
+    // Se processData() for chamado depois (upload de arquivo), o patch já estará ativo
+    // pois getValidityStatus foi sobrescrita antes, então os itens novos já nascem corretos.
+    document.addEventListener('DOMContentLoaded', function() {
+      // Pequeno delay para garantir que processData (se auto-executado) termine primeiro
+      setTimeout(_patchRecalcularValidadeStatus, 150);
+    });
+
+    // ══════════════════════════════════════════════════════════════════
+
   </script>
 
   <!-- ══════════════════════════════════════════════════
@@ -5950,6 +6287,126 @@ self.addEventListener('fetch', e => {
     document.addEventListener('DOMContentLoaded', () => {
       updateThemeToggle(document.documentElement.classList.contains('dark'));
     });
+  <!-- ══════════════════════════════════════════════════
+       SISTEMA DE ALERTA SEMANAL — VENDAS DIÁRIAS POR SKU
+  ═══════════════════════════════════════════════════ -->
+  <script>
+    // ── Abre o modal de edição de vendas ───────────────────
+    function abrirModalVendasSemanais() {
+      // Pré-preenche com os valores atuais
+      const linhas = Object.entries(vendasDiariasPorSKU)
+        .map(([cod, val]) => `${cod}=${val}`)
+        .join('\n');
+      document.getElementById('inputVendasSemanais').value = linhas;
+      document.getElementById('vendas-parse-preview').textContent = '';
+      const m = document.getElementById('modal-vendas-semanais');
+      m.style.display = 'flex';
+      m.style.flexDirection = 'column';
+      m.style.alignItems = 'center';
+      m.style.justifyContent = 'center';
+    }
+
+    function fecharModalVendasSemanais() {
+      document.getElementById('modal-vendas-semanais').style.display = 'none';
+    }
+
+    // ── Preview em tempo real ──────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      const textarea = document.getElementById('inputVendasSemanais');
+      if (textarea) {
+        textarea.addEventListener('input', function() {
+          const linhas = this.value.split('\n').filter(l => l.trim());
+          let ok = 0, erro = 0;
+          linhas.forEach(l => {
+            const parts = l.trim().split('=');
+            if (parts.length === 2 && parts[0].trim() && !isNaN(parseFloat(parts[1]))) ok++;
+            else if (l.trim()) erro++;
+          });
+          const prev = document.getElementById('vendas-parse-preview');
+          if (ok > 0 || erro > 0) {
+            prev.textContent = `${ok} SKU(s) válido(s)${erro > 0 ? ` · ${erro} linha(s) inválida(s)` : ''}`;
+            prev.style.color = erro > 0 ? '#E77D1A' : '#2E7D32';
+          } else {
+            prev.textContent = '';
+          }
+        });
+      }
+
+      // ── Alerta de segunda-feira ──────────────────────────
+      const hoje = new Date();
+      const diaSemana = hoje.getDay(); // 0=dom, 1=seg
+
+      // Verifica se já foi dispensado hoje
+      const ultimaDismiss = localStorage.getItem('panutrir_vendas_dismiss_date');
+      const hojeStr = hoje.toISOString().slice(0, 10);
+
+      if (diaSemana === 1 && ultimaDismiss !== hojeStr) {
+        setTimeout(function() {
+          const modal = document.getElementById('modal-alerta-semanal');
+          if (modal) modal.style.display = 'flex';
+        }, 1800); // aparece 1.8s após carregar a página
+      }
+    });
+
+    function fecharAlertaSemanal() {
+      const modal = document.getElementById('modal-alerta-semanal');
+      if (modal) modal.style.display = 'none';
+      // Salva data de dispensa para não repetir hoje
+      const hoje = new Date().toISOString().slice(0, 10);
+      localStorage.setItem('panutrir_vendas_dismiss_date', hoje);
+    }
+
+    // ── Aplica os novos valores de venda diária ────────────
+    function aplicarVendasSemanais() {
+      const raw = document.getElementById('inputVendasSemanais').value;
+      const linhas = raw.split('\n').filter(l => l.trim());
+      let aplicados = 0, erros = 0;
+      const novoMap = {};
+
+      linhas.forEach(l => {
+        const parts = l.trim().split('=');
+        if (parts.length === 2) {
+          const cod = parts[0].trim();
+          const val = parseFloat(parts[1].trim().replace(',', '.'));
+          if (cod && !isNaN(val) && val >= 0) {
+            novoMap[cod] = val;
+            aplicados++;
+          } else {
+            erros++;
+          }
+        } else if (l.trim()) {
+          erros++;
+        }
+      });
+
+      if (aplicados === 0) {
+        alert('Nenhum valor válido encontrado. Use o formato: COD=VALOR (ex: 2=10046.8)');
+        return;
+      }
+
+      // Atualiza o objeto global vendasDiariasPorSKU
+      Object.keys(vendasDiariasPorSKU).forEach(k => delete vendasDiariasPorSKU[k]);
+      Object.assign(vendasDiariasPorSKU, novoMap);
+
+      // Salva data da última atualização
+      const hoje = new Date().toISOString().slice(0, 10);
+      localStorage.setItem('panutrir_vendas_ultima_atualizacao', hoje);
+      localStorage.setItem('panutrir_vendas_dismiss_date', hoje);
+
+      fecharModalVendasSemanais();
+
+      // Recalcula todos os status com a nova base
+      if (typeof _patchRecalcularValidadeStatus === 'function') {
+        _patchRecalcularValidadeStatus();
+      }
+
+      const msg = `✓ ${aplicados} SKU(s) atualizados${erros > 0 ? ` (${erros} linha(s) ignorada(s))` : ''}.`;
+      const toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2E7D32;color:#fff;padding:10px 20px;border-radius:99px;font-size:11px;font-weight:800;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,0.15);font-family:Outfit,sans-serif;white-space:nowrap;';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
   </script>
 
 </body>
