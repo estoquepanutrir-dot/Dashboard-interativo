@@ -1252,6 +1252,13 @@
         style="color:var(--md-on-surface-variant);background:transparent;border:none;cursor:pointer;padding:6px;border-radius:50%;display:none;" id="clearSearchBtn">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>
+      <!-- Botão contextual: aparece só quando há busca ativa -->
+      <button id="btnBaixarBusca" onclick="exportarQtdBuscaAtual()" title="Baixar relatório de quantidades por data para a busca atual"
+        style="display:none;flex-shrink:0;background:linear-gradient(135deg,#6750A4,#4A90D9);color:#fff;border:none;border-radius:99px;padding:7px 14px;font-size:9px;font-weight:900;letter-spacing:0.05em;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;transition:opacity 0.2s;gap:5px;align-items:center;"
+        onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:3px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        BAIXAR QTD
+      </button>
     </div>
 
     <!-- CENTRAL DE RELATÓRIOS -->
@@ -1262,14 +1269,30 @@
         <span style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;background:rgba(103,80,164,0.09);padding:2px 10px;border-radius:99px;letter-spacing:0.05em;">Importação · Exportação · Download</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;overflow:visible;position:relative;">
-        <!-- Importar Pedidos -->
-        <label id="btnImportarPedidos" title="Importe até 4 arquivos de pedidos (.xlsx/.xls/.csv) para cruzamento FEFO"
-          class="dl-btn px-5 py-2 rounded-full text-white text-[10px] cursor-pointer flex items-center gap-1.5"
-          style="background:linear-gradient(135deg,var(--md-secondary),var(--md-primary));">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          IMPORTAR PEDIDOS
-          <input type="file" id="pedidosUpload" accept=".xlsx,.xls,.csv" multiple class="hidden" onchange="handlePedidosUpload(event)" />
-        </label>
+        <!-- Importar Pedidos — 3 botões com prioridade de ordem -->
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+          <label id="btnImportarPedido1" title="Pedido 1 — maior prioridade no direcionamento"
+            class="dl-btn px-4 py-2 rounded-full text-white text-[10px] cursor-pointer flex items-center gap-1.5"
+            style="background:linear-gradient(135deg,#1565C0,#1976D2);">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            PEDIDO 1
+            <input type="file" id="pedidoUpload1" accept=".xlsx,.xls,.csv" class="hidden" onchange="handlePedidoSlot(event, 1)" />
+          </label>
+          <label id="btnImportarPedido2" title="Pedido 2 — segunda prioridade"
+            class="dl-btn px-4 py-2 rounded-full text-white text-[10px] cursor-pointer flex items-center gap-1.5"
+            style="background:linear-gradient(135deg,#6A1B9A,#8E24AA);">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            PEDIDO 2
+            <input type="file" id="pedidoUpload2" accept=".xlsx,.xls,.csv" class="hidden" onchange="handlePedidoSlot(event, 2)" />
+          </label>
+          <label id="btnImportarPedido3" title="Pedido 3 — terceira prioridade"
+            class="dl-btn px-4 py-2 rounded-full text-white text-[10px] cursor-pointer flex items-center gap-1.5"
+            style="background:linear-gradient(135deg,#2E7D32,#388E3C);">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            PEDIDO 3
+            <input type="file" id="pedidoUpload3" accept=".xlsx,.xls,.csv" class="hidden" onchange="handlePedidoSlot(event, 3)" />
+          </label>
+        </div>
         <!-- Faltantes da Carga -->
         <button onclick="abrirModalFaltantes()"
           class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5"
@@ -1283,6 +1306,8 @@
           <span id="pedidosBadgeText">0 pedidos</span>
           <button onclick="limparPedidos()" class="ml-1 opacity-60 hover:opacity-100" style="font-size:9px;">✕</button>
         </span>
+        <!-- Slots badge individual -->
+        <span id="pedidoSlotsBadge" style="display:none;font-size:9px;font-weight:800;color:var(--md-on-surface-variant);background:rgba(103,80,164,0.06);border:1px solid var(--md-outline-variant);border-radius:99px;padding:3px 10px;"></span>
         <!-- Direcionamento dropdown -->
         <div id="btnDirecionamento" style="position:relative;display:none;" id="dirDropdownWrap">
           <button onclick="toggleDirDropdown(event)"
@@ -1384,6 +1409,14 @@
             </button>
           </div>
         </div>
+        <!-- Relatório Consolidado por SKU -->
+        <button onclick="abrirModalRelatorioSku()"
+          class="dl-btn px-5 py-2 rounded-full text-white text-[10px] flex items-center gap-1.5"
+          style="background:linear-gradient(135deg,#5B4397,#7C3AED);"
+          title="Gera relatório consolidado de estoque agrupado por SKU (Excel ou PDF)">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          RELATÓRIO SKU
+        </button>
       </div>
     </div>
 
@@ -1990,6 +2023,7 @@
     }
     // ── Vendas diárias por SKU (unidades/dia) — BASE DE CÁLCULO GLOBAL ──
     const vendasDiariasPorSKU = {
+  "_default_": true,
   "2": 10046.8,
   "5": 7013.4,
   "6": 1962.6,
@@ -2041,6 +2075,24 @@
   "162922": 262.4,
   "162923": 1148.4,
 };
+
+    // ── Restaura vendas salvas no localStorage (sobrescreve defaults) ──
+    (function() {
+      try {
+        const saved = localStorage.getItem('panutrir_vendas_diarias_map');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          // Remove flag de default e sobrescreve com os valores salvos
+          delete vendasDiariasPorSKU['_default_'];
+          Object.assign(vendasDiariasPorSKU, parsed);
+        } else {
+          delete vendasDiariasPorSKU['_default_'];
+        }
+      } catch(e) {
+        delete vendasDiariasPorSKU['_default_'];
+        console.warn('[Vendas] Erro ao restaurar localStorage:', e);
+      }
+    })();
 
     /**
      * Calcula o status de validade com base no giro de estoque.
@@ -3743,7 +3795,9 @@
     // ─────────────────────────────────────────────────────────────────────
 
     // Base de pedidos em memória (fantasma)
-    let pedidosDB = []; // [ { direcionamento, cod, qtdPedida } ]
+    let pedidosDB = []; // [ { direcionamento, cod, qtdPedida, _slot } ]
+    // Slots individuais (slot 1 = prioridade máxima)
+    const pedidosSlots = { 1: [], 2: [], 3: [] };
 
     // helpers para leitura de pedidos
     function normalizePedidoKey(k) {
@@ -3757,104 +3811,155 @@
       return '';
     }
 
-    function handlePedidosUpload(event) {
-      const files = Array.from(event.target.files).slice(0, 4);
-      if (!files.length) return;
-      event.target.value = '';
-
-      showLoader(true);
-      const promises = files.map(file => new Promise((resolve, reject) => {
+    // ── Lê um arquivo e retorna array de linhas de pedido ──
+    function _lerArquivoPedido(file, slot) {
+      return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: false });
             const sheet = wb.Sheets[wb.SheetNames[0]];
             const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: true });
-            resolve({ fileName: file.name, rows });
+            const linhas = [];
+            rows.forEach(rawRow => {
+              const row = {};
+              Object.keys(rawRow).forEach(k => { row[normalizePedidoKey(k)] = rawRow[k]; });
+
+              const codRaw = getPedidoField(row, ['COD','CODIGO','SKU','ITEM_COD','CODIGO_SKU','PRODUCT_CODE','CODIGO_PRODUTO']);
+              const cod = String(codRaw).trim().replace(/\.0+$/, '');
+              if (!cod || cod === '' || cod === '0' || cod === 'undefined') return;
+
+              const qtdRaw = getPedidoField(row, [
+                'QTD_CARGA','QTD_PEDIDO','QTD_SOLICITADA','QUANTIDADE','QTD','QTDE',
+                'AMOUNT','PEDIDO','TOTAL','QTD_TOTAL'
+              ]);
+              const qtd = Math.round(parseNumber(qtdRaw));
+              if (!qtd || qtd <= 0) return;
+
+              const localizador = getPedidoField(row, ['LOCALIZADOR','PEDIDO_NUM','NUMERO_PEDIDO','ORDER_ID','NR_PEDIDO']);
+              const destino     = getPedidoField(row, ['DESTINO','CD','CD_DESTINO','DESTINATION','LOCAL']);
+
+              let direcionamento = '';
+              if (localizador && destino) {
+                direcionamento = String(localizador).replace(/\.0+$/,'').trim() + ' ' + String(destino).trim();
+              } else if (localizador) {
+                direcionamento = String(localizador).replace(/\.0+$/,'').trim();
+              } else if (destino) {
+                direcionamento = String(destino).trim();
+              } else {
+                direcionamento = file.name.replace(/\.(xlsx?|csv)$/i, '').trim();
+              }
+
+              const _soDestino = getPedidoField(row, ['DESTINO','CD','CD_DESTINO','DESTINATION','LOCAL']);
+              const destinoSemLoc = _soDestino ? String(_soDestino).trim() : direcionamento;
+              linhas.push({ direcionamento, destinoSemLoc, cod, qtdPedida: qtd, _slot: slot });
+            });
+            resolve(linhas);
           } catch(err) { reject(err); }
         };
         reader.onerror = reject;
         reader.readAsArrayBuffer(file);
-      }));
-
-      Promise.all(promises).then(results => {
-        pedidosDB = [];
-        let totalLinhas = 0;
-
-        results.forEach(({ fileName, rows }) => {
-          if (!rows.length) return;
-
-          rows.forEach(rawRow => {
-            // Normalizar cabecalhos da linha
-            const row = {};
-            Object.keys(rawRow).forEach(k => { row[normalizePedidoKey(k)] = rawRow[k]; });
-
-            // COD: formato real = COD (inteiro)
-            const codRaw = getPedidoField(row, ['COD','CODIGO','SKU','ITEM_COD','CODIGO_SKU','PRODUCT_CODE','CODIGO_PRODUTO']);
-            const cod = String(codRaw).trim().replace(/\.0+$/, '');
-            if (!cod || cod === '' || cod === '0' || cod === 'undefined') return;
-
-            // QTD: formato real = QTD_CARGA
-            const qtdRaw = getPedidoField(row, [
-              'QTD_CARGA','QTD_PEDIDO','QTD_SOLICITADA','QUANTIDADE','QTD','QTDE',
-              'AMOUNT','PEDIDO','TOTAL','QTD_TOTAL'
-            ]);
-            const qtd = Math.round(parseNumber(qtdRaw));
-            if (!qtd || qtd <= 0) return;
-
-            // DIRECIONAMENTO: LOCALIZADOR + DESTINO (formato real do pedido Inflow)
-            const localizador = getPedidoField(row, ['LOCALIZADOR','PEDIDO_NUM','NUMERO_PEDIDO','ORDER_ID','NR_PEDIDO']);
-            const destino     = getPedidoField(row, ['DESTINO','CD','CD_DESTINO','DESTINATION','LOCAL']);
-
-            let direcionamento = '';
-            if (localizador && destino) {
-              direcionamento = String(localizador).replace(/\.0+$/,'').trim() + ' ' + String(destino).trim();
-            } else if (localizador) {
-              direcionamento = String(localizador).replace(/\.0+$/,'').trim();
-            } else if (destino) {
-              direcionamento = String(destino).trim();
-            } else {
-              direcionamento = fileName.replace(/\.(xlsx?|csv)$/i, '').trim();
-            }
-
-            // destino = apenas o campo DESTINO (sem localizador), para usar no DC com Direcionamento
-            const _soDestino = getPedidoField(row, ['DESTINO','CD','CD_DESTINO','DESTINATION','LOCAL']);
-            const destinoSemLoc = _soDestino ? String(_soDestino).trim() : direcionamento;
-            pedidosDB.push({ direcionamento, destinoSemLoc, cod, qtdPedida: qtd });
-            totalLinhas++;
-          });
-        });
-
-        console.log('[Pedidos carregados]', pedidosDB);
-        showLoader(false);
-        atualizarBadgePedidos(totalLinhas, results.length);
-      }).catch(err => {
-        showLoader(false);
-        console.error('[Erro pedidos]', err);
-        alert('Erro ao importar pedidos: ' + err.message);
       });
     }
 
-    function atualizarBadgePedidos(totalLinhas, numArquivos) {
+    // ── Handler por slot (chamado ao selecionar arquivo no botão 1, 2 ou 3) ──
+    function handlePedidoSlot(event, slot) {
+      const file = event.target.files[0];
+      if (!file) return;
+      event.target.value = '';
+
+      showLoader(true);
+      _lerArquivoPedido(file, slot).then(linhas => {
+        pedidosSlots[slot] = linhas;
+        _reconstruirPedidosDB();
+        showLoader(false);
+        _atualizarBadgePedidosSlots();
+      }).catch(err => {
+        showLoader(false);
+        console.error('[Erro pedido slot ' + slot + ']', err);
+        alert('Erro ao importar pedido ' + slot + ': ' + err.message);
+      });
+    }
+
+    // ── Reconstrói pedidosDB em ordem de prioridade (slot 1 → 2 → 3) ──
+    function _reconstruirPedidosDB() {
+      pedidosDB = [
+        ...pedidosSlots[1],
+        ...pedidosSlots[2],
+        ...pedidosSlots[3]
+      ];
+      console.log('[pedidosDB reconstruído]', pedidosDB.length, 'linhas — slots:', 
+        pedidosSlots[1].length, pedidosSlots[2].length, pedidosSlots[3].length);
+    }
+
+    // ── Atualiza badge e botão de direcionamento ──
+    function _atualizarBadgePedidosSlots() {
       const badge = document.getElementById('pedidosBadge');
       const badgeText = document.getElementById('pedidosBadgeText');
+      const slotsBadge = document.getElementById('pedidoSlotsBadge');
       const btnDir = document.getElementById('btnDirecionamento');
 
-      if (totalLinhas > 0) {
-        badgeText.textContent = `${totalLinhas} SKU(s) em ${numArquivos} pedido(s)`;
+      const total = pedidosDB.length;
+      const slotsAtivos = [1,2,3].filter(s => pedidosSlots[s].length > 0);
+
+      if (total > 0) {
+        badgeText.textContent = `${total} SKU(s) em ${slotsAtivos.length} pedido(s)`;
         badge.classList.remove('hidden');
         btnDir.style.display = 'inline-block';
+
+        const slotInfo = slotsAtivos.map(s => `P${s}: ${pedidosSlots[s].length}`).join(' · ');
+        slotsBadge.textContent = '📋 ' + slotInfo;
+        slotsBadge.style.display = 'inline-block';
+
+        // Colore os botões de slot: verde se carregado, normal se vazio
+        [1,2,3].forEach(s => {
+          const btn = document.getElementById('btnImportarPedido' + s);
+          if (btn) {
+            btn.style.opacity = pedidosSlots[s].length > 0 ? '1' : '0.55';
+            btn.style.outline = pedidosSlots[s].length > 0 ? '2px solid #fff' : 'none';
+          }
+        });
       } else {
         badge.classList.add('hidden');
         btnDir.style.display = 'none';
-        alert('Nenhum SKU válido encontrado nos arquivos. Verifique se as colunas COD/CODIGO/SKU e QTD/QUANTIDADE estão presentes.');
+        slotsBadge.style.display = 'none';
+        [1,2,3].forEach(s => {
+          const btn = document.getElementById('btnImportarPedido' + s);
+          if (btn) { btn.style.opacity = '1'; btn.style.outline = 'none'; }
+        });
       }
+    }
+
+    function atualizarBadgePedidos(totalLinhas, numArquivos) {
+      // Mantido para compatibilidade — agora delegado ao slot handler
+      _atualizarBadgePedidosSlots();
+    }
+
+    function handlePedidosUpload(event) {
+      // Compatibilidade legada — não utilizado com os novos botões de slot
+      const files = Array.from(event.target.files).slice(0, 3);
+      if (!files.length) return;
+      event.target.value = '';
+      showLoader(true);
+      Promise.all(files.map((f, i) => _lerArquivoPedido(f, i + 1))).then(results => {
+        results.forEach((linhas, i) => { pedidosSlots[i + 1] = linhas; });
+        _reconstruirPedidosDB();
+        showLoader(false);
+        _atualizarBadgePedidosSlots();
+      }).catch(err => { showLoader(false); alert('Erro: ' + err.message); });
     }
 
     function limparPedidos() {
       pedidosDB = [];
+      pedidosSlots[1] = []; pedidosSlots[2] = []; pedidosSlots[3] = [];
       document.getElementById('pedidosBadge').classList.add('hidden');
       document.getElementById('btnDirecionamento').style.display = 'none';
+      const sb = document.getElementById('pedidoSlotsBadge');
+      if (sb) sb.style.display = 'none';
+      [1,2,3].forEach(s => {
+        const btn = document.getElementById('btnImportarPedido' + s);
+        if (btn) { btn.style.opacity = '1'; btn.style.outline = 'none'; }
+      });
     }
 
     /**
@@ -3903,12 +4008,17 @@
       // Normaliza COD para comparação: remove zeros à esquerda e .0 de float
       function normCod(v) { return String(v).trim().replace(/\.0+$/, '').replace(/^0+/, '') || String(v).trim(); }
 
-      // Agrupar pedidos por COD normalizado
+      // Agrupar pedidos por COD normalizado, RESPEITANDO A ORDEM DE SLOT (1 → 2 → 3)
+      // pedidosDB já está ordenado por slot graças ao _reconstruirPedidosDB
       const pedidosPorCod = {};
       pedidosDB.forEach(p => {
         const cod = normCod(p.cod);
         if (!pedidosPorCod[cod]) pedidosPorCod[cod] = [];
         pedidosPorCod[cod].push({ ...p, _restante: p.qtdPedida });
+      });
+      // Ordena cada lista de pedidos por _slot para garantir prioridade
+      Object.values(pedidosPorCod).forEach(arr => {
+        arr.sort((a, b) => (a._slot || 99) - (b._slot || 99));
       });
 
       Object.entries(pedidosPorCod).forEach(([cod, pedidos]) => {
@@ -3926,8 +4036,8 @@
             lote._saldo -= desconto;
             qtdADescontar -= desconto;
 
-            // Cada destino aparece com sua quantidade: "CD CURITIBA 330 / CD BARUERI 330"
-            const destStr = (pedido.destinoSemLoc || pedido.direcionamento) + ' ' + Math.round(desconto);
+            // Cada destino aparece com quantidade ANTES do nome: "330 CD CURITIBA / 330 CD BARUERI"
+            const destStr = Math.round(desconto) + ' ' + (pedido.destinoSemLoc || pedido.direcionamento);
             if (lote.DIRECIONAMENTO && !lote.DIRECIONAMENTO.includes(destStr)) {
               lote.DIRECIONAMENTO += ' / ' + destStr;
             } else if (!lote.DIRECIONAMENTO) {
@@ -4033,8 +4143,12 @@
         const dests = item.DIRECIONAMENTO.split(' / ');
         const valStr = item.VALIDADE || '';
         dests.forEach(dest => {
-          const chave = item.COD + '|||' + dest.trim() + '|||' + valStr;
-          if (!narrativaMap.has(chave)) narrativaMap.set(chave, { cod: item.COD, produto: item.PRODUTO, dest: dest.trim(), qtd: 0, validade: valStr });
+          // Novo formato: "330 CD CURITIBA" — extrai a qtd do prefixo numérico e o nome do destino
+          const destTrimmed = dest.trim();
+          const matchQtdDest = destTrimmed.match(/^(\d+)\s+(.+)$/);
+          const destNome = matchQtdDest ? matchQtdDest[2].trim() : destTrimmed;
+          const chave = item.COD + '|||' + destNome + '|||' + valStr;
+          if (!narrativaMap.has(chave)) narrativaMap.set(chave, { cod: item.COD, produto: item.PRODUTO, dest: destNome, qtd: 0, validade: valStr });
           narrativaMap.get(chave).qtd += Math.round(item.QTD_PEDIDA / dests.length);
         });
       });
@@ -4308,9 +4422,13 @@
               doc.setFont('helvetica', 'bold');
               doc.setFontSize(FS.cellMain);
               doc.setTextColor(0, 0, 0);
+              // Trunca pelo final para preservar a quantidade (que vem primeiro)
               let dir = String(item.DIRECIONAMENTO);
-              while (doc.getTextWidth(dir) > col.w - 5 && dir.length > 6) dir = dir.slice(0, -1);
-              if (dir !== item.DIRECIONAMENTO) dir = dir.slice(0, -1) + '...';
+              const maxW = col.w - 3;
+              if (doc.getTextWidth(dir) > maxW) {
+                while (doc.getTextWidth(dir + '…') > maxW && dir.length > 4) dir = dir.slice(0, -1);
+                dir = dir + '…';
+              }
               doc.text(dir, tx, cellY, { align: talign });
             } else {
               doc.setFont('helvetica', 'normal');
@@ -7673,6 +7791,11 @@ self.addEventListener('fetch', e => {
       // Sobrescreve silenciosamente apenas os valores enviados
       Object.assign(vendasDiariasPorSKU, novoMap);
 
+      // Salva mapa completo no localStorage (persiste entre recarregamentos)
+      try {
+        localStorage.setItem('panutrir_vendas_diarias_map', JSON.stringify(vendasDiariasPorSKU));
+      } catch(e) { console.warn('[Vendas] Erro ao salvar localStorage:', e); }
+
       // Salva data da última atualização
       const hoje = new Date().toISOString().slice(0, 10);
       localStorage.setItem('panutrir_vendas_ultima_atualizacao', hoje);
@@ -7693,6 +7816,307 @@ self.addEventListener('fetch', e => {
       setTimeout(() => toast.remove(), 4000);
     }
   </script>
+
+
+    <style>
+      #modal-relatorio-sku { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; }
+      .modal-box-sku { background: var(--md-surface, #fff); color: var(--md-on-surface, #1C1B1F); border-radius: 24px; padding: 24px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; max-height: 90vh; }
+      .dark .modal-box-sku { background: #1F1E25; color: #F3EEF9; }
+      #sku-modal-lista { overflow-y: auto; flex-grow: 1; margin: 16px 0; border: 1px solid var(--md-outline-variant, #CAC4D0); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+      .btn-acao-relatorio { padding: 10px 16px; border-radius: 24px; cursor: pointer; font-weight: bold; border: none; font-size: 13px; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+      .btn-acao-relatorio:hover { opacity: 0.9; transform: translateY(-1px); }
+      .btn-excel { background: #1D8348; color: white; }
+      .btn-pdf { background: #C0392B; color: white; }
+    </style>
+
+    <div id="modal-relatorio-sku">
+      <div class="modal-box-sku">
+        <h2 style="font-size: 18px; font-weight: 800; margin-bottom: 4px;">Relatório Consolidado</h2>
+        <p style="font-size: 11px; opacity: 0.7; margin-bottom: 16px;">Exporte o estoque agrupado em Excel ou PDF.</p>
+        
+        <input type="text" id="sku-modal-search" placeholder="Pesquisar produto..." style="width:100%; padding:12px; border:1px solid #79747E; border-radius:8px; background:transparent; color:inherit; outline:none;" oninput="filtrarSkusModal(this.value)">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 12px;">
+           <div style="display:flex; gap: 8px;">
+             <button onclick="selecionarTodosSkus(true)" style="background:#E8DEF8; color:#1D192B; padding:6px 12px; border-radius:8px; font-size:11px; cursor:pointer; border:none; font-weight: 600;">Marcar Todos</button>
+             <button onclick="selecionarTodosSkus(false)" style="background:#E8DEF8; color:#1D192B; padding:6px 12px; border-radius:8px; font-size:11px; cursor:pointer; border:none; font-weight: 600;">Desmarcar Todos</button>
+           </div>
+           <span id="sku-modal-counter" style="font-size:11px; font-weight:bold; color:#5B4397;">0 selecionados</span>
+        </div>
+
+        <div id="sku-modal-lista"></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px; border-top: 1px solid var(--md-outline-variant, #CAC4D0); padding-top: 16px;">
+          <button onclick="fecharModalRelatorioSku()" style="background:transparent; color:inherit; border:1px solid #79747E; padding:10px 16px; border-radius:24px; cursor:pointer; font-weight:bold;">Cancelar</button>
+          <div style="display:flex; gap: 8px;">
+            <button onclick="gerarRelatorioSkuExcel()" class="btn-acao-relatorio btn-excel">Gerar Excel</button>
+            <button onclick="gerarRelatorioSkuPdf()" class="btn-acao-relatorio btn-pdf">Gerar PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+    // ══════════════════════════════════════════════════════════════════
+    // RELATÓRIO POR SKU — Lógica Interna
+    // ══════════════════════════════════════════════════════════════════
+    let _skuModalSkus = [];
+    let _skuModalFiltro = '';
+
+    function _normSkuNome(nome) { return String(nome || '').trim().toLowerCase(); }
+
+    function abrirModalRelatorioSku() {
+      const db = window.estoqueGlobal || window.db || [];
+      if (!db || db.length === 0) { alert('Importe a base de estoque primeiro.'); return; }
+      
+      const mapaSkus = {};
+      db.forEach(function(item) {
+        const nome = String(item.produto || item.PRODUTO || '').trim();
+        const cod  = String(item.cod || item.COD || item.codigo || item.CODIGO || '').trim();
+        const chave = _normSkuNome(nome);
+        if (chave && !mapaSkus[chave]) mapaSkus[chave] = { nome: nome, cod: cod };
+      });
+      
+      _skuModalSkus = Object.values(mapaSkus).sort(function(a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', {sensitivity:'base'}); }).map(function(entry) { return { nome: entry.nome, cod: entry.cod, checked: false }; });
+      _skuModalFiltro = ''; document.getElementById('sku-modal-search').value = '';
+      _renderizarListaSkuModal(); _atualizarContadorSkuModal();
+      document.getElementById('modal-relatorio-sku').style.display = 'flex';
+    }
+
+    function fecharModalRelatorioSku() { document.getElementById('modal-relatorio-sku').style.display = 'none'; }
+
+    function filtrarSkusModal(termo) { _skuModalFiltro = _normSkuNome(termo); _renderizarListaSkuModal(); }
+
+    function selecionarTodosSkus(valor) {
+      _skuModalSkus.forEach(function(sku) { if (!_skuModalFiltro || _normSkuNome(sku.nome).includes(_skuModalFiltro)) sku.checked = valor; });
+      _renderizarListaSkuModal(); _atualizarContadorSkuModal();
+    }
+
+    function _renderizarListaSkuModal() {
+      const container = document.getElementById('sku-modal-lista');
+      const filtrados = _skuModalFiltro ? _skuModalSkus.filter(function(s) { return _normSkuNome(s.nome).includes(_skuModalFiltro); }) : _skuModalSkus;
+      if (filtrados.length === 0) { container.innerHTML = '<p style="text-align:center;font-size:11px;opacity:0.6;padding:2rem 0;">Nenhum SKU encontrado.</p>'; return; }
+      container.innerHTML = filtrados.map(function(sku) {
+        const idx = _skuModalSkus.indexOf(sku); const chk = sku.checked ? 'checked' : '';
+        const codLabel = sku.cod ? '<span style="font-size:10px;font-weight:700;color:var(--md-on-surface-variant);background:rgba(103,80,164,0.10);border-radius:6px;padding:1px 7px;margin-left:4px;white-space:nowrap;">' + sku.cod + '</span>' : '';
+        return '<label style="display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:10px;cursor:pointer;transition:0.1s;"><input type="checkbox" '+chk+' data-gidx="'+idx+'" onchange="_toggleSkuModal(this)" style="width:16px;height:16px;accent-color:#5B4397;cursor:pointer;"/><span style="font-size:12px;font-weight:600;flex:1;">'+sku.nome+'</span>'+codLabel+'</label>';
+      }).join('');
+    }
+
+    function _toggleSkuModal(cb) {
+      const idx = parseInt(cb.getAttribute('data-gidx'));
+      if (!isNaN(idx) && _skuModalSkus[idx]) _skuModalSkus[idx].checked = cb.checked;
+      _atualizarContadorSkuModal();
+    }
+
+    function _atualizarContadorSkuModal() {
+      const total = _skuModalSkus.filter(function(s) { return s.checked; }).length;
+      document.getElementById('sku-modal-counter').textContent = total + ' selecionado' + (total !== 1 ? 's' : '');
+    }
+
+    function _processarDadosRelatorioSku() {
+      const selecionados = _skuModalSkus.filter(function(s) { return s.checked; }).map(function(s) { return _normSkuNome(s.nome); });
+      if (selecionados.length === 0) { alert('Selecione pelo menos um SKU.'); return null; }
+      
+      const db = window.estoqueGlobal || window.db || [];
+      const dadosFiltrados = db.filter(function(item) { return selecionados.indexOf(_normSkuNome(item.produto || item.PRODUTO || '')) !== -1; });
+      if (dadosFiltrados.length === 0) { alert('Nenhum dado encontrado para os SKUs selecionados.'); return null; }
+      
+      const porSku = dadosFiltrados.reduce(function(acc, item) {
+        const nome = String(item.produto || item.PRODUTO || '').trim(); const chave = _normSkuNome(nome);
+        const cod  = String(item.cod || item.COD || item.codigo || item.CODIGO || '').trim();
+        if (!acc[chave]) acc[chave] = { nome: nome, cod: cod, total: 0 };
+        acc[chave].total += Number(item.quantidade || item.qtd || item.QTD || item.QUANTIDADE || 0); return acc;
+      }, {});
+      
+      const porData = dadosFiltrados.reduce(function(acc, item) {
+        const data = String(item.validade || item.VALIDADE || item.data || '').trim() || 'Sem data';
+        if (!acc[data]) acc[data] = { data: data, total: 0, skus: new Set() };
+        acc[data].total += Number(item.quantidade || item.qtd || item.QTD || item.QUANTIDADE || 0);
+        acc[data].skus.add(String(item.produto || item.PRODUTO || '').trim()); return acc;
+      }, {});
+      
+      const tabelaSku = Object.values(porSku).sort(function(a, b) { return a.nome.localeCompare(b.nome, 'pt-BR', {sensitivity:'base'}); });
+      const tabelaData = Object.values(porData).sort(function(a, b) { return a.data.localeCompare(b.data); }).map(function(d) { return { data: d.data, total: d.total, skus: Array.from(d.skus).join(', ') }; });
+      return { tabelaSku: tabelaSku, tabelaData: tabelaData, totalGeral: tabelaSku.reduce(function(s,r) { return s + r.total; }, 0) };
+    }
+
+    // ── EXPORTAÇÃO EXCEL ──
+    async function gerarRelatorioSkuExcel() {
+      const dados = _processarDadosRelatorioSku(); if (!dados) return;
+      if (typeof ExcelJS === 'undefined') { alert('ExcelJS não carregado.'); return; }
+      const wb = new ExcelJS.Workbook(); wb.creator = 'Panutrir CD'; wb.created = new Date();
+      
+      const ws1 = wb.addWorksheet('Resumo por SKU');
+      ws1.columns = [{ key:'a', width:14 }, { key:'b', width:50 }, { key:'c', width:18 }];
+      ws1.addRow(['RELATÓRIO POR SKU — PANUTRIR CD']).font = { bold:true, size:13, color:{argb:'FFFFFFFF'} }; ws1.getCell('A1').fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF3A2470'} }; ws1.mergeCells('A1:C1');
+      ws1.addRow(['CÓD. SKU', 'SKU / PRODUTO', 'QTD. TOTAL']).font = { bold:true };
+      dados.tabelaSku.forEach(function(row) { ws1.addRow([row.cod, row.nome, row.total]); });
+      ws1.addRow(['', 'TOTAL GERAL', dados.totalGeral]).font = { bold:true };
+
+      const ws2 = wb.addWorksheet('Resumo por Validade');
+      ws2.columns = [{ key:'a', width:18 }, { key:'b', width:18 }, { key:'c', width:65 }];
+      ws2.addRow(['RELATÓRIO POR VALIDADE — PANUTRIR CD']).font = { bold:true, size:13, color:{argb:'FFFFFFFF'} }; ws2.getCell('A1').fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FF3A2470'} }; ws2.mergeCells('A1:C1');
+      ws2.addRow(['DATA VALIDADE', 'QTD. TOTAL', 'SKUs INCLUÍDOS']).font = { bold:true };
+      dados.tabelaData.forEach(function(row) { ws2.addRow([row.data, row.total, row.skus]); });
+      ws2.addRow(['TOTAL GERAL', dados.totalGeral, '']).font = { bold:true };
+
+      const buf = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'Relatorio_SKU_' + new Date().toISOString().slice(0,10) + '.xlsx'; a.click();
+      fecharModalRelatorioSku();
+    }
+
+    // ── EXPORTAÇÃO PDF ──
+    function gerarRelatorioSkuPdf() {
+      const dados = _processarDadosRelatorioSku(); if (!dados) return;
+      if (!window.jspdf || !window.jspdf.jsPDF) { alert('jsPDF não carregado.'); return; }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pgW = doc.internal.pageSize.getWidth();
+      const pgH = doc.internal.pageSize.getHeight();
+      const hoje = new Date().toLocaleDateString('pt-BR');
+
+      // ── Cabeçalho ──
+      doc.setFillColor(58, 36, 112);
+      doc.rect(0, 0, pgW, 28, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(255, 255, 255);
+      doc.text('CD PANUTRIR — RELATÓRIO CONSOLIDADO POR SKU', 14, 13);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(210, 200, 240);
+      doc.text('Gerado em: ' + hoje + '   |   Total SKUs: ' + dados.tabelaSku.length + '   |   Total Unidades: ' + dados.totalGeral, 14, 21);
+
+      let y = 38;
+
+      // ── Função auxiliar: adiciona página nova com mini-cabeçalho ──
+      function novaPagina() {
+        doc.addPage();
+        doc.setFillColor(58, 36, 112);
+        doc.rect(0, 0, pgW, 12, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(255, 255, 255);
+        doc.text('CD PANUTRIR — RELATÓRIO POR SKU  |  ' + hoje, 14, 8);
+        y = 20;
+      }
+
+      // ══ SEÇÃO 1: RESUMO POR SKU ══
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(58, 36, 112);
+      doc.text('1. RESUMO POR SKU', 14, y); y += 5;
+
+      // Cabeçalho da tabela
+      doc.setFillColor(232, 221, 255);
+      doc.rect(10, y, pgW - 20, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(58, 36, 112);
+      doc.text('CÓD.', 13, y + 4.8);
+      doc.text('PRODUTO / SKU', 32, y + 4.8);
+      doc.text('QTD.', pgW - 13, y + 4.8, { align: 'right' });
+      y += 9;
+
+      // Linhas da tabela
+      dados.tabelaSku.forEach(function(row, idx) {
+        if (y > pgH - 20) novaPagina();
+        if (idx % 2 === 0) {
+          doc.setFillColor(248, 245, 255);
+          doc.rect(10, y - 3, pgW - 20, 6.5, 'F');
+        }
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(28, 28, 30);
+        // Código (coluna 1)
+        const codStr = String(row.cod || '—');
+        doc.text(codStr.substring(0, 10), 13, y + 1.5);
+        // Nome (coluna 2) — truncado se necessário
+        const nomeStr = String(row.nome || '');
+        const nomeTrunc = doc.splitTextToSize(nomeStr, pgW - 65)[0];
+        doc.text(nomeTrunc, 32, y + 1.5);
+        // Quantidade (alinhada à direita)
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(row.total), pgW - 13, y + 1.5, { align: 'right' });
+        y += 6.5;
+      });
+
+      // Linha de total geral SKU
+      if (y > pgH - 16) novaPagina();
+      doc.setFillColor(58, 36, 112);
+      doc.rect(10, y, pgW - 20, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(255, 255, 255);
+      doc.text('TOTAL GERAL', 13, y + 4.8);
+      doc.text(String(dados.totalGeral), pgW - 13, y + 4.8, { align: 'right' });
+      y += 14;
+
+      // ══ SEÇÃO 2: RESUMO POR VALIDADE ══
+      if (y > pgH - 40) novaPagina();
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(58, 36, 112);
+      doc.text('2. RESUMO POR VALIDADE', 14, y); y += 5;
+
+      // Cabeçalho da tabela validade
+      doc.setFillColor(232, 221, 255);
+      doc.rect(10, y, pgW - 20, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(58, 36, 112);
+      doc.text('DATA VALIDADE', 13, y + 4.8);
+      doc.text('QTD.', 52, y + 4.8);
+      doc.text('SKUs INCLUÍDOS', 68, y + 4.8);
+      y += 9;
+
+      dados.tabelaData.forEach(function(row, idx) {
+        if (y > pgH - 20) novaPagina();
+        if (idx % 2 === 0) {
+          doc.setFillColor(248, 245, 255);
+          doc.rect(10, y - 3, pgW - 20, 6.5, 'F');
+        }
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.5);
+        doc.setTextColor(28, 28, 30);
+        doc.text(String(row.data), 13, y + 1.5);
+        doc.setFont('helvetica', 'bold');
+        doc.text(String(row.total), 52, y + 1.5);
+        doc.setFont('helvetica', 'normal');
+        const skusTrunc = doc.splitTextToSize(String(row.skus), pgW - 80)[0];
+        doc.text(skusTrunc + (row.skus.length > skusTrunc.length ? '…' : ''), 68, y + 1.5);
+        y += 6.5;
+      });
+
+      // Total geral validade
+      if (y > pgH - 16) novaPagina();
+      doc.setFillColor(58, 36, 112);
+      doc.rect(10, y, pgW - 20, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(255, 255, 255);
+      doc.text('TOTAL GERAL', 13, y + 4.8);
+      doc.text(String(dados.totalGeral), 52, y + 4.8);
+      y += 10;
+
+      // ── Rodapé em todas as páginas ──
+      const totalPaginas = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= totalPaginas; p++) {
+        doc.setPage(p);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        doc.setTextColor(150, 150, 150);
+        doc.text('CD Matriz Panutrir  ·  Relatório gerado automaticamente  ·  ' + hoje, pgW / 2, pgH - 5, { align: 'center' });
+        doc.text('Pág. ' + p + ' / ' + totalPaginas, pgW - 14, pgH - 5, { align: 'right' });
+      }
+
+      doc.save('Relatorio_SKU_' + new Date().toISOString().slice(0,10) + '.pdf');
+      fecharModalRelatorioSku();
+    }
+    </script>
 
 </body>
 </html>
