@@ -1352,6 +1352,11 @@
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               PDF (imprimir)
             </button>
+            <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
+            <button onclick="abrirConferenciaMobile(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+              Conf. Mobile
+            </button>
           </div>
         </div>
         <button onclick="exportarRelatorioTransferencia()"
@@ -6612,6 +6617,327 @@ self.addEventListener('fetch', e => {
       doc.save('Relatorio_Quebras_' + dataArq + '.pdf');
     }
 
+    function abrirConferenciaMobile() {
+      if (!db || db.length === 0) return alert('Sem dados. Importe a base primeiro.');
+      const listaQ = db.filter(i => i.qtd < i.lastro);
+      if (listaQ.length === 0) return alert('Nenhuma quebra encontrada.');
+      const minDiff = Math.min(...listaQ.map(i => i.diff));
+      const _ordem = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
+      const rows = listaQ.map(i => {
+        const div = i.produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
+        const upCx = i.lastro / div;
+        return {
+          etiqueta: String(i.etiqueta || i.cod || '-'),
+          _cod: i.cod,
+          _val: i.validade ? i.validade.getTime() : Infinity,
+          data: i.validade ? i.validade.toLocaleDateString('pt-BR') : '-',
+          nome: i.produto,
+          cx: Math.floor(i.qtd / upCx),
+          unds: Math.round(i.qtd % upCx),
+          total: Math.round(i.qtd),
+          obs: (i.qtd < 30 && i.diff === minDiff) ? 'FANTASMA?' : ''
+        };
+      }).sort((a, b) => {
+        const ia = _ordem.indexOf(Number(a._cod)), ib = _ordem.indexOf(Number(b._cod));
+        const pA = ia === -1 ? Infinity : ia, pB = ib === -1 ? Infinity : ib;
+        if (pA !== pB) return pA - pB;
+        return a._val - b._val;
+      });
+
+      const dadosJson = JSON.stringify(rows).replace(/<\/script>/gi, '<\\/script>');
+      const win = window.open('', '_blank');
+      if (!win) return alert('Permita popups para este site e tente novamente.');
+
+      const css = `*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F2F2F7;padding-bottom:90px}
+.hdr{position:sticky;top:0;z-index:100;background:#1A3770;color:#fff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.hdr h1{font-size:13px;font-weight:800;letter-spacing:.03em;flex:1;white-space:nowrap}
+.ptxt{font-size:10px;opacity:.75;white-space:nowrap}
+.btn-pdf{background:#34C759;color:#fff;border:none;border-radius:9px;padding:8px 13px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.btn-pdf:active{opacity:.75}
+.pbar-bg{position:sticky;top:49px;z-index:99;background:#D1D1D6;height:3px}
+.pbar{height:3px;background:#34C759;transition:width .3s;width:0}
+.cards{padding:10px 11px;display:flex;flex-direction:column;gap:9px}
+.card{background:#fff;border-radius:13px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.09)}
+.card.fant{border-left:4px solid #FF9500;background:#FFFBEB}
+.chdr{display:flex;align-items:center;justify-content:space-between;padding:9px 12px 7px;border-bottom:1px solid #F2F2F7;gap:8px}
+.etq-a{font-size:13px;font-weight:800;color:#1A3770;text-decoration:none;background:#EEF2FF;padding:3px 9px;border-radius:6px}
+.etq-s{font-size:13px;font-weight:800;color:#8E8E93;background:#F2F2F7;padding:3px 9px;border-radius:6px}
+.bdg{font-size:9px;font-weight:800;padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.cbdy{padding:8px 12px 11px}
+.nome{font-size:12px;font-weight:600;color:#1C1C1E;margin-bottom:7px;line-height:1.35}
+.qlbl{font-size:9px;font-weight:700;color:#8E8E93;text-transform:uppercase;letter-spacing:.05em}
+.qval{font-size:15px;font-weight:800;color:#1C1C1E}
+.sgrp{display:flex;gap:5px;margin-top:2px}
+.sbtn{flex:1;padding:9px 2px;border:2px solid #E5E5EA;border-radius:10px;background:#fff;font-size:10px;font-weight:800;color:#8E8E93;cursor:pointer;text-align:center;transition:all .12s}
+.sbtn.pres.on{background:#34C759;border-color:#34C759;color:#fff}
+.sbtn.ause.on{background:#FF3B30;border-color:#FF3B30;color:#fff}
+.sbtn.corr.on{background:#FF9500;border-color:#FF9500;color:#fff}
+.obs-inp{margin-top:8px;width:100%;border:1.5px solid #E5E5EA;border-radius:8px;padding:7px 10px;font-size:12px;font-family:inherit;color:#1C1C1E;outline:none}
+.obs-inp:focus{border-color:#FF9500}
+.ftag{display:inline-block;font-size:9px;font-weight:700;color:#92480A;background:#FFF0CC;padding:2px 7px;border-radius:8px;margin-left:5px;vertical-align:middle}
+.sku-sep{background:#1A3770;color:#fff;padding:9px 13px;border-radius:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
+.sku-sep:first-child{margin-top:0}
+.sku-sep-nome{font-size:11px;font-weight:800;letter-spacing:.02em;line-height:1.3;flex:1}
+.sku-sep-cnt{font-size:9px;font-weight:700;background:rgba(255,255,255,0.18);padding:2px 8px;border-radius:8px;white-space:nowrap}`;
+
+      const js = `
+var SK = 'conf_q_' + new Date().toLocaleDateString('pt-BR').replace(/\\//g,'_');
+var E = {};
+try { E = JSON.parse(localStorage.getItem(SK) || '{}'); } catch(e) {}
+
+function sc(d) {
+  try {
+    var p=d.split('/'),dd=+p[0],mm=+p[1],aa=+p[2];
+    var df=Math.floor((new Date(aa,mm-1,dd)-new Date())/86400000);
+    if(df<0)  return{bg:'#1C1C1E',tx:'#fff',lb:'VENCIDO'};
+    if(df<10) return{bg:'#8B4513',tx:'#fff',lb:'PRAZO LIM.'};
+    if(df<=19)return{bg:'#FF3B30',tx:'#fff',lb:'URGENTE'};
+    if(df<=21)return{bg:'#FF9500',tx:'#fff',lb:'CRÍTICO'};
+    if(df<=23)return{bg:'#FFCC00',tx:'#2D1F00',lb:'ATENÇÃO'};
+    return    {bg:'#E5E5EA',tx:'#1C1C1E',lb:'NORMAL'};
+  }catch(e){return{bg:'#E5E5EA',tx:'#1C1C1E',lb:''};}
+}
+
+function salvar(i,k,v){
+  if(!E[i])E[i]={};
+  E[i][k]=v;
+  try{localStorage.setItem(SK,JSON.stringify(E));}catch(e){}
+  prog();
+}
+
+function setSt(i,st){
+  salvar(i,'status',st);
+  ['pres','ause','corr'].forEach(function(s,j){
+    var b=document.getElementById('b'+j+'_'+i);
+    if(b){if(s===st)b.classList.add('on');else b.classList.remove('on');}
+  });
+  var ow=document.getElementById('ow_'+i);
+  if(ow)ow.style.display=(st==='corr')?'block':'none';
+}
+
+function prog(){
+  var m=0;
+  for(var k in E){if(E[k]&&E[k].status)m++;}
+  var t=dados.length;
+  var el=document.getElementById('ptxt');
+  if(el)el.textContent=m+'/'+t+' conferidos';
+  var pb=document.getElementById('pbar');
+  if(pb)pb.style.width=(t?(m/t*100):0)+'%';
+}
+
+function render(){
+  var cont=document.getElementById('cards');
+  if(!cont)return;
+  var h='';
+  var lastCod=null;
+  var codCount={};
+  for(var k=0;k<dados.length;k++){var c=dados[k]._cod;codCount[c]=(codCount[c]||0)+1;}
+  for(var i=0;i<dados.length;i++){
+    var item=dados[i],est=E[i]||{},s=sc(item.data);
+    if(item._cod!==lastCod){
+      lastCod=item._cod;
+      var cnt=codCount[item._cod]||1;
+      h+='<div class="sku-sep">'+
+         '<div class="sku-sep-nome">'+item.nome+'</div>'+
+         '<span class="sku-sep-cnt">'+cnt+(cnt===1?' etiqueta':' etiquetas')+'</span>'+
+         '</div>';
+    }
+    var hasL=item.etiqueta&&item.etiqueta!=='-';
+    var ifu='https://inflow.tec.br/view_etiqueta?e='+encodeURIComponent(item.etiqueta);
+    var ov=(est.obs||'').replace(/"/g,'&quot;');
+    var p0=est.status==='pres'?' on':'',p1=est.status==='ause'?' on':'',p2=est.status==='corr'?' on':'';
+    var od=est.status==='corr'?'block':'none';
+    h+='<div class="card'+(item.obs?' fant':'')+'">'+
+       '<div class="chdr">'+
+       '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+
+       (hasL?'<a class="etq-a" href="'+ifu+'" target="_blank">'+item.etiqueta+'</a>':'<span class="etq-s">'+item.etiqueta+'</span>')+
+       (item.obs?'<span class="ftag">⚠ FANTASMA?</span>':'')+
+       '</div>'+
+       '<span class="bdg" style="background:'+s.bg+';color:'+s.tx+'">'+s.lb+'</span>'+
+       '</div>'+
+       '<div class="cbdy">'+
+       '<div class="nome">'+item.nome+'</div>'+
+       '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px">'+
+       '<div style="font-size:10px;color:#8E8E93">'+item.data+'</div>'+
+       '<div style="display:flex;gap:14px">'+
+       '<div><div class="qlbl">CX</div><div class="qval">'+item.cx+'</div></div>'+
+       '<div><div class="qlbl">UNDS</div><div class="qval">'+item.unds+'</div></div>'+
+       '<div><div class="qlbl">TOTAL</div><div class="qval">'+item.total+'</div></div>'+
+       '</div></div>'+
+       '<div class="sgrp">'+
+       '<button id="b0_'+i+'" class="sbtn pres'+p0+'" data-idx="'+i+'" data-st="pres">✓ PRESENTE</button>'+
+       '<button id="b1_'+i+'" class="sbtn ause'+p1+'" data-idx="'+i+'" data-st="ause">✗ AUSENTE</button>'+
+       '<button id="b2_'+i+'" class="sbtn corr'+p2+'" data-idx="'+i+'" data-st="corr">✎ CORRIGIDA</button>'+
+       '</div>'+
+       '<div id="ow_'+i+'" style="display:'+od+'">'+
+       '<input class="obs-inp" type="text" placeholder="Observação..." value="'+ov+'" data-idx="'+i+'"/>'+
+       '</div>'+
+       '</div></div>';
+  }
+  cont.innerHTML=h;
+  cont.addEventListener('click',function(e){
+    var b=e.target.closest('[data-st]');
+    if(b)setSt(parseInt(b.getAttribute('data-idx')),b.getAttribute('data-st'));
+  });
+  cont.addEventListener('input',function(e){
+    var inp=e.target.closest('input.obs-inp');
+    if(inp)salvar(parseInt(inp.getAttribute('data-idx')),'obs',inp.value);
+  });
+  prog();
+}
+
+function gerarPDF(){
+  if(!window.jspdf){alert('Aguarde o carregamento do PDF.');return;}
+  var jsPDF=window.jspdf.jsPDF;
+  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  var pgW=doc.internal.pageSize.getWidth();
+  var pgH=doc.internal.pageSize.getHeight();
+  var hoje=new Date().toLocaleDateString('pt-BR');
+  var np=0,na=0,nc=0;
+  for(var k in E){if(!E[k])continue;if(E[k].status==='pres')np++;else if(E[k].status==='ause')na++;else if(E[k].status==='corr')nc++;}
+  var nn=dados.length-np-na-nc;
+
+  doc.setFillColor(88,86,214);doc.rect(0,0,pgW,1.5,'F');
+  doc.setFillColor(250,250,253);doc.rect(0,1.5,pgW,28,'F');
+  doc.setDrawColor(235,235,242);doc.setLineWidth(0.3);doc.line(0,29.5,pgW,29.5);
+  doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(28,28,30);
+  doc.text('Conferência de Quebras',10,14);
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(108,108,112);
+  doc.text('Resultado da conferência — CD Matriz Panutrir',10,20);
+  doc.text('Gerado em: '+hoje,10,26);
+
+  var kpiY=33,kpiH=16,kpiW=(pgW-20)/4;
+  var kpis=[
+    {lb:'PRESENTE',vl:np,c:[52,199,89]},
+    {lb:'AUSENTE',vl:na,c:[255,59,48]},
+    {lb:'CORRIGIDA',vl:nc,c:[255,149,0]},
+    {lb:'N. CONFERIDO',vl:nn,c:[108,108,112]}
+  ];
+  kpis.forEach(function(ki,j){
+    var x=10+j*kpiW;
+    doc.setFillColor(242,242,247);doc.roundedRect(x,kpiY,kpiW-3,kpiH,2,2,'F');
+    doc.setFillColor(ki.c[0],ki.c[1],ki.c[2]);doc.rect(x,kpiY,2,kpiH,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(28,28,30);
+    doc.text(String(ki.vl),x+(kpiW-3)/2,kpiY+9.5,{align:'center'});
+    doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(108,108,112);
+    doc.text(ki.lb,x+(kpiW-3)/2,kpiY+14,{align:'center'});
+  });
+
+  var y=kpiY+kpiH+6;
+  var cols=[
+    {h:'ETIQUETA',w:24,a:'center'},{h:'PRODUTO',w:66,a:'left'},
+    {h:'VENCIMENTO',w:26,a:'center'},{h:'CX',w:11,a:'center'},
+    {h:'UNDS',w:13,a:'center'},{h:'TOTAL',w:13,a:'center'},{h:'STATUS',w:24,a:'center'}
+  ];
+  var xC=9;
+  doc.setFillColor(28,28,30);doc.rect(xC,y,pgW-18,6.5,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(6);doc.setTextColor(255,255,255);
+  var cx2=xC;
+  cols.forEach(function(c){
+    var tx=c.a==='center'?cx2+c.w/2:cx2+2;
+    doc.text(c.h,tx,y+4.3,{align:c.a==='center'?'center':'left'});
+    cx2+=c.w;
+  });
+  y+=6.5;
+
+  var maxY=pgH-14;
+  var pageNum=1;
+  function drawFoot2(){
+    doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(150,150,160);
+    doc.text('Pág '+pageNum,pgW/2,pgH-5,{align:'center'});
+    doc.text('Conferência de Quebras — '+hoje+' — CD Matriz Panutrir',pgW/2,pgH-9,{align:'center'});
+  }
+
+  var stMap={'pres':{lb:'PRESENTE',c:[52,199,89]},'ause':{lb:'AUSENTE',c:[255,59,48]},'corr':{lb:'CORRIGIDA',c:[255,149,0]}};
+  dados.forEach(function(item,i){
+    if(y+8>maxY){drawFoot2();doc.addPage();pageNum++;y=14;}
+    var est=E[i]||{};
+    var alt=i%2===0;
+    var rfill=alt?[250,250,253]:[255,255,255];
+    doc.setFillColor(rfill[0],rfill[1],rfill[2]);doc.rect(xC,y,pgW-18,8,'F');
+
+    var stInfo=est.status&&stMap[est.status]?stMap[est.status]:{lb:'—',c:[200,200,200]};
+    doc.setFillColor(stInfo.c[0],stInfo.c[1],stInfo.c[2]);doc.rect(xC,y,2,8,'F');
+
+    var cx3=xC+2;
+    doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(26,55,112);
+    doc.text(item.etiqueta,cx3+22/2,y+5,{align:'center'});cx3+=22;
+
+    var nomeT=item.nome.length>38?item.nome.substring(0,37)+'…':item.nome;
+    doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(28,28,30);
+    doc.text(nomeT,cx3+2,y+5);cx3+=66;
+
+    var sp=function(dataStr){
+      try{var p=dataStr.split('/'),df=Math.floor((new Date(+p[2],+p[1]-1,+p[0])-new Date())/86400000);
+        if(df<0)  return{bg:[28,28,30],tx:[255,255,255],lb:'VENCIDO'};
+        if(df<10) return{bg:[139,69,19],tx:[255,255,255],lb:'PRAZO LIM.'};
+        if(df<=19)return{bg:[255,59,48],tx:[255,255,255],lb:'URGENTE'};
+        if(df<=21)return{bg:[255,149,0],tx:[255,255,255],lb:'CRITICO'};
+        if(df<=23)return{bg:[255,204,0],tx:[45,31,0],lb:'ATENCAO'};
+        return    {bg:[229,229,234],tx:[28,28,30],lb:'NORMAL'};}
+      catch(e){return{bg:[229,229,234],tx:[28,28,30],lb:''};} };
+    var sp2=sp(item.data);
+    doc.setFillColor(sp2.bg[0],sp2.bg[1],sp2.bg[2]);doc.roundedRect(cx3+1,y+1.5,24,5,1,1,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(5.5);doc.setTextColor(sp2.tx[0],sp2.tx[1],sp2.tx[2]);
+    doc.text(item.data,cx3+13,y+4.2,{align:'center'});cx3+=26;
+
+    doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(28,28,30);
+    doc.text(String(item.cx),cx3+11/2,y+5,{align:'center'});cx3+=11;
+    doc.text(String(item.unds),cx3+13/2,y+5,{align:'center'});cx3+=13;
+    doc.text(String(item.total),cx3+13/2,y+5,{align:'center'});cx3+=13;
+
+    doc.setFillColor(stInfo.c[0],stInfo.c[1],stInfo.c[2]);doc.roundedRect(cx3+1,y+1.8,22,4.5,1,1,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(5.5);doc.setTextColor(255,255,255);
+    if(est.status==='ause'||!est.status)doc.setTextColor(est.status?255:130,est.status?255:130,est.status?255:130);
+    doc.text(stInfo.lb,cx3+12,y+4.7,{align:'center'});
+
+    if(item.obs){
+      doc.setFont('helvetica','bold');doc.setFontSize(5);doc.setTextColor(160,100,0);
+      doc.text('FANTASMA?',xC+pgW-25,y+5);
+    }
+    if(est.obs){
+      y+=8;
+      if(y+5>maxY){drawFoot2();doc.addPage();pageNum++;y=14;}
+      doc.setFillColor(255,249,235);doc.rect(xC,y,pgW-18,5,'F');
+      doc.setFont('helvetica','italic');doc.setFontSize(6);doc.setTextColor(130,80,0);
+      var obsT=('OBS: '+est.obs);if(obsT.length>90)obsT=obsT.substring(0,89)+'…';
+      doc.text(obsT,xC+4,y+3.5);
+      y+=5;
+    } else { y+=8; }
+
+    doc.setDrawColor(242,242,247);doc.setLineWidth(0.2);doc.line(xC,y,xC+pgW-18,y);
+  });
+
+  drawFoot2();
+  var dt=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  doc.save('Conferencia_Quebras_'+dt+'.pdf');
+}
+
+render();
+`;
+
+      const html = '<!DOCTYPE html><html lang="pt-BR"><head>'
+        + '<meta charset="UTF-8">'
+        + '<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">'
+        + '<title>Conferência de Quebras</title>'
+        + '<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>'
+        + '<style>' + css + '</style>'
+        + '</head><body>'
+        + '<div class="hdr">'
+        + '<h1>Conferência de Quebras</h1>'
+        + '<span id="ptxt" class="ptxt">0/0 conferidos</span>'
+        + '<button class="btn-pdf" onclick="gerarPDF()">&#128247; Gerar PDF</button>'
+        + '</div>'
+        + '<div class="pbar-bg"><div class="pbar" id="pbar"></div></div>'
+        + '<div class="cards" id="cards"></div>'
+        + '<script>var dados=' + dadosJson + ';' + js + '<\/script>'
+        + '</body></html>';
+
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+    }
 
     // Dropdown Datas Curtas com Direcionamento
     function toggleDirDropdown(e) {
@@ -8799,6 +9125,25 @@ self.addEventListener('fetch', e => {
       doc.save('Relatorio_SKU_' + new Date().toISOString().slice(0,10) + '.pdf');
       fecharModalRelatorioSku();
     }
+    </script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('./sw.js').then(function (reg) {
+            reg.addEventListener('updatefound', function () {
+              var nw = reg.installing;
+              if (!nw) return;
+              nw.addEventListener('statechange', function () {
+                // Novo SW ativado e havia um SW anterior controlando a página → recarrega
+                if (nw.state === 'activated' && navigator.serviceWorker.controller) {
+                  window.location.reload();
+                }
+              });
+            });
+          });
+        });
+      }
     </script>
 
 </body>
