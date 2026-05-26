@@ -6178,33 +6178,7 @@
       };
       const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
       document.getElementById('pwaManifest').href = URL.createObjectURL(blob);
-
-      if ('serviceWorker' in navigator) {
-        const swCode = `
-const CACHE = 'panutrir-v1';
-const ASSETS = ['./', './index.html'];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
-  self.skipWaiting();
-});
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request).then(r => {
-      const clone = r.clone();
-      caches.open(CACHE).then(c => c.put(e.request, clone)).catch(()=>{});
-      return r;
-    }).catch(() => caches.match(e.request))
-  );
-});`;
-        const swBlob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl  = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).catch(() => {});
-      }
+      // Service Worker é registrado no bloco final do arquivo, apontando para ./sw.js
     })();
 
     // ══════════════════════════════════════════════════════════════════
@@ -6635,6 +6609,7 @@ self.addEventListener('fetch', e => {
           cx: Math.floor(i.qtd / upCx),
           unds: Math.round(i.qtd % upCx),
           total: Math.round(i.qtd),
+          upCx: upCx,
           obs: (i.qtd < 30 && i.diff === minDiff) ? 'FANTASMA?' : ''
         };
       }).sort((a, b) => {
@@ -6679,12 +6654,50 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sku-sep{background:#1A3770;color:#fff;padding:9px 13px;border-radius:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px}
 .sku-sep:first-child{margin-top:0}
 .sku-sep-nome{font-size:11px;font-weight:800;letter-spacing:.02em;line-height:1.3;flex:1}
-.sku-sep-cnt{font-size:9px;font-weight:700;background:rgba(255,255,255,0.18);padding:2px 8px;border-radius:8px;white-space:nowrap}`;
+.sku-sep-cnt{font-size:9px;font-weight:700;background:rgba(255,255,255,0.18);padding:2px 8px;border-radius:8px;white-space:nowrap}
+.search-bar{position:sticky;top:52px;z-index:97;background:#F2F2F7;padding:9px 11px 7px;display:flex;gap:7px;align-items:center;border-bottom:1px solid #E5E5EA}
+.search-inp{flex:1;border:1.5px solid #D1D1D6;border-radius:10px;padding:9px 12px;font-size:13px;font-family:inherit;color:#1C1C1E;background:#fff;outline:none;-webkit-appearance:none}
+.search-inp:focus{border-color:#1A3770;box-shadow:0 0 0 3px rgba(26,55,112,0.12)}
+.search-clr{background:#E5E5EA;color:#1C1C1E;border:none;border-radius:9px;padding:9px 11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+.search-clr:active{opacity:.7}
+.sum-btn{background:#5856D6;color:#fff;border:none;border-radius:9px;padding:9px 11px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.sum-btn.active{background:#FF9500}
+.sum-btn:active{opacity:.8}
+.no-res{text-align:center;padding:40px 20px;color:#8E8E93;font-size:13px;font-weight:600}
+.card.selecionado{box-shadow:0 0 0 3px #5856D6,0 1px 3px rgba(0,0,0,.09)}
+.card-sel-mark{display:none;align-items:center;justify-content:center;width:22px;height:22px;background:#5856D6;color:#fff;border-radius:50%;font-size:11px;font-weight:900;flex-shrink:0}
+.card.selecionado .card-sel-mark{display:flex}
+.sum-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(2px)}
+.sum-modal-bg.show{display:flex}
+.sum-modal{background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.3)}
+.sum-modal-hdr{background:#5856D6;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.sum-modal-hdr h2{font-size:14px;font-weight:800;letter-spacing:.02em}
+.sum-modal-close{background:rgba(255,255,255,0.18);color:#fff;border:none;width:28px;height:28px;border-radius:50%;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.sum-modal-bdy{padding:14px 18px;overflow-y:auto;flex:1}
+.sum-total-bg{background:linear-gradient(135deg,#5856D6,#7B79E0);color:#fff;border-radius:14px;padding:14px;margin-bottom:14px;text-align:center}
+.sum-total-lb{font-size:9px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.sum-total-vl{font-size:26px;font-weight:900;letter-spacing:-.02em}
+.sum-total-sub{font-size:11px;opacity:.85;margin-top:3px;font-weight:600}
+.sum-grp{background:#F2F2F7;border-radius:11px;padding:12px;margin-bottom:9px}
+.sum-grp-nm{font-size:11px;font-weight:800;color:#1A3770;margin-bottom:8px;line-height:1.3}
+.sum-grp-info{font-size:10px;color:#8E8E93;margin-bottom:7px;font-weight:600}
+.sum-grp-res{display:flex;gap:10px;align-items:center;background:#fff;border-radius:8px;padding:9px 11px}
+.sum-grp-res-it{flex:1;text-align:center}
+.sum-grp-res-it.div{border-left:1px solid #E5E5EA;border-right:1px solid #E5E5EA}
+.sum-grp-res-lb{font-size:8px;font-weight:700;color:#8E8E93;text-transform:uppercase;letter-spacing:.05em}
+.sum-grp-res-vl{font-size:17px;font-weight:900;color:#1C1C1E;margin-top:1px}
+.sum-grp-res-vl.cx{color:#5856D6}
+.sum-grp-res-vl.un{color:#FF9500}
+.sum-grp-etqs{font-size:9px;color:#8E8E93;margin-top:7px;font-style:italic;line-height:1.4}
+.sum-empty{text-align:center;padding:30px 10px;color:#8E8E93;font-size:13px}`;
 
       const js = `
 var SK = 'conf_q_' + new Date().toLocaleDateString('pt-BR').replace(/\\//g,'_');
 var E = {};
 try { E = JSON.parse(localStorage.getItem(SK) || '{}'); } catch(e) {}
+var filtroAtual = '';
+var modoSoma = false;
+var somaSel = {};
 
 function sc(d) {
   try {
@@ -6726,19 +6739,157 @@ function prog(){
   if(pb)pb.style.width=(t?(m/t*100):0)+'%';
 }
 
+// Cor estável e suave por SKU: mesmo SKU sempre gera a mesma cor (HSL com matiz por hash).
+var _corSkuCache={};
+function corDoSku(cod){
+  var key=String(cod||'0');
+  if(_corSkuCache[key])return _corSkuCache[key];
+  // Hash simples e determinístico
+  var h=0;
+  for(var x=0;x<key.length;x++){h=((h<<5)-h)+key.charCodeAt(x);h|=0;}
+  // Espalhar matiz em 360º. Multiplica por número primo para reduzir clusters quando codes são sequenciais
+  var hue=Math.abs(h*47)%360;
+  // Light: fundo bem suave (pastel, alta luminosidade, baixa saturação)
+  // Dark:  versão saturada da mesma matiz para o separador e a barra lateral
+  var light='hsl('+hue+',62%,93%)';
+  var dark ='hsl('+hue+',45%,38%)';
+  var res={light:light,dark:dark,hue:hue};
+  _corSkuCache[key]=res;
+  return res;
+}
+
+function limparBusca(){
+  filtroAtual='';
+  var si=document.getElementById('srch');
+  if(si)si.value='';
+  render();
+}
+
+function toggleSomaModo(){
+  if(!modoSoma){
+    modoSoma=true;
+    var btn=document.getElementById('sumBtn');
+    if(btn){btn.classList.add('active');btn.innerHTML='&#931; Ver total ('+Object.keys(somaSel).length+')';}
+    alert('Modo SOMA ativado. Toque nas etiquetas que deseja somar. Quando terminar, toque novamente em "Ver total".');
+  } else {
+    if(Object.keys(somaSel).length===0){
+      // Sai do modo soma sem mostrar nada
+      modoSoma=false;
+      somaSel={};
+      var btn0=document.getElementById('sumBtn');
+      if(btn0){btn0.classList.remove('active');btn0.innerHTML='&#931; Somar';}
+      // Re-renderizar para remover marcação visual
+      render();
+      return;
+    }
+    abrirSomaModal();
+  }
+}
+
+function atualizarBtnSoma(){
+  var btn=document.getElementById('sumBtn');
+  if(btn && modoSoma){
+    btn.innerHTML='&#931; Ver total ('+Object.keys(somaSel).length+')';
+  }
+}
+
+function abrirSomaModal(){
+  var bdy=document.getElementById('sumModalBdy');
+  if(!bdy)return;
+  var sel=[];
+  for(var k in somaSel){if(somaSel[k]){sel.push(dados[parseInt(k)]);}}
+  if(sel.length===0){
+    bdy.innerHTML='<div class="sum-empty">Nenhuma etiqueta selecionada.<br>Volte e toque nas etiquetas que deseja somar.</div>';
+    document.getElementById('sumModal').classList.add('show');
+    return;
+  }
+  // Agrupar por SKU (_cod) — só faz sentido somar caixas para o mesmo SKU
+  var grupos={};
+  sel.forEach(function(it){
+    var cod=it._cod;
+    if(!grupos[cod])grupos[cod]={nome:it.nome,upCx:it.upCx,totalUnd:0,etiquetas:[]};
+    grupos[cod].totalUnd+=it.total;
+    grupos[cod].etiquetas.push(it.etiqueta);
+  });
+  var totalGeralUnd=0,html='';
+  var chaves=Object.keys(grupos);
+  chaves.forEach(function(cod){
+    var g=grupos[cod];
+    totalGeralUnd+=g.totalUnd;
+    var cxsT=Math.floor(g.totalUnd/g.upCx);
+    var undT=Math.round(g.totalUnd%g.upCx);
+    var lastroFmt=Number.isInteger(g.upCx)?g.upCx:g.upCx.toFixed(2);
+    html+='<div class="sum-grp">'+
+          '<div class="sum-grp-nm">'+g.nome+'</div>'+
+          '<div class="sum-grp-info">'+g.etiquetas.length+(g.etiquetas.length===1?' etiqueta':' etiquetas')+' &middot; lastro: '+lastroFmt+' un/cx</div>'+
+          '<div class="sum-grp-res">'+
+          '<div class="sum-grp-res-it"><div class="sum-grp-res-lb">TOTAL</div><div class="sum-grp-res-vl">'+g.totalUnd+'</div></div>'+
+          '<div class="sum-grp-res-it div"><div class="sum-grp-res-lb">CAIXAS</div><div class="sum-grp-res-vl cx">'+cxsT+'</div></div>'+
+          '<div class="sum-grp-res-it"><div class="sum-grp-res-lb">UNDS SOLTAS</div><div class="sum-grp-res-vl un">'+undT+'</div></div>'+
+          '</div>'+
+          '<div class="sum-grp-etqs">Etiquetas: '+g.etiquetas.join(', ')+'</div>'+
+          '</div>';
+  });
+  var headerHtml='<div class="sum-total-bg">'+
+                 '<div class="sum-total-lb">Total Geral (Unidades)</div>'+
+                 '<div class="sum-total-vl">'+totalGeralUnd+'</div>'+
+                 '<div class="sum-total-sub">'+sel.length+(sel.length===1?' etiqueta':' etiquetas')+' &middot; '+chaves.length+(chaves.length===1?' SKU':' SKUs')+'</div>'+
+                 '</div>';
+  var footerHtml='<div style="display:flex;gap:8px;margin-top:6px">'+
+                 '<button onclick="limparSelecao()" style="flex:1;padding:11px;background:#FF3B30;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer">Limpar seleção</button>'+
+                 '<button onclick="fecharSomaModal()" style="flex:1;padding:11px;background:#1A3770;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer">Fechar</button>'+
+                 '</div>';
+  bdy.innerHTML=headerHtml+html+footerHtml;
+  document.getElementById('sumModal').classList.add('show');
+}
+
+function fecharSomaModal(){
+  var m=document.getElementById('sumModal');
+  if(m)m.classList.remove('show');
+}
+
+function limparSelecao(){
+  somaSel={};
+  modoSoma=false;
+  var btn=document.getElementById('sumBtn');
+  if(btn){btn.classList.remove('active');btn.innerHTML='&#931; Somar';}
+  fecharSomaModal();
+  render();
+}
+
 function render(){
   var cont=document.getElementById('cards');
   if(!cont)return;
+  var termo=(filtroAtual||'').toLowerCase().trim();
+  var dadosVis=[];
+  for(var i=0;i<dados.length;i++){
+    var it=dados[i];
+    if(termo){
+      var etq=String(it.etiqueta||'').toLowerCase();
+      var cod=String(it._cod||'').toLowerCase();
+      var nm=String(it.nome||'').toLowerCase();
+      if(etq.indexOf(termo)===-1 && cod.indexOf(termo)===-1 && nm.indexOf(termo)===-1) continue;
+    }
+    dadosVis.push({item:it,idx:i});
+  }
+  if(dadosVis.length===0){
+    cont.innerHTML='<div class="no-res">Nenhum resultado para "<strong>'+(termo||'')+'</strong>"</div>';
+    prog();
+    return;
+  }
   var h='';
   var lastCod=null;
   var codCount={};
-  for(var k=0;k<dados.length;k++){var c=dados[k]._cod;codCount[c]=(codCount[c]||0)+1;}
-  for(var i=0;i<dados.length;i++){
-    var item=dados[i],est=E[i]||{},s=sc(item.data);
+  for(var k=0;k<dadosVis.length;k++){var c=dadosVis[k].item._cod;codCount[c]=(codCount[c]||0)+1;}
+  for(var j=0;j<dadosVis.length;j++){
+    var item=dadosVis[j].item;
+    var i=dadosVis[j].idx;
+    var est=E[i]||{},s=sc(item.data);
+    var skuColor=corDoSku(item._cod);
     if(item._cod!==lastCod){
       lastCod=item._cod;
       var cnt=codCount[item._cod]||1;
-      h+='<div class="sku-sep">'+
+      h+='<div class="sku-sep" style="background:'+skuColor.dark+'">'+
          '<div class="sku-sep-nome">'+item.nome+'</div>'+
          '<span class="sku-sep-cnt">'+cnt+(cnt===1?' etiqueta':' etiquetas')+'</span>'+
          '</div>';
@@ -6748,13 +6899,19 @@ function render(){
     var ov=(est.obs||'').replace(/"/g,'&quot;');
     var p0=est.status==='pres'?' on':'',p1=est.status==='ause'?' on':'',p2=est.status==='corr'?' on':'';
     var od=est.status==='corr'?'block':'none';
-    h+='<div class="card'+(item.obs?' fant':'')+'">'+
+    var selCls=somaSel[i]?' selecionado':'';
+    // Cor de fundo do card por SKU (mas mantém amarelo se for FANTASMA)
+    var cardStyle=item.obs?'':' style="background:'+skuColor.light+';border-left:4px solid '+skuColor.dark+'"';
+    h+='<div class="card'+(item.obs?' fant':'')+selCls+'"'+cardStyle+' data-cidx="'+i+'">'+
        '<div class="chdr">'+
        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+
        (hasL?'<a class="etq-a" href="'+ifu+'" target="_blank">'+item.etiqueta+'</a>':'<span class="etq-s">'+item.etiqueta+'</span>')+
        (item.obs?'<span class="ftag">⚠ FANTASMA?</span>':'')+
        '</div>'+
+       '<div style="display:flex;align-items:center;gap:7px">'+
+       '<span class="card-sel-mark">✓</span>'+
        '<span class="bdg" style="background:'+s.bg+';color:'+s.tx+'">'+s.lb+'</span>'+
+       '</div>'+
        '</div>'+
        '<div class="cbdy">'+
        '<div class="nome">'+item.nome+'</div>'+
@@ -6776,15 +6933,46 @@ function render(){
        '</div></div>';
   }
   cont.innerHTML=h;
-  cont.addEventListener('click',function(e){
-    var b=e.target.closest('[data-st]');
-    if(b)setSt(parseInt(b.getAttribute('data-idx')),b.getAttribute('data-st'));
-  });
-  cont.addEventListener('input',function(e){
-    var inp=e.target.closest('input.obs-inp');
-    if(inp)salvar(parseInt(inp.getAttribute('data-idx')),'obs',inp.value);
-  });
   prog();
+}
+
+// Listeners delegados (instalados uma só vez)
+function initListeners(){
+  var cont=document.getElementById('cards');
+  if(cont){
+    cont.addEventListener('click',function(e){
+      if(modoSoma){
+        var card=e.target.closest('.card[data-cidx]');
+        if(card){
+          var ci=parseInt(card.getAttribute('data-cidx'));
+          if(somaSel[ci]){delete somaSel[ci];card.classList.remove('selecionado');}
+          else{somaSel[ci]=true;card.classList.add('selecionado');}
+          atualizarBtnSoma();
+          e.preventDefault();
+          return;
+        }
+      }
+      var b=e.target.closest('[data-st]');
+      if(b)setSt(parseInt(b.getAttribute('data-idx')),b.getAttribute('data-st'));
+    });
+    cont.addEventListener('input',function(e){
+      var inp=e.target.closest('input.obs-inp');
+      if(inp)salvar(parseInt(inp.getAttribute('data-idx')),'obs',inp.value);
+    });
+  }
+  var si=document.getElementById('srch');
+  if(si){
+    si.addEventListener('input',function(){
+      filtroAtual=si.value;
+      render();
+    });
+  }
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',initListeners);
+} else {
+  initListeners();
 }
 
 function gerarPDF(){
@@ -6798,20 +6986,33 @@ function gerarPDF(){
   for(var k in E){if(!E[k])continue;if(E[k].status==='pres')np++;else if(E[k].status==='ause')na++;else if(E[k].status==='corr')nc++;}
   var nn=dados.length-np-na-nc;
 
+  // FILTRO: gera PDF APENAS com etiquetas AUSENTES e CORRIGIDAS (com observação)
+  var dadosFiltrados=[];
+  for(var idx=0; idx<dados.length; idx++){
+    var estF=E[idx]||{};
+    if(estF.status==='ause' || estF.status==='corr'){
+      dadosFiltrados.push({item:dados[idx], idx:idx, est:estF});
+    }
+  }
+  if(dadosFiltrados.length===0){
+    alert('Nenhuma etiqueta marcada como AUSENTE ou CORRIGIDA. Faça a conferência antes de gerar o PDF.');
+    return;
+  }
+
   doc.setFillColor(88,86,214);doc.rect(0,0,pgW,1.5,'F');
   doc.setFillColor(250,250,253);doc.rect(0,1.5,pgW,28,'F');
   doc.setDrawColor(235,235,242);doc.setLineWidth(0.3);doc.line(0,29.5,pgW,29.5);
   doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(28,28,30);
-  doc.text('Conferência de Quebras',10,14);
+  doc.text('Quebras: Ausentes & Correções',10,14);
   doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(108,108,112);
-  doc.text('Resultado da conferência — CD Matriz Panutrir',10,20);
+  doc.text('Apenas etiquetas ausentes e observações de correção — CD Matriz Panutrir',10,20);
   doc.text('Gerado em: '+hoje,10,26);
 
   var kpiY=33,kpiH=16,kpiW=(pgW-20)/4;
   var kpis=[
-    {lb:'PRESENTE',vl:np,c:[52,199,89]},
     {lb:'AUSENTE',vl:na,c:[255,59,48]},
     {lb:'CORRIGIDA',vl:nc,c:[255,149,0]},
+    {lb:'PRESENTE',vl:np,c:[52,199,89]},
     {lb:'N. CONFERIDO',vl:nn,c:[108,108,112]}
   ];
   kpis.forEach(function(ki,j){
@@ -6825,10 +7026,11 @@ function gerarPDF(){
   });
 
   var y=kpiY+kpiH+6;
+  // Coluna ETIQUETA agora inclui o status como badge ao lado. Coluna STATUS separada removida.
   var cols=[
-    {h:'ETIQUETA',w:24,a:'center'},{h:'PRODUTO',w:66,a:'left'},
-    {h:'VENCIMENTO',w:26,a:'center'},{h:'CX',w:11,a:'center'},
-    {h:'UNDS',w:13,a:'center'},{h:'TOTAL',w:13,a:'center'},{h:'STATUS',w:24,a:'center'}
+    {h:'ETIQUETA / STATUS',w:46,a:'left'},{h:'PRODUTO',w:68,a:'left'},
+    {h:'VENCIMENTO',w:26,a:'center'},{h:'CX',w:12,a:'center'},
+    {h:'UNDS',w:14,a:'center'},{h:'TOTAL',w:16,a:'center'}
   ];
   var xC=9;
   doc.setFillColor(28,28,30);doc.rect(xC,y,pgW-18,6.5,'F');
@@ -6846,27 +7048,37 @@ function gerarPDF(){
   function drawFoot2(){
     doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(150,150,160);
     doc.text('Pág '+pageNum,pgW/2,pgH-5,{align:'center'});
-    doc.text('Conferência de Quebras — '+hoje+' — CD Matriz Panutrir',pgW/2,pgH-9,{align:'center'});
+    doc.text('Quebras: Ausentes & Correções — '+hoje+' — CD Matriz Panutrir',pgW/2,pgH-9,{align:'center'});
   }
 
   var stMap={'pres':{lb:'PRESENTE',c:[52,199,89]},'ause':{lb:'AUSENTE',c:[255,59,48]},'corr':{lb:'CORRIGIDA',c:[255,149,0]}};
-  dados.forEach(function(item,i){
+  dadosFiltrados.forEach(function(reg,rowIdx){
+    var item=reg.item;
+    var i=reg.idx;
+    var est=reg.est;
     if(y+8>maxY){drawFoot2();doc.addPage();pageNum++;y=14;}
-    var est=E[i]||{};
-    var alt=i%2===0;
+    var alt=rowIdx%2===0;
     var rfill=alt?[250,250,253]:[255,255,255];
     doc.setFillColor(rfill[0],rfill[1],rfill[2]);doc.rect(xC,y,pgW-18,8,'F');
 
     var stInfo=est.status&&stMap[est.status]?stMap[est.status]:{lb:'—',c:[200,200,200]};
-    doc.setFillColor(stInfo.c[0],stInfo.c[1],stInfo.c[2]);doc.rect(xC,y,2,8,'F');
+    // Barra colorida vertical mais grossa à esquerda (reforço visual do status)
+    doc.setFillColor(stInfo.c[0],stInfo.c[1],stInfo.c[2]);doc.rect(xC,y,2.5,8,'F');
 
-    var cx3=xC+2;
-    doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(26,55,112);
-    doc.text(item.etiqueta,cx3+22/2,y+5,{align:'center'});cx3+=22;
+    var cx3=xC+3;
+    // ETIQUETA + BADGE STATUS lado a lado (largura total da coluna: 46mm)
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(26,55,112);
+    doc.text(item.etiqueta,cx3+1,y+5);
+    // Badge de status logo após a etiqueta
+    var stBadgeX=cx3+19;
+    doc.setFillColor(stInfo.c[0],stInfo.c[1],stInfo.c[2]);doc.roundedRect(stBadgeX,y+1.6,22,4.8,1.2,1.2,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(6);doc.setTextColor(255,255,255);
+    doc.text(stInfo.lb,stBadgeX+11,y+4.8,{align:'center'});
+    cx3+=43;
 
-    var nomeT=item.nome.length>38?item.nome.substring(0,37)+'…':item.nome;
+    var nomeT=item.nome.length>40?item.nome.substring(0,39)+'…':item.nome;
     doc.setFont('helvetica','normal');doc.setFontSize(6.5);doc.setTextColor(28,28,30);
-    doc.text(nomeT,cx3+2,y+5);cx3+=66;
+    doc.text(nomeT,cx3+2,y+5);cx3+=68;
 
     var sp=function(dataStr){
       try{var p=dataStr.split('/'),df=Math.floor((new Date(+p[2],+p[1]-1,+p[0])-new Date())/86400000);
@@ -6883,18 +7095,13 @@ function gerarPDF(){
     doc.text(item.data,cx3+13,y+4.2,{align:'center'});cx3+=26;
 
     doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(28,28,30);
-    doc.text(String(item.cx),cx3+11/2,y+5,{align:'center'});cx3+=11;
-    doc.text(String(item.unds),cx3+13/2,y+5,{align:'center'});cx3+=13;
-    doc.text(String(item.total),cx3+13/2,y+5,{align:'center'});cx3+=13;
-
-    doc.setFillColor(stInfo.c[0],stInfo.c[1],stInfo.c[2]);doc.roundedRect(cx3+1,y+1.8,22,4.5,1,1,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(5.5);doc.setTextColor(255,255,255);
-    if(est.status==='ause'||!est.status)doc.setTextColor(est.status?255:130,est.status?255:130,est.status?255:130);
-    doc.text(stInfo.lb,cx3+12,y+4.7,{align:'center'});
+    doc.text(String(item.cx),cx3+12/2,y+5,{align:'center'});cx3+=12;
+    doc.text(String(item.unds),cx3+14/2,y+5,{align:'center'});cx3+=14;
+    doc.text(String(item.total),cx3+16/2,y+5,{align:'center'});cx3+=16;
 
     if(item.obs){
       doc.setFont('helvetica','bold');doc.setFontSize(5);doc.setTextColor(160,100,0);
-      doc.text('FANTASMA?',xC+pgW-25,y+5);
+      doc.text('FANTASMA?',xC+pgW-26,y+5);
     }
     if(est.obs){
       y+=8;
@@ -6911,7 +7118,7 @@ function gerarPDF(){
 
   drawFoot2();
   var dt=new Date().toISOString().slice(0,10).replace(/-/g,'');
-  doc.save('Conferencia_Quebras_'+dt+'.pdf');
+  doc.save('Quebras_Ausentes_Correcoes_'+dt+'.pdf');
 }
 
 render();
@@ -6930,7 +7137,21 @@ render();
         + '<button class="btn-pdf" onclick="gerarPDF()">&#128247; Gerar PDF</button>'
         + '</div>'
         + '<div class="pbar-bg"><div class="pbar" id="pbar"></div></div>'
+        + '<div class="search-bar">'
+        + '<input id="srch" class="search-inp" type="text" placeholder="Buscar por etiqueta ou SKU..." autocomplete="off"/>'
+        + '<button id="srchClr" class="search-clr" onclick="limparBusca()">Limpar</button>'
+        + '<button id="sumBtn" class="sum-btn" onclick="toggleSomaModo()">&#931; Somar</button>'
+        + '</div>'
         + '<div class="cards" id="cards"></div>'
+        + '<div id="sumModal" class="sum-modal-bg" onclick="if(event.target===this)fecharSomaModal()">'
+        + '<div class="sum-modal">'
+        + '<div class="sum-modal-hdr">'
+        + '<h2>&#931; Totalizador por Caixas</h2>'
+        + '<button class="sum-modal-close" onclick="fecharSomaModal()">&times;</button>'
+        + '</div>'
+        + '<div id="sumModalBdy" class="sum-modal-bdy"></div>'
+        + '</div>'
+        + '</div>'
         + '<script>var dados=' + dadosJson + ';' + js + '<\/script>'
         + '</body></html>';
 
