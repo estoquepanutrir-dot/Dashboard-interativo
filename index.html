@@ -1249,8 +1249,17 @@
     <p style="color:var(--md-on-surface-variant);font-size:0.9rem;max-width:20rem;font-weight:500;line-height:1.6;">
       Importe o relatório de etiquetas gerado pelo sistema Inflow para começar.
     </p>
-    <div class="mt-10">
+    <div class="mt-10" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
       <label for="fileUpload" class="upload-btn">Importar Dados</label>
+      <button onclick="carregarDbNuvem()"
+        style="display:inline-flex;align-items:center;gap:8px;background:var(--md-primary-container);color:var(--md-on-primary-container);border:none;border-radius:2rem;padding:0.75rem 1.75rem;font-size:0.875rem;font-weight:700;cursor:pointer;letter-spacing:0.02em;font-family:inherit;transition:opacity 0.2s;"
+        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
+        Carregar da Nuvem
+      </button>
+      <p style="font-size:0.75rem;color:var(--md-on-surface-variant);font-weight:500;margin-top:-4px;">
+        Carrega o estoque do dia já importado pelo responsável
+      </p>
     </div>
   </div>
 
@@ -6611,6 +6620,22 @@
       const dataKey = String(hoje.getDate()).padStart(2,'0') + String(hoje.getMonth()+1).padStart(2,'0') + hoje.getFullYear();
       const urlEstoque = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/estoque_' + dataKey;
       const urlQuebras = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/quebras_' + dataKey;
+      const urlDbFull  = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/db_full_'  + dataKey;
+
+      // Envia o db completo em background (permite que o outro estoquista abra o dashboard completo)
+      const dbPayload = {
+        v: 1, dataEnvio: new Date().toISOString(),
+        baseImportada: window.currentImportLabel || '?',
+        total: db.length,
+        itens: db.map(i => ({
+          c: String(i.cod).trim(), p: i.produto, q: Math.round(i.qtd),
+          v: i.validade.toISOString().slice(0, 10),
+          lo: String(i.lote || '').trim(), e: String(i.etiqueta || '').trim(),
+          l: i.lastro, t: i.tipo, m: i.marca, o: i.operacao
+        }))
+      };
+      const rqDb = { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dbPayload) };
+      fetch(urlDbFull, rqDb).then(r => r.ok ? null : fetch(urlDbFull, {...rqDb, method:'POST'})).catch(() => {});
 
       // Monta payload enxuto com só o necessário para o popup de conferência
       const itensQuebra = db
@@ -6668,6 +6693,65 @@
           console.warn('[nuvem] falha ao sincronizar estoque:', err.message);
           // Não alerta o usuário — o dashboard continua funcionando localmente
         });
+    }
+
+    async function carregarDbNuvem() {
+      const PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
+      const hoje = new Date();
+      const dataKey = String(hoje.getDate()).padStart(2,'0') + String(hoje.getMonth()+1).padStart(2,'0') + hoje.getFullYear();
+      const urlDbFull = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/db_full_' + dataKey;
+
+      showLoader(true);
+      const oldTitle = document.title;
+      document.title = '☁ Carregando estoque da nuvem...';
+      try {
+        const r = await fetch(urlDbFull, { method: 'GET' });
+        if (!r.ok) {
+          showLoader(false);
+          document.title = oldTitle;
+          return alert('Estoque do dia ainda não está na nuvem.\n\nPeça para o responsável importar a planilha primeiro.');
+        }
+        const data = await r.json();
+        if (!data || !Array.isArray(data.itens) || data.itens.length === 0) {
+          showLoader(false);
+          document.title = oldTitle;
+          return alert('A nuvem retornou um estoque vazio. Peça para o responsável reimportar a planilha.');
+        }
+
+        const todayDate = new Date(); todayDate.setHours(0,0,0,0);
+        db.length = 0;
+        data.itens.forEach((it, i) => {
+          const validade = new Date(it.v + 'T00:00:00');
+          const diff = Math.ceil((validade - todayDate) / 86400000);
+          db.push({
+            id: i, cod: it.c, produto: it.p, qtd: it.q,
+            validade, diff,
+            lote: it.lo || '', etiqueta: it.e || '',
+            lastro: it.l, tipo: it.t, marca: it.m, operacao: it.o,
+            isDataCurta: diff <= 29,
+            validadeStatus: getValidityStatus(diff, it.q, it.c)
+          });
+        });
+
+        window.currentImportLabel = (data.baseImportada || 'Nuvem') + ' • ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        document.title = oldTitle;
+
+        document.getElementById('notif-btn').style.display = 'flex';
+        document.getElementById('hist-btn').style.display  = 'flex';
+        showLoader(false);
+        emptyView.classList.add('hidden');
+        mainContent.classList.remove('hidden');
+        applyFilters();
+        renderNotificacoes();
+        renderTendencia();
+        verificarAlertaUrgente();
+        salvarSnapshot();
+
+      } catch (err) {
+        showLoader(false);
+        document.title = oldTitle;
+        alert('Erro ao carregar da nuvem: ' + err.message);
+      }
     }
 
     function abrirConferenciaMobile() {
@@ -6815,9 +6899,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sum-empty{text-align:center;padding:30px 10px;color:#8E8E93;font-size:13px}
 .sync-dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#8E8E93;margin-left:6px;cursor:pointer;transition:background .25s;box-shadow:0 0 0 2px rgba(255,255,255,0.4)}
 .sync-dot:active{transform:scale(.85)}
-.card-by{position:absolute;top:6px;right:80px;font-size:8.5px;font-weight:800;color:#fff;background:#5856D6;padding:2px 7px;border-radius:8px;letter-spacing:.02em;animation:byPulse 3s ease}
+.card-by{position:absolute;top:6px;right:80px;font-size:8.5px;font-weight:800;color:#fff;background:#5856D6;padding:2px 7px;border-radius:8px;letter-spacing:.02em}.card-by.new{animation:byPulse 1.5s ease forwards}.card-by-me{position:absolute;top:6px;right:80px;font-size:8.5px;font-weight:800;color:#fff;background:#636366;padding:2px 7px;border-radius:8px;letter-spacing:.02em;opacity:.85}
 .card{position:relative}
-@keyframes byPulse{0%{transform:scale(1.3);opacity:0}15%{transform:scale(1);opacity:1}80%{opacity:1}100%{opacity:.7}}`;
+@keyframes byPulse{0%{transform:scale(1.3);opacity:0}15%{transform:scale(1);opacity:1}100%{opacity:1}}`;
 
       const js = `
 var SK = 'conf_q_' + new Date().toLocaleDateString('pt-BR').replace(/\\//g,'_');
@@ -6836,11 +6920,24 @@ var PANTRY_URL = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/
 var POLL_MS = 5000;
 var PUSH_DEBOUNCE_MS = 1500;
 
-// Nome do estoquista (pedido só na 1ª vez)
+// Nome do estoquista — lido do localStorage (configurado pelo modal)
 var ME = localStorage.getItem('estoquista_nome') || '';
-if(!ME){
-  ME = (prompt('Qual seu nome? (ex: Carlos)') || '').trim() || 'Anon';
-  try { localStorage.setItem('estoquista_nome', ME); } catch(e) {}
+function setMeNome(nome){
+  nome=(nome||'').trim();
+  if(!nome)return;
+  ME=nome;
+  try{localStorage.setItem('estoquista_nome',nome);}catch(e){}
+  var m=document.getElementById('nomeModal');
+  if(m)m.style.display='none';
+  var bn=document.getElementById('btnNome');
+  if(bn)bn.textContent='👤 '+ME;
+  render();
+  iniciarSync();
+  setSyncStatus(navigator.onLine?'idle':'offline');
+}
+function mudarNome(){
+  var m=document.getElementById('nomeModal');
+  if(m)m.style.display='flex';
 }
 
 var syncStatus = 'idle'; // 'idle' | 'pushing' | 'pulling' | 'error' | 'offline'
@@ -6872,24 +6969,31 @@ function cloudPushDebounced(){
 function cloudPush(){
   if(!navigator.onLine){ setSyncStatus('offline'); return; }
   setSyncStatus('pushing');
-  // Pantry: PUT cria/substitui o basket inteiro
-  fetch(PANTRY_URL, {
-    method: 'PUT',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(E)
-  }).then(function(r){
-    if(!r.ok){
-      // Se basket não existe (404), tenta POST para criar
-      if(r.status===400 || r.status===404){
-        return fetch(PANTRY_URL, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify(E)
-        });
+  // Lê o estado atual do servidor, faz merge (evita apagar correções do colega) e salva
+  fetch(PANTRY_URL, { method:'GET' })
+  .then(function(r){ return r.ok ? r.json() : null; })
+  .then(function(remoto){
+    if(remoto && typeof remoto === 'object'){
+      for(var k in remoto){
+        var rem=remoto[k], loc=E[k];
+        if(!rem || typeof rem !== 'object') continue;
+        var remTs=rem.ts||0, locTs=(loc&&loc.ts)||0;
+        if(remTs > locTs) E[k]=rem; // remoto mais recente prevalece
       }
-      throw new Error('HTTP '+r.status);
     }
-    return r;
+    return fetch(PANTRY_URL,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(E)
+    });
+  }).then(function(r){
+    if(r && !r.ok && (r.status===400||r.status===404)){
+      return fetch(PANTRY_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(E)
+      });
+    }
   }).then(function(){ setSyncStatus('idle'); })
   .catch(function(){ setSyncStatus('error'); });
 }
@@ -7190,10 +7294,15 @@ function render(){
     var p0=est.status==='pres'?' on':'',p1=est.status==='ause'?' on':'',p2=est.status==='corr'?' on':'';
     var od=est.status==='corr'?'block':'none';
     var selCls=somaSel[i]?' selecionado':'';
-    // "Marcado por X" — só mostra se a última mudança foi remota (de outra pessoa) nos últimos 8s
+    // "Marcado por X" — sempre visível quando há status definido
     var byHtml='';
-    if(est.by && est.by !== ME && ultimaMudancaRemota[i] && (Date.now()-ultimaMudancaRemota[i])<8000){
-      byHtml='<span class="card-by">por '+est.by+'</span>';
+    if(est.status && est.by){
+      if(est.by===ME){
+        byHtml='<span class="card-by-me">você</span>';
+      } else {
+        var isNew=ultimaMudancaRemota[i]&&(Date.now()-ultimaMudancaRemota[i])<8000;
+        byHtml='<span class="card-by'+(isNew?' new':'')+'">por '+est.by+'</span>';
+      }
     }
     // Cor de fundo do card por SKU (mas mantém amarelo se for FANTASMA)
     var cardStyle=item.obs?'':' style="background:'+skuColor.light+';border-left:4px solid '+skuColor.dark+'"';
@@ -7417,9 +7526,16 @@ function gerarPDF(){
   doc.save('Quebras_Ausentes_Correcoes_'+dt+'.pdf');
 }
 
-render();
-iniciarSync();
-setSyncStatus(navigator.onLine ? 'idle' : 'offline');
+if(ME){
+  var bn=document.getElementById('btnNome');
+  if(bn)bn.textContent='👤 '+ME;
+  render();
+  iniciarSync();
+  setSyncStatus(navigator.onLine?'idle':'offline');
+} else {
+  var m=document.getElementById('nomeModal');
+  if(m)m.style.display='flex';
+}
 `;
 
       const html = '<!DOCTYPE html><html lang="pt-BR"><head>'
@@ -7432,6 +7548,7 @@ setSyncStatus(navigator.onLine ? 'idle' : 'offline');
         + '<div class="hdr">'
         + '<h1>Conferência de Quebras</h1>'
         + '<span id="ptxt" class="ptxt">0/0 conferidos</span>'
+        + '<button id="btnNome" onclick="mudarNome()" style="background:rgba(255,255,255,0.18);color:#fff;border:none;border-radius:9px;padding:6px 11px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap;letter-spacing:.02em;">👤 ...</button>'
         + '<span id="syncDot" class="sync-dot" title="Sincronizado" onclick="forcarSync()"></span>'
         + '<button class="btn-pdf" onclick="gerarPDF()">&#128247; Gerar PDF</button>'
         + '</div>'
@@ -7442,6 +7559,20 @@ setSyncStatus(navigator.onLine ? 'idle' : 'offline');
         + '<button id="sumBtn" class="sum-btn" onclick="toggleSomaModo()">&#931; Somar</button>'
         + '</div>'
         + '<div class="cards" id="cards"></div>'
+        + '<div id="nomeModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px)">'
+        + '<div style="background:#fff;border-radius:20px;max-width:340px;width:100%;padding:24px 20px;box-shadow:0 12px 40px rgba(0,0,0,.35)">'
+        + '<h2 style="font-size:17px;font-weight:800;color:#1C1C1E;margin:0 0 5px">Quem é você?</h2>'
+        + '<p style="font-size:12px;color:#8E8E93;margin:0 0 18px;line-height:1.5">Identifica suas correções para o colega ver</p>'
+        + '<div style="display:flex;flex-direction:column;gap:10px">'
+        + '<button onclick="setMeNome(\'Eduardo\')" style="padding:14px;border:none;border-radius:12px;background:#1A3770;color:#fff;font-size:15px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent">Eduardo</button>'
+        + '<button onclick="setMeNome(\'Anderson\')" style="padding:14px;border:none;border-radius:12px;background:#1A3770;color:#fff;font-size:15px;font-weight:800;cursor:pointer;-webkit-tap-highlight-color:transparent">Anderson</button>'
+        + '<div style="display:flex;gap:8px;margin-top:4px">'
+        + '<input id="nomeInput" type="text" placeholder="Outro nome..." style="flex:1;border:1.5px solid #D1D1D6;border-radius:10px;padding:12px;font-size:14px;font-family:inherit;outline:none;-webkit-appearance:none;color:#1C1C1E" />'
+        + '<button onclick="setMeNome(document.getElementById(\'nomeInput\').value)" style="padding:12px 16px;border:none;border-radius:10px;background:#34C759;color:#fff;font-size:13px;font-weight:800;cursor:pointer">OK</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>'
+        + '</div>'
         + '<div id="sumModal" class="sum-modal-bg" onclick="if(event.target===this)fecharSomaModal()">'
         + '<div class="sum-modal">'
         + '<div class="sum-modal-hdr">'
