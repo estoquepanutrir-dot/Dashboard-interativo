@@ -6689,7 +6689,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sum-grp-res-vl.cx{color:#5856D6}
 .sum-grp-res-vl.un{color:#FF9500}
 .sum-grp-etqs{font-size:9px;color:#8E8E93;margin-top:7px;font-style:italic;line-height:1.4}
-.sum-empty{text-align:center;padding:30px 10px;color:#8E8E93;font-size:13px}`;
+.sum-empty{text-align:center;padding:30px 10px;color:#8E8E93;font-size:13px}
+.sync-dot{display:inline-block;width:11px;height:11px;border-radius:50%;background:#8E8E93;margin-left:6px;cursor:pointer;transition:background .25s;box-shadow:0 0 0 2px rgba(255,255,255,0.4)}
+.sync-dot:active{transform:scale(.85)}
+.card-by{position:absolute;top:6px;right:80px;font-size:8.5px;font-weight:800;color:#fff;background:#5856D6;padding:2px 7px;border-radius:8px;letter-spacing:.02em;animation:byPulse 3s ease}
+.card{position:relative}
+@keyframes byPulse{0%{transform:scale(1.3);opacity:0}15%{transform:scale(1);opacity:1}80%{opacity:1}100%{opacity:.7}}`;
 
       const js = `
 var SK = 'conf_q_' + new Date().toLocaleDateString('pt-BR').replace(/\\//g,'_');
@@ -6698,6 +6703,122 @@ try { E = JSON.parse(localStorage.getItem(SK) || '{}'); } catch(e) {}
 var filtroAtual = '';
 var modoSoma = false;
 var somaSel = {};
+
+// ═══════════════════════════════════════════════════════════════
+// SINCRONIZAÇÃO PANTRY (cloud) — 2 estoquistas simultâneos
+// ═══════════════════════════════════════════════════════════════
+var PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
+var BASKET = 'quebras_' + new Date().toLocaleDateString('pt-BR').replace(/\\//g,'');
+var PANTRY_URL = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/' + BASKET;
+var POLL_MS = 5000;
+var PUSH_DEBOUNCE_MS = 1500;
+
+// Nome do estoquista (pedido só na 1ª vez)
+var ME = localStorage.getItem('estoquista_nome') || '';
+if(!ME){
+  ME = (prompt('Qual seu nome? (ex: Carlos)') || '').trim() || 'Anon';
+  try { localStorage.setItem('estoquista_nome', ME); } catch(e) {}
+}
+
+var syncStatus = 'idle'; // 'idle' | 'pushing' | 'pulling' | 'error' | 'offline'
+var ultimaMudancaRemota = {}; // {idx: timestamp} para destacar visualmente quem mudou remotamente
+var pushTimer = null;
+var pullTimer = null;
+
+function setSyncStatus(s){
+  syncStatus = s;
+  var el = document.getElementById('syncDot');
+  if(!el) return;
+  var cores = {
+    idle:    {bg:'#34C759', tit:'Sincronizado'},
+    pushing: {bg:'#FFCC00', tit:'Enviando...'},
+    pulling: {bg:'#FFCC00', tit:'Buscando atualizações...'},
+    error:   {bg:'#FF3B30', tit:'Erro de sincronização'},
+    offline: {bg:'#8E8E93', tit:'Offline'}
+  };
+  var c = cores[s] || cores.idle;
+  el.style.background = c.bg;
+  el.title = c.tit;
+}
+
+function cloudPushDebounced(){
+  if(pushTimer) clearTimeout(pushTimer);
+  pushTimer = setTimeout(cloudPush, PUSH_DEBOUNCE_MS);
+}
+
+function cloudPush(){
+  if(!navigator.onLine){ setSyncStatus('offline'); return; }
+  setSyncStatus('pushing');
+  // Pantry: PUT cria/substitui o basket inteiro
+  fetch(PANTRY_URL, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(E)
+  }).then(function(r){
+    if(!r.ok){
+      // Se basket não existe (404), tenta POST para criar
+      if(r.status===400 || r.status===404){
+        return fetch(PANTRY_URL, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(E)
+        });
+      }
+      throw new Error('HTTP '+r.status);
+    }
+    return r;
+  }).then(function(){ setSyncStatus('idle'); })
+  .catch(function(){ setSyncStatus('error'); });
+}
+
+function cloudPull(){
+  if(!navigator.onLine){ setSyncStatus('offline'); return; }
+  setSyncStatus('pulling');
+  fetch(PANTRY_URL, { method: 'GET' })
+  .then(function(r){
+    if(r.status===400 || r.status===404){
+      // Basket ainda não existe — cria com estado vazio
+      return null;
+    }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(remoto){
+    if(remoto && typeof remoto === 'object'){
+      var mudou = false;
+      var nomesRemotos = [];
+      for(var k in remoto){
+        var rem = remoto[k];
+        var loc = E[k];
+        if(!rem || typeof rem !== 'object') continue;
+        var remTs = rem.ts || 0;
+        var locTs = (loc && loc.ts) || 0;
+        // Se servidor tem versão mais nova OU se localmente não existe
+        if(remTs > locTs){
+          E[k] = rem;
+          ultimaMudancaRemota[k] = Date.now();
+          if(rem.by && rem.by !== ME) nomesRemotos.push(rem.by);
+          mudou = true;
+        }
+      }
+      if(mudou){
+        try { localStorage.setItem(SK, JSON.stringify(E)); } catch(e) {}
+        render();
+        prog();
+      }
+    }
+    setSyncStatus('idle');
+  }).catch(function(){ setSyncStatus('error'); });
+}
+
+window.addEventListener('online',  function(){ setSyncStatus('idle'); cloudPull(); });
+window.addEventListener('offline', function(){ setSyncStatus('offline'); });
+
+function iniciarSync(){
+  cloudPull(); // pull inicial
+  if(pullTimer) clearInterval(pullTimer);
+  pullTimer = setInterval(cloudPull, POLL_MS);
+}
+function forcarSync(){ cloudPush(); setTimeout(cloudPull, 300); }
 
 function sc(d) {
   try {
@@ -6715,8 +6836,11 @@ function sc(d) {
 function salvar(i,k,v){
   if(!E[i])E[i]={};
   E[i][k]=v;
+  E[i].ts=Date.now();
+  E[i].by=ME||'?';
   try{localStorage.setItem(SK,JSON.stringify(E));}catch(e){}
   prog();
+  cloudPushDebounced();
 }
 
 function setSt(i,st){
@@ -6900,9 +7024,15 @@ function render(){
     var p0=est.status==='pres'?' on':'',p1=est.status==='ause'?' on':'',p2=est.status==='corr'?' on':'';
     var od=est.status==='corr'?'block':'none';
     var selCls=somaSel[i]?' selecionado':'';
+    // "Marcado por X" — só mostra se a última mudança foi remota (de outra pessoa) nos últimos 8s
+    var byHtml='';
+    if(est.by && est.by !== ME && ultimaMudancaRemota[i] && (Date.now()-ultimaMudancaRemota[i])<8000){
+      byHtml='<span class="card-by">por '+est.by+'</span>';
+    }
     // Cor de fundo do card por SKU (mas mantém amarelo se for FANTASMA)
     var cardStyle=item.obs?'':' style="background:'+skuColor.light+';border-left:4px solid '+skuColor.dark+'"';
     h+='<div class="card'+(item.obs?' fant':'')+selCls+'"'+cardStyle+' data-cidx="'+i+'">'+
+       byHtml+
        '<div class="chdr">'+
        '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+
        (hasL?'<a class="etq-a" href="'+ifu+'" target="_blank">'+item.etiqueta+'</a>':'<span class="etq-s">'+item.etiqueta+'</span>')+
@@ -7122,6 +7252,8 @@ function gerarPDF(){
 }
 
 render();
+iniciarSync();
+setSyncStatus(navigator.onLine ? 'idle' : 'offline');
 `;
 
       const html = '<!DOCTYPE html><html lang="pt-BR"><head>'
@@ -7134,6 +7266,7 @@ render();
         + '<div class="hdr">'
         + '<h1>Conferência de Quebras</h1>'
         + '<span id="ptxt" class="ptxt">0/0 conferidos</span>'
+        + '<span id="syncDot" class="sync-dot" title="Sincronizado" onclick="forcarSync()"></span>'
         + '<button class="btn-pdf" onclick="gerarPDF()">&#128247; Gerar PDF</button>'
         + '</div>'
         + '<div class="pbar-bg"><div class="pbar" id="pbar"></div></div>'
@@ -9352,6 +9485,17 @@ render();
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
           navigator.serviceWorker.register('./sw.js').then(function (reg) {
+            // Força check de atualização IMEDIATO ao abrir a página
+            // (sem isso, o navegador só checaria a cada ~24h)
+            reg.update().catch(function(){});
+
+            // E checa de novo sempre que o usuário volta pra aba
+            document.addEventListener('visibilitychange', function () {
+              if (document.visibilityState === 'visible') {
+                reg.update().catch(function(){});
+              }
+            });
+
             reg.addEventListener('updatefound', function () {
               var nw = reg.installing;
               if (!nw) return;
@@ -9362,6 +9506,11 @@ render();
                 }
               });
             });
+          });
+
+          // Se outro SW assumir o controle (em outra aba, por exemplo), recarrega esta aba também
+          navigator.serviceWorker.addEventListener('controllerchange', function () {
+            window.location.reload();
           });
         });
       }
