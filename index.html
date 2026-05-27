@@ -1357,11 +1357,6 @@
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
               Conf. Mobile
             </button>
-            <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
-            <button onclick="enviarEstoqueParaNuvem(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#5856D6;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(88,86,214,0.09)'" onmouseout="this.style.background='none'" title="Publica o estoque atual na nuvem para o app de conferência standalone">
-              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Enviar p/ Nuvem
-            </button>
           </div>
         </div>
         <button onclick="exportarRelatorioTransferencia()"
@@ -2458,6 +2453,10 @@
       // renderComparacao() removido
       renderTendencia();
       verificarAlertaUrgente();
+
+      // Envia as quebras do dia pra nuvem automaticamente (background, não bloqueia)
+      // Permite que outros estoquistas abram a conferência mobile sem precisar reimportar a planilha.
+      enviarQuebrasNuvemAuto();
     }
 
     function applyFilters() {
@@ -6597,102 +6596,129 @@
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // ENVIO DE ESTOQUE PARA NUVEM (Pantry) — alimenta quebras.html standalone
+    // ENVIO AUTOMÁTICO DAS QUEBRAS PARA A NUVEM (Pantry)
+    // Chamado após processData() para que outros estoquistas vejam o estoque do dia
+    // sem precisar reimportar a planilha.
+    // - Sobrescreve direto (sem confirmação) — comportamento solicitado
+    // - Não bloqueia a UI (background fetch)
+    // - Em caso de erro, só faz log; o dashboard continua funcionando normalmente
     // ═══════════════════════════════════════════════════════════════
-    async function enviarEstoqueParaNuvem() {
-      if (db.length === 0) { alert('Sem dados. Importe a base primeiro.'); return; }
+    function enviarQuebrasNuvemAuto() {
+      if (!Array.isArray(db) || db.length === 0) return;
+
       const PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
       const hoje = new Date();
       const dataKey = String(hoje.getDate()).padStart(2,'0') + String(hoje.getMonth()+1).padStart(2,'0') + hoje.getFullYear();
-      const basketEstoque = 'estoque_' + dataKey;
-      const basketQuebras = 'quebras_' + dataKey;
-      const urlEstoque = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/' + basketEstoque;
-      const urlQuebras = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/' + basketQuebras;
+      const urlEstoque = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/estoque_' + dataKey;
+      const urlQuebras = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/quebras_' + dataKey;
 
-      // 1) Verifica se já existe estoque do dia + marcações em andamento
-      try {
-        const r = await fetch(urlEstoque, { method: 'GET' });
-        if (r.ok) {
-          // Já existe — checa se tem marcações pra avisar
-          let nMarcacoes = 0;
-          try {
-            const rQ = await fetch(urlQuebras, { method: 'GET' });
-            if (rQ.ok) {
-              const estado = await rQ.json();
-              for (const k in estado) if (estado[k] && estado[k].status) nMarcacoes++;
-            }
-          } catch(e) {}
-          const msg = nMarcacoes > 0
-            ? 'Já existe um estoque enviado hoje com ' + nMarcacoes + ' marcação(ões) em andamento.\n\nSe enviar de novo, as marcações serão ZERADAS.\n\nDeseja continuar?'
-            : 'Já existe um estoque enviado hoje (sem marcações).\n\nDeseja sobrescrever?';
-          if (!confirm(msg)) return;
-        }
-      } catch(e) {}
-
-      // 2) Monta payload enxuto — só os campos que quebras.html precisa
+      // Monta payload enxuto com só o necessário para o popup de conferência
       const itensQuebra = db
-        .filter(i => i.qtd < i.lastro && i.validade) // só quebras com validade válida
+        .filter(i => i.qtd < i.lastro && i.validade)
         .map(i => ({
           c: String(i.cod).trim(),
           p: i.produto,
           q: Math.round(i.qtd),
-          v: i.validade.toISOString().slice(0,10), // YYYY-MM-DD
+          v: i.validade.toISOString().slice(0,10),
           l: i.lastro,
           e: String(i.etiqueta || i.cod || '').trim()
         }));
 
-      if (itensQuebra.length === 0) {
-        alert('Nenhuma quebra encontrada no estoque atual. Nada para enviar.');
-        return;
-      }
+      if (itensQuebra.length === 0) return;
 
       const payload = {
-        v: 1, // versão do schema
+        v: 1,
         dataEnvio: new Date().toISOString(),
-        baseImportada: (window.currentImportLabel || '?'),
+        baseImportada: window.currentImportLabel || '?',
         totalQuebras: itensQuebra.length,
         itens: itensQuebra
       };
 
-      // 3) Envia para o Pantry
-      const tamKB = Math.round(JSON.stringify(payload).length / 1024);
+      // Indicador visual sutil — temporariamente muda o título da aba
+      const oldTitle = document.title;
+      document.title = '☁ Sincronizando estoque...';
 
-      // Loader visual simples
-      const oldText = document.title;
-      document.title = '⏳ Enviando ' + tamKB + 'KB...';
+      const reqInit = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      };
 
-      try {
-        let resp = await fetch(urlEstoque, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+      fetch(urlEstoque, reqInit)
+        .then(r => {
+          if (!r.ok && (r.status === 400 || r.status === 404)) {
+            // Basket ainda não existe — usa POST para criar
+            return fetch(urlEstoque, { ...reqInit, method: 'POST' });
+          }
+          return r;
+        })
+        .then(r => {
+          if (!r || !r.ok) throw new Error('HTTP ' + (r ? r.status : '?'));
+          // Como a planilha foi reimportada, zera marcações antigas do dia
+          // (uma nova importação significa estado novo de estoque)
+          return fetch(urlQuebras, { method: 'DELETE' }).catch(() => {});
+        })
+        .then(() => {
+          document.title = '✓ Estoque sincronizado';
+          setTimeout(() => { document.title = oldTitle; }, 2200);
+          console.log('[nuvem] estoque do dia enviado:', itensQuebra.length, 'quebras');
+        })
+        .catch(err => {
+          document.title = oldTitle;
+          console.warn('[nuvem] falha ao sincronizar estoque:', err.message);
+          // Não alerta o usuário — o dashboard continua funcionando localmente
         });
-        if (!resp.ok && (resp.status === 400 || resp.status === 404)) {
-          // Basket não existe ainda — usa POST para criar
-          resp = await fetch(urlEstoque, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-        }
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-
-        // 4) Zerar marcações antigas (apaga o basket de quebras do dia)
-        try { await fetch(urlQuebras, { method: 'DELETE' }); } catch(e) {}
-
-        document.title = oldText;
-        alert('✅ Estoque enviado com sucesso!\n\n' + itensQuebra.length + ' quebras (' + tamKB + ' KB)\n\nAgora os estoquistas podem abrir o app de conferência (quebras.html).');
-      } catch (err) {
-        document.title = oldText;
-        alert('❌ Falha ao enviar estoque: ' + err.message + '\n\nVerifique sua conexão e tente novamente.');
-      }
     }
 
     function abrirConferenciaMobile() {
-      if (!db || db.length === 0) return alert('Sem dados. Importe a base primeiro.');
-      const listaQ = db.filter(i => i.qtd < i.lastro);
-      if (listaQ.length === 0) return alert('Nenhuma quebra encontrada.');
-      const minDiff = Math.min(...listaQ.map(i => i.diff));
+      // Caminho rápido SÍNCRONO: db tem dados → abre popup direto (sem perder user gesture)
+      if (db && db.length > 0) {
+        const listaQ = db.filter(i => i.qtd < i.lastro);
+        if (listaQ.length === 0) return alert('Nenhuma quebra encontrada.');
+        const minDiff = Math.min(...listaQ.map(i => i.diff));
+        return _abrirPopupConferencia(listaQ, minDiff);
+      }
+      // Fallback: db vazio → busca na nuvem (assíncrono)
+      _conferenciaFallbackNuvem();
+    }
+
+    async function _conferenciaFallbackNuvem() {
+      const PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
+      const hoje = new Date();
+      const dataKey = String(hoje.getDate()).padStart(2,'0') + String(hoje.getMonth()+1).padStart(2,'0') + hoje.getFullYear();
+      const urlEstoque = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/estoque_' + dataKey;
+      const oldTitle = document.title;
+      document.title = '☁ Carregando estoque...';
+      try {
+        const r = await fetch(urlEstoque, { method: 'GET' });
+        if (!r.ok) {
+          document.title = oldTitle;
+          return alert('Sem dados. Importe a base primeiro (nuvem também não tem estoque do dia).');
+        }
+        const data = await r.json();
+        if (!data || !Array.isArray(data.itens) || data.itens.length === 0) {
+          document.title = oldTitle;
+          return alert('Nuvem retornou estoque vazio. Importe a base.');
+        }
+        document.title = oldTitle;
+        const today = new Date(); today.setHours(0,0,0,0);
+        const listaQ = data.itens.map(it => {
+          const dt = new Date(it.v + 'T00:00:00');
+          return {
+            cod: it.c, produto: it.p, qtd: it.q,
+            validade: dt, lastro: it.l, etiqueta: it.e,
+            diff: Math.ceil((dt - today) / 86400000)
+          };
+        });
+        const minDiff = Math.min(...listaQ.map(i => i.diff));
+        _abrirPopupConferencia(listaQ, minDiff);
+      } catch (err) {
+        document.title = oldTitle;
+        alert('Sem dados na memória e falha ao buscar nuvem: ' + err.message);
+      }
+    }
+
+    function _abrirPopupConferencia(listaQ, minDiff) {
       const _ordem = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
       const rows = listaQ.map(i => {
         const div = i.produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
@@ -6950,6 +6976,28 @@ function salvar(i,k,v){
 }
 
 function setSt(i,st){
+  var est = E[i] || {};
+  var stAtual = est.status || '';
+
+  // Se já está marcado e o usuário está mudando para outro status, pedir confirmação
+  if (stAtual && stAtual !== st) {
+    var labels = { pres: 'PRESENTE', ause: 'AUSENTE', corr: 'CORRIGIDA' };
+    var labelAtual = labels[stAtual] || stAtual;
+    var labelNovo  = labels[st] || st;
+    var msg;
+    if (est.by && est.by !== ME) {
+      // Outro estoquista marcou
+      var tempoAtras = est.ts ? tempoRelativo(est.ts) : 'pouco tempo';
+      msg = 'Esse item foi marcado como ' + labelAtual + '\\npor ' + est.by + ' (há ' + tempoAtras + ').\\n\\nDeseja alterar para ' + labelNovo + '?';
+    } else {
+      // Eu mesmo marquei
+      msg = 'Esse item já consta como ' + labelAtual + '.\\n\\nDeseja alterar para ' + labelNovo + '?';
+    }
+    if (!confirm(msg)) {
+      return; // cancelou — não muda nada
+    }
+  }
+
   salvar(i,'status',st);
   ['pres','ause','corr'].forEach(function(s,j){
     var b=document.getElementById('b'+j+'_'+i);
@@ -6957,6 +7005,18 @@ function setSt(i,st){
   });
   var ow=document.getElementById('ow_'+i);
   if(ow)ow.style.display=(st==='corr')?'block':'none';
+}
+
+// Devolve "5 min", "2 h", "3 dias" — texto curto para o alerta
+function tempoRelativo(ts){
+  var s = Math.floor((Date.now() - ts) / 1000);
+  if(s < 60)   return s + ' s';
+  var m = Math.floor(s / 60);
+  if(m < 60)   return m + ' min';
+  var h = Math.floor(m / 60);
+  if(h < 24)   return h + ' h';
+  var d = Math.floor(h / 24);
+  return d + ' dia' + (d > 1 ? 's' : '');
 }
 
 function prog(){
