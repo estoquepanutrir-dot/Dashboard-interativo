@@ -6920,6 +6920,18 @@ function cloudPushDebounced(){
   pushTimer = setTimeout(cloudPush, PUSH_DEBOUNCE_MS);
 }
 
+// Fetch com timeout — evita que requisições travadas (sinal fraco) congelem o sync
+function fetchTimeout(url, opts, ms){
+  opts = opts || {};
+  if(typeof AbortController !== 'undefined'){
+    var ctrl = new AbortController();
+    var t = setTimeout(function(){ ctrl.abort(); }, ms || 12000);
+    opts.signal = ctrl.signal;
+    return fetch(url, opts).finally(function(){ clearTimeout(t); });
+  }
+  return fetch(url, opts);
+}
+
 function cloudPush(){
   if(!navigator.onLine){ setSyncStatus('offline'); return; }
   if(_syncBusy){ // se há sync em andamento, reagenda
@@ -6928,8 +6940,10 @@ function cloudPush(){
   }
   _syncBusy = true;
   setSyncStatus('pushing');
+  // Trava de segurança: se algo travar, libera o flag em 15s no máximo
+  var guard = setTimeout(function(){ _syncBusy = false; setSyncStatus('error'); }, 15000);
   // Lê o estado atual do servidor, faz merge (evita apagar correções do colega) e salva
-  fetch(PANTRY_URL, { method:'GET' })
+  fetchTimeout(PANTRY_URL, { method:'GET' }, 12000)
   .then(function(r){ return r.ok ? r.json() : null; })
   .then(function(remoto){
     if(remoto && typeof remoto === 'object'){
@@ -6940,19 +6954,19 @@ function cloudPush(){
         if(remTs > locTs){ E[k]=rem; ultimaMudancaRemota[k]=Date.now(); } // remoto mais recente prevalece
       }
     }
-    return fetch(PANTRY_URL,{
+    return fetchTimeout(PANTRY_URL,{
       method:'PUT',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(E)
-    });
+    }, 12000);
   }).then(function(r){
     if(r && !r.ok){
       if(r.status===400 || r.status===404){
-        return fetch(PANTRY_URL,{
+        return fetchTimeout(PANTRY_URL,{
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify(E)
-        });
+        }, 12000);
       }
       throw new Error('HTTP '+r.status);
     }
@@ -6961,10 +6975,11 @@ function cloudPush(){
     if(r && !r.ok) throw new Error('HTTP '+r.status);
     try { localStorage.setItem(SK, JSON.stringify(E)); } catch(e) {}
     render(); prog();
+    clearTimeout(guard);
     _syncBusy = false;
     setSyncStatus('idle');
   })
-  .catch(function(err){ console.warn('[cloud push]', err); _syncBusy=false; setSyncStatus('error'); });
+  .catch(function(err){ console.warn('[cloud push]', err); clearTimeout(guard); _syncBusy=false; setSyncStatus('error'); });
 }
 
 function cloudPull(){
@@ -6972,7 +6987,9 @@ function cloudPull(){
   if(_syncBusy) return; // não puxa enquanto um push está escrevendo
   _syncBusy = true;
   setSyncStatus('pulling');
-  fetch(PANTRY_URL, { method: 'GET' })
+  // Trava de segurança: libera o flag mesmo se a requisição travar
+  var guard = setTimeout(function(){ _syncBusy = false; setSyncStatus('error'); }, 15000);
+  fetchTimeout(PANTRY_URL, { method: 'GET' }, 12000)
   .then(function(r){
     if(r.status===400 || r.status===404){
       return null; // basket ainda não existe
@@ -7000,29 +7017,33 @@ function cloudPull(){
         prog();
       }
     }
+    clearTimeout(guard);
     _syncBusy = false;
     setSyncStatus('idle');
-  }).catch(function(){ _syncBusy=false; setSyncStatus('error'); });
+  }).catch(function(){ clearTimeout(guard); _syncBusy=false; setSyncStatus('error'); });
 }
 
-window.addEventListener('online',  function(){ setSyncStatus('idle'); cloudPull(); });
+window.addEventListener('online',  function(){ setSyncStatus('idle'); cloudPush(); });
 window.addEventListener('offline', function(){ setSyncStatus('offline'); });
 
 // Pull imediato ao voltar pra aba — corrige atraso de minutos quando navegador suspende setInterval
 document.addEventListener('visibilitychange', function(){
   if(document.visibilityState === 'visible'){
-    cloudPull();
+    cloudPush();
     if(pullTimer) clearInterval(pullTimer);
-    pullTimer = setInterval(cloudPull, POLL_MS);
+    pullTimer = setInterval(cloudPush, POLL_MS);
   }
 });
 
 function iniciarSync(){
-  cloudPull(); // pull inicial
+  // O ciclo usa cloudPush, que faz GET (puxa+merge mudanças do colega) + PUT (envia as suas).
+  // Assim, marcações que falharam num envio anterior são reenviadas automaticamente no próximo ciclo,
+  // e mudanças do outro estoquista chegam no mesmo ciclo. Resolve "não aparece pro outro".
+  cloudPush();
   if(pullTimer) clearInterval(pullTimer);
-  pullTimer = setInterval(cloudPull, POLL_MS);
+  pullTimer = setInterval(cloudPush, POLL_MS);
 }
-function forcarSync(){ cloudPush(); setTimeout(cloudPull, 300); }
+function forcarSync(){ cloudPush(); }
 
 // Reset automático à meia-noite: novo dia = novas chaves = tudo limpo
 setInterval(function(){
@@ -7034,7 +7055,7 @@ setInterval(function(){
     PANTRY_URL = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/' + BASKET;
     try { localStorage.setItem(SK, '{}'); } catch(e) {}
     if(pullTimer) clearInterval(pullTimer);
-    pullTimer = setInterval(cloudPull, POLL_MS);
+    pullTimer = setInterval(cloudPush, POLL_MS);
     render();
     prog();
   }
