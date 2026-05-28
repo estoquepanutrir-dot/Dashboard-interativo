@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestão de Estoque | CD MATRIZ PANUTRIR</title>
   <link rel="manifest" id="pwaManifest" />
+  <link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="assets/icon-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#F7F2FA" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Panutrir CD" />
@@ -1251,15 +1254,7 @@
     </p>
     <div class="mt-10" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
       <label for="fileUpload" class="upload-btn">Importar Dados</label>
-      <button onclick="carregarDbNuvem()"
-        style="display:inline-flex;align-items:center;gap:8px;background:var(--md-primary-container);color:var(--md-on-primary-container);border:none;border-radius:2rem;padding:0.75rem 1.75rem;font-size:0.875rem;font-weight:700;cursor:pointer;letter-spacing:0.02em;font-family:inherit;transition:opacity 0.2s;"
-        onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/></svg>
-        Carregar da Nuvem
-      </button>
-      <p style="font-size:0.75rem;color:var(--md-on-surface-variant);font-weight:500;margin-top:-4px;">
-        Carrega o estoque do dia já importado pelo responsável
-      </p>
+    </div>
     </div>
   </div>
 
@@ -6195,11 +6190,12 @@
         short_name: 'Panutrir CD',
         start_url: './',
         display: 'standalone',
-        background_color: '#ECECF1',
-        theme_color: '#1C1C1E',
+        background_color: '#1A3770',
+        theme_color: '#1A3770',
         icons: [
-          { src: 'assets/logo.png', sizes: '192x192', type: 'image/png' },
-          { src: 'assets/logo.png', sizes: '512x512', type: 'image/png' }
+          { src: 'assets/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'assets/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'assets/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       };
       const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
@@ -6633,25 +6629,6 @@
       const dataKey = String(hoje.getDate()).padStart(2,'0') + String(hoje.getMonth()+1).padStart(2,'0') + hoje.getFullYear();
       const urlEstoque = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/estoque_' + dataKey;
       const urlQuebras = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/quebras_' + dataKey;
-      const urlDbFull  = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/db_full_'  + dataKey;
-
-      // Envia o db completo em background (permite que o outro estoquista abra o dashboard completo)
-      const dbPayload = {
-        v: 1, dataEnvio: new Date().toISOString(),
-        baseImportada: window.currentImportLabel || '?',
-        total: db.length,
-        itens: db.map(i => ({
-          c: String(i.cod).trim(), p: i.produto, q: Math.round(i.qtd),
-          v: i.validade.toISOString().slice(0, 10),
-          lo: String(i.lote || '').trim(), e: String(i.etiqueta || '').trim(),
-          l: i.lastro, t: i.tipo, m: i.marca, o: i.operacao
-        }))
-      };
-      const rqDb = { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dbPayload) };
-      fetch(urlDbFull, rqDb)
-        .then(r => r.ok ? null : fetch(urlDbFull, {...rqDb, method:'POST'}))
-        .then(r2 => { if(r2 && !r2.ok) console.warn('[nuvem] db_full upload falhou HTTP', r2.status); })
-        .catch(err => console.warn('[nuvem] db_full upload erro:', err.message));
 
       // Monta payload enxuto com só o necessário para o popup de conferência
       const itensQuebra = db
@@ -6709,65 +6686,6 @@
           console.warn('[nuvem] falha ao sincronizar estoque:', err.message);
           // Não alerta o usuário — o dashboard continua funcionando localmente
         });
-    }
-
-    async function carregarDbNuvem() {
-      const PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
-      const hoje = new Date();
-      const dataKey = String(hoje.getDate()).padStart(2,'0') + String(hoje.getMonth()+1).padStart(2,'0') + hoje.getFullYear();
-      const urlDbFull = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/db_full_' + dataKey;
-
-      showLoader(true);
-      const oldTitle = document.title;
-      document.title = '☁ Carregando estoque da nuvem...';
-      try {
-        const r = await fetch(urlDbFull, { method: 'GET' });
-        if (!r.ok) {
-          showLoader(false);
-          document.title = oldTitle;
-          return alert('Estoque do dia ainda não está na nuvem.\n\nPeça para o responsável importar a planilha primeiro.');
-        }
-        const data = await r.json();
-        if (!data || !Array.isArray(data.itens) || data.itens.length === 0) {
-          showLoader(false);
-          document.title = oldTitle;
-          return alert('A nuvem retornou um estoque vazio. Peça para o responsável reimportar a planilha.');
-        }
-
-        const todayDate = new Date(); todayDate.setHours(0,0,0,0);
-        db.length = 0;
-        data.itens.forEach((it, i) => {
-          const validade = new Date(it.v + 'T00:00:00');
-          const diff = Math.ceil((validade - todayDate) / 86400000);
-          db.push({
-            id: i, cod: it.c, produto: it.p, qtd: it.q,
-            validade, diff,
-            lote: it.lo || '', etiqueta: it.e || '',
-            lastro: it.l, tipo: it.t, marca: it.m, operacao: it.o,
-            isDataCurta: diff <= 29,
-            validadeStatus: getValidityStatus(diff, it.q, it.c)
-          });
-        });
-
-        window.currentImportLabel = (data.baseImportada || 'Nuvem') + ' • ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-        document.title = oldTitle;
-
-        document.getElementById('notif-btn').style.display = 'flex';
-        document.getElementById('hist-btn').style.display  = 'flex';
-        showLoader(false);
-        emptyView.classList.add('hidden');
-        mainContent.classList.remove('hidden');
-        applyFilters();
-        renderNotificacoes();
-        renderTendencia();
-        verificarAlertaUrgente();
-        salvarSnapshot();
-
-      } catch (err) {
-        showLoader(false);
-        document.title = oldTitle;
-        alert('Erro ao carregar da nuvem: ' + err.message);
-      }
     }
 
     function abrirConferenciaMobile() {
@@ -6828,8 +6746,15 @@
       const rows = listaQ.map(i => {
         const div = i.produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
         const upCx = i.lastro / div;
+        const etq = String(i.etiqueta || i.cod || '-');
+        const valStr = i.validade ? i.validade.toISOString().slice(0,10) : '0';
+        // Chave ESTÁVEL: independe da ordenação/origem. Garante que a marcação
+        // sempre caia no item certo, em qualquer aparelho. Etiqueta+cod+validade+qtd
+        // evita colisão quando há etiquetas repetidas ou ausentes.
+        const k = (etq + '|' + i.cod + '|' + valStr + '|' + Math.round(i.qtd)).replace(/\s+/g,'_');
         return {
-          etiqueta: String(i.etiqueta || i.cod || '-'),
+          k: k,
+          etiqueta: etq,
           _cod: i.cod,
           _val: i.validade ? i.validade.getTime() : Infinity,
           data: i.validade ? i.validade.toLocaleDateString('pt-BR') : '-',
@@ -6988,6 +6913,8 @@ function setSyncStatus(s){
   el.title = c.tit;
 }
 
+var _syncBusy = false; // trava simples para evitar push e pull simultâneos
+
 function cloudPushDebounced(){
   if(pushTimer) clearTimeout(pushTimer);
   pushTimer = setTimeout(cloudPush, PUSH_DEBOUNCE_MS);
@@ -6995,6 +6922,11 @@ function cloudPushDebounced(){
 
 function cloudPush(){
   if(!navigator.onLine){ setSyncStatus('offline'); return; }
+  if(_syncBusy){ // se há sync em andamento, reagenda
+    cloudPushDebounced();
+    return;
+  }
+  _syncBusy = true;
   setSyncStatus('pushing');
   // Lê o estado atual do servidor, faz merge (evita apagar correções do colega) e salva
   fetch(PANTRY_URL, { method:'GET' })
@@ -7005,7 +6937,7 @@ function cloudPush(){
         var rem=remoto[k], loc=E[k];
         if(!rem || typeof rem !== 'object') continue;
         var remTs=rem.ts||0, locTs=(loc&&loc.ts)||0;
-        if(remTs > locTs) E[k]=rem; // remoto mais recente prevalece
+        if(remTs > locTs){ E[k]=rem; ultimaMudancaRemota[k]=Date.now(); } // remoto mais recente prevalece
       }
     }
     return fetch(PANTRY_URL,{
@@ -7016,50 +6948,49 @@ function cloudPush(){
   }).then(function(r){
     if(r && !r.ok){
       if(r.status===400 || r.status===404){
-        // Basket ainda não existe — cria com POST
         return fetch(PANTRY_URL,{
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify(E)
         });
       }
-      // Outro erro HTTP — propaga para o catch
       throw new Error('HTTP '+r.status);
     }
     return r;
   }).then(function(r){
     if(r && !r.ok) throw new Error('HTTP '+r.status);
+    try { localStorage.setItem(SK, JSON.stringify(E)); } catch(e) {}
+    render(); prog();
+    _syncBusy = false;
     setSyncStatus('idle');
   })
-  .catch(function(err){ console.warn('[cloud push]', err); setSyncStatus('error'); });
+  .catch(function(err){ console.warn('[cloud push]', err); _syncBusy=false; setSyncStatus('error'); });
 }
 
 function cloudPull(){
   if(!navigator.onLine){ setSyncStatus('offline'); return; }
+  if(_syncBusy) return; // não puxa enquanto um push está escrevendo
+  _syncBusy = true;
   setSyncStatus('pulling');
   fetch(PANTRY_URL, { method: 'GET' })
   .then(function(r){
     if(r.status===400 || r.status===404){
-      // Basket ainda não existe — cria com estado vazio
-      return null;
+      return null; // basket ainda não existe
     }
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
   }).then(function(remoto){
     if(remoto && typeof remoto === 'object'){
       var mudou = false;
-      var nomesRemotos = [];
       for(var k in remoto){
         var rem = remoto[k];
         var loc = E[k];
         if(!rem || typeof rem !== 'object') continue;
         var remTs = rem.ts || 0;
         var locTs = (loc && loc.ts) || 0;
-        // Se servidor tem versão mais nova OU se localmente não existe
         if(remTs > locTs){
           E[k] = rem;
           ultimaMudancaRemota[k] = Date.now();
-          if(rem.by && rem.by !== ME) nomesRemotos.push(rem.by);
           mudou = true;
         }
       }
@@ -7069,8 +7000,9 @@ function cloudPull(){
         prog();
       }
     }
+    _syncBusy = false;
     setSyncStatus('idle');
-  }).catch(function(){ setSyncStatus('error'); });
+  }).catch(function(){ _syncBusy=false; setSyncStatus('error'); });
 }
 
 window.addEventListener('online',  function(){ setSyncStatus('idle'); cloudPull(); });
@@ -7121,18 +7053,21 @@ function sc(d) {
   }catch(e){return{bg:'#E5E5EA',tx:'#1C1C1E',lb:''};}
 }
 
-function salvar(i,k,v){
-  if(!E[i])E[i]={};
-  E[i][k]=v;
-  E[i].ts=Date.now();
-  E[i].by=ME||'?';
+function salvar(key,campo,v){
+  if(!E[key])E[key]={};
+  E[key][campo]=v;
+  E[key].ts=Date.now();
+  E[key].by=ME||'?';
   try{localStorage.setItem(SK,JSON.stringify(E));}catch(e){}
   prog();
   cloudPushDebounced();
 }
 
 function setSt(i,st){
-  var est = E[i] || {};
+  var item = dados[i];
+  if(!item) return;
+  var key = item.k;
+  var est = E[key] || {};
   var stAtual = est.status || '';
 
   // Se já está marcado e o usuário está mudando para outro status, pedir confirmação
@@ -7154,7 +7089,7 @@ function setSt(i,st){
     }
   }
 
-  salvar(i,'status',st);
+  salvar(key,'status',st);
   ['pres','ause','corr'].forEach(function(s,j){
     var b=document.getElementById('b'+j+'_'+i);
     if(b){if(s===st)b.classList.add('on');else b.classList.remove('on');}
@@ -7339,7 +7274,7 @@ function render(){
   for(var j=0;j<dadosVis.length;j++){
     var item=dadosVis[j].item;
     var i=dadosVis[j].idx;
-    var est=E[i]||{},s=sc(item.data);
+    var est=E[item.k]||{},s=sc(item.data);
     var skuColor=corDoSku(item._cod);
     if(item._cod!==lastCod){
       lastCod=item._cod;
@@ -7426,7 +7361,11 @@ function initListeners(){
     });
     cont.addEventListener('input',function(e){
       var inp=e.target.closest('input.obs-inp');
-      if(inp)salvar(parseInt(inp.getAttribute('data-idx')),'obs',inp.value);
+      if(inp){
+        var idx=parseInt(inp.getAttribute('data-idx'));
+        var item=dados[idx];
+        if(item)salvar(item.k,'obs',inp.value);
+      }
     });
   }
   var si=document.getElementById('srch');
@@ -7458,7 +7397,7 @@ function gerarPDF(){
   // FILTRO: gera PDF APENAS com etiquetas AUSENTES e CORRIGIDAS (com observação)
   var dadosFiltrados=[];
   for(var idx=0; idx<dados.length; idx++){
-    var estF=E[idx]||{};
+    var estF=E[dados[idx].k]||{};
     if(estF.status==='ause' || estF.status==='corr'){
       dadosFiltrados.push({item:dados[idx], idx:idx, est:estF});
     }
