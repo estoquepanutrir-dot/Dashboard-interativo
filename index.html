@@ -6625,7 +6625,7 @@
     // - Não bloqueia a UI (background fetch)
     // - Em caso de erro, só faz log; o dashboard continua funcionando normalmente
     // ═══════════════════════════════════════════════════════════════
-    async function enviarQuebrasNuvemAuto() {
+    function enviarQuebrasNuvemAuto() {
       if (!Array.isArray(db) || db.length === 0) return;
 
       const PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
@@ -6634,9 +6634,8 @@
       const urlEstoque = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/estoque_' + dataKey;
       const urlQuebras = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/quebras_' + dataKey;
       const urlDbFull  = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/db_full_'  + dataKey;
-      const hdrs = { 'Content-Type': 'application/json' };
 
-      // ── Envia db completo (await garante que DELETE termina ANTES do POST) ──
+      // Envia o db completo em background (permite que o outro estoquista abra o dashboard completo)
       const dbPayload = {
         v: 1, dataEnvio: new Date().toISOString(),
         baseImportada: window.currentImportLabel || '?',
@@ -6648,13 +6647,13 @@
           l: i.lastro, t: i.tipo, m: i.marca, o: i.operacao
         }))
       };
-      try {
-        await fetch(urlDbFull, { method:'DELETE' }).catch(()=>{});
-        const rDb = await fetch(urlDbFull, { method:'POST', headers:hdrs, body:JSON.stringify(dbPayload) });
-        if (!rDb.ok) console.warn('[nuvem] db_full upload falhou HTTP', rDb.status);
-      } catch(err) { console.warn('[nuvem] db_full upload erro:', err.message); }
+      const rqDb = { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dbPayload) };
+      fetch(urlDbFull, rqDb)
+        .then(r => r.ok ? null : fetch(urlDbFull, {...rqDb, method:'POST'}))
+        .then(r2 => { if(r2 && !r2.ok) console.warn('[nuvem] db_full upload falhou HTTP', r2.status); })
+        .catch(err => console.warn('[nuvem] db_full upload erro:', err.message));
 
-      // ── Monta payload enxuto para o popup de conferência ──
+      // Monta payload enxuto com só o necessário para o popup de conferência
       const itensQuebra = db
         .filter(i => i.qtd < i.lastro && i.validade)
         .map(i => ({
@@ -6669,27 +6668,47 @@
       if (itensQuebra.length === 0) return;
 
       const payload = {
-        v: 1, dataEnvio: new Date().toISOString(),
+        v: 1,
+        dataEnvio: new Date().toISOString(),
         baseImportada: window.currentImportLabel || '?',
         totalQuebras: itensQuebra.length,
         itens: itensQuebra
       };
 
+      // Indicador visual sutil — temporariamente muda o título da aba
       const oldTitle = document.title;
       document.title = '☁ Sincronizando estoque...';
-      try {
-        // DELETE síncrono garante que o basket antigo sumiu antes de criar o novo
-        await fetch(urlEstoque, { method:'DELETE' }).catch(()=>{});
-        const rEst = await fetch(urlEstoque, { method:'POST', headers:hdrs, body:JSON.stringify(payload) });
-        if (!rEst.ok) throw new Error('HTTP ' + rEst.status);
-        await fetch(urlQuebras, { method:'DELETE' }).catch(()=>{});
-        document.title = '✓ Estoque sincronizado';
-        setTimeout(() => { document.title = oldTitle; }, 2200);
-        console.log('[nuvem] estoque enviado:', itensQuebra.length, 'quebras');
-      } catch(err) {
-        document.title = oldTitle;
-        console.warn('[nuvem] falha ao sincronizar estoque:', err.message);
-      }
+
+      const reqInit = {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      };
+
+      fetch(urlEstoque, reqInit)
+        .then(r => {
+          if (!r.ok && (r.status === 400 || r.status === 404)) {
+            // Basket ainda não existe — usa POST para criar
+            return fetch(urlEstoque, { ...reqInit, method: 'POST' });
+          }
+          return r;
+        })
+        .then(r => {
+          if (!r || !r.ok) throw new Error('HTTP ' + (r ? r.status : '?'));
+          // Como a planilha foi reimportada, zera marcações antigas do dia
+          // (uma nova importação significa estado novo de estoque)
+          return fetch(urlQuebras, { method: 'DELETE' }).catch(() => {});
+        })
+        .then(() => {
+          document.title = '✓ Estoque sincronizado';
+          setTimeout(() => { document.title = oldTitle; }, 2200);
+          console.log('[nuvem] estoque do dia enviado:', itensQuebra.length, 'quebras');
+        })
+        .catch(err => {
+          document.title = oldTitle;
+          console.warn('[nuvem] falha ao sincronizar estoque:', err.message);
+          // Não alerta o usuário — o dashboard continua funcionando localmente
+        });
     }
 
     async function carregarDbNuvem() {
