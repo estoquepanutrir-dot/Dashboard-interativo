@@ -2312,6 +2312,19 @@
       const file = e.target.files[0];
       if (!file) return;
 
+      // ── PROTEÇÃO POR SENHA ──────────────────────────────────────────────
+      // Se já tem planilha carregada (local OU vinda da nuvem), pede senha
+      // para evitar que alguém substitua acidentalmente a base do dia.
+      if (db && db.length > 0) {
+        const senha = prompt('Já existe um estoque carregado.\n\nDigite a senha para substituir pela nova planilha:');
+        if (senha === null) { e.target.value = ''; return; } // cancelou
+        if (senha !== '445566@Edu') {
+          alert('Senha incorreta. A importação foi cancelada.');
+          e.target.value = '';
+          return;
+        }
+      }
+
       const nameRegex = /_(\d{2})-(\d{2})-(\d{4})_(\d{2})_(\d{2})/;
       const match = file.name.match(nameRegex);
       
@@ -6612,7 +6625,7 @@
     // - Não bloqueia a UI (background fetch)
     // - Em caso de erro, só faz log; o dashboard continua funcionando normalmente
     // ═══════════════════════════════════════════════════════════════
-    function enviarQuebrasNuvemAuto() {
+    async function enviarQuebrasNuvemAuto() {
       if (!Array.isArray(db) || db.length === 0) return;
 
       const PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
@@ -6621,8 +6634,9 @@
       const urlEstoque = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/estoque_' + dataKey;
       const urlQuebras = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/quebras_' + dataKey;
       const urlDbFull  = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/db_full_'  + dataKey;
+      const hdrs = { 'Content-Type': 'application/json' };
 
-      // Envia o db completo em background (permite que o outro estoquista abra o dashboard completo)
+      // ── Envia db completo (await garante que DELETE termina ANTES do POST) ──
       const dbPayload = {
         v: 1, dataEnvio: new Date().toISOString(),
         baseImportada: window.currentImportLabel || '?',
@@ -6634,10 +6648,13 @@
           l: i.lastro, t: i.tipo, m: i.marca, o: i.operacao
         }))
       };
-      const rqDb = { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(dbPayload) };
-      fetch(urlDbFull, rqDb).then(r => r.ok ? null : fetch(urlDbFull, {...rqDb, method:'POST'})).catch(() => {});
+      try {
+        await fetch(urlDbFull, { method:'DELETE' }).catch(()=>{});
+        const rDb = await fetch(urlDbFull, { method:'POST', headers:hdrs, body:JSON.stringify(dbPayload) });
+        if (!rDb.ok) console.warn('[nuvem] db_full upload falhou HTTP', rDb.status);
+      } catch(err) { console.warn('[nuvem] db_full upload erro:', err.message); }
 
-      // Monta payload enxuto com só o necessário para o popup de conferência
+      // ── Monta payload enxuto para o popup de conferência ──
       const itensQuebra = db
         .filter(i => i.qtd < i.lastro && i.validade)
         .map(i => ({
@@ -6652,47 +6669,27 @@
       if (itensQuebra.length === 0) return;
 
       const payload = {
-        v: 1,
-        dataEnvio: new Date().toISOString(),
+        v: 1, dataEnvio: new Date().toISOString(),
         baseImportada: window.currentImportLabel || '?',
         totalQuebras: itensQuebra.length,
         itens: itensQuebra
       };
 
-      // Indicador visual sutil — temporariamente muda o título da aba
       const oldTitle = document.title;
       document.title = '☁ Sincronizando estoque...';
-
-      const reqInit = {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      };
-
-      fetch(urlEstoque, reqInit)
-        .then(r => {
-          if (!r.ok && (r.status === 400 || r.status === 404)) {
-            // Basket ainda não existe — usa POST para criar
-            return fetch(urlEstoque, { ...reqInit, method: 'POST' });
-          }
-          return r;
-        })
-        .then(r => {
-          if (!r || !r.ok) throw new Error('HTTP ' + (r ? r.status : '?'));
-          // Como a planilha foi reimportada, zera marcações antigas do dia
-          // (uma nova importação significa estado novo de estoque)
-          return fetch(urlQuebras, { method: 'DELETE' }).catch(() => {});
-        })
-        .then(() => {
-          document.title = '✓ Estoque sincronizado';
-          setTimeout(() => { document.title = oldTitle; }, 2200);
-          console.log('[nuvem] estoque do dia enviado:', itensQuebra.length, 'quebras');
-        })
-        .catch(err => {
-          document.title = oldTitle;
-          console.warn('[nuvem] falha ao sincronizar estoque:', err.message);
-          // Não alerta o usuário — o dashboard continua funcionando localmente
-        });
+      try {
+        // DELETE síncrono garante que o basket antigo sumiu antes de criar o novo
+        await fetch(urlEstoque, { method:'DELETE' }).catch(()=>{});
+        const rEst = await fetch(urlEstoque, { method:'POST', headers:hdrs, body:JSON.stringify(payload) });
+        if (!rEst.ok) throw new Error('HTTP ' + rEst.status);
+        await fetch(urlQuebras, { method:'DELETE' }).catch(()=>{});
+        document.title = '✓ Estoque sincronizado';
+        setTimeout(() => { document.title = oldTitle; }, 2200);
+        console.log('[nuvem] estoque enviado:', itensQuebra.length, 'quebras');
+      } catch(err) {
+        document.title = oldTitle;
+        console.warn('[nuvem] falha ao sincronizar estoque:', err.message);
+      }
     }
 
     async function carregarDbNuvem() {
@@ -6803,6 +6800,11 @@
     }
 
     function _abrirPopupConferencia(listaQ, minDiff) {
+      // Proteção: nunca abre popup vazio (evita confusão visual)
+      if (!Array.isArray(listaQ) || listaQ.length === 0) {
+        alert('Sem quebras para conferir hoje.\n\n• Se você é o responsável: importe a planilha do dia.\n• Se você é o colega: peça para o responsável importar.');
+        return;
+      }
       const _ordem = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
       const rows = listaQ.map(i => {
         const div = i.produto.toUpperCase().includes('HAMBURGUER') ? 17 : 19;
@@ -6823,6 +6825,8 @@
         const ia = _ordem.indexOf(Number(a._cod)), ib = _ordem.indexOf(Number(b._cod));
         const pA = ia === -1 ? Infinity : ia, pB = ib === -1 ? Infinity : ib;
         if (pA !== pB) return pA - pB;
+        // Garante que itens do mesmo SKU fiquem sempre juntos (evita separadores duplicados)
+        if (a._cod !== b._cod) return String(a._cod).localeCompare(String(b._cod));
         return a._val - b._val;
       });
 
@@ -6906,7 +6910,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .card{position:relative}`;
 
       const js = `
-var SK = 'conf_q_' + new Date().toLocaleDateString('pt-BR').replace(/\\//g,'_');
+// Formato de data consistente ddmmyyyy — não depende de locale do browser
+function _dataKey(d){ var dt=d||new Date(); return String(dt.getDate()).padStart(2,'0')+String(dt.getMonth()+1).padStart(2,'0')+dt.getFullYear(); }
+var SK = 'conf_q_' + _dataKey();
 var E = {};
 try { E = JSON.parse(localStorage.getItem(SK) || '{}'); } catch(e) {}
 var filtroAtual = '';
@@ -6917,7 +6923,7 @@ var somaSel = {};
 // SINCRONIZAÇÃO PANTRY (cloud) — 2 estoquistas simultâneos
 // ═══════════════════════════════════════════════════════════════
 var PANTRY_ID = '5dc6c6c6-90b2-4984-8658-2ac8e15d674b';
-var BASKET = 'quebras_' + new Date().toLocaleDateString('pt-BR').replace(/\\//g,'');
+var BASKET = 'quebras_' + _dataKey();
 var PANTRY_URL = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/' + BASKET;
 var POLL_MS = 5000;
 var PUSH_DEBOUNCE_MS = 1500;
@@ -6989,15 +6995,24 @@ function cloudPush(){
       body:JSON.stringify(E)
     });
   }).then(function(r){
-    if(r && !r.ok && (r.status===400||r.status===404)){
-      return fetch(PANTRY_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(E)
-      });
+    if(r && !r.ok){
+      if(r.status===400 || r.status===404){
+        // Basket ainda não existe — cria com POST
+        return fetch(PANTRY_URL,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(E)
+        });
+      }
+      // Outro erro HTTP — propaga para o catch
+      throw new Error('HTTP '+r.status);
     }
-  }).then(function(){ setSyncStatus('idle'); })
-  .catch(function(){ setSyncStatus('error'); });
+    return r;
+  }).then(function(r){
+    if(r && !r.ok) throw new Error('HTTP '+r.status);
+    setSyncStatus('idle');
+  })
+  .catch(function(err){ console.warn('[cloud push]', err); setSyncStatus('error'); });
 }
 
 function cloudPull(){
@@ -7060,11 +7075,11 @@ function forcarSync(){ cloudPush(); setTimeout(cloudPull, 300); }
 
 // Reset automático à meia-noite: novo dia = novas chaves = tudo limpo
 setInterval(function(){
-  var novoSK = 'conf_q_' + new Date().toLocaleDateString('pt-BR').replace(/\//g,'_');
+  var novoSK = 'conf_q_' + _dataKey();
   if(novoSK !== SK){
     SK = novoSK;
     E = {};
-    BASKET = 'quebras_' + new Date().toLocaleDateString('pt-BR').replace(/\//g,'');
+    BASKET = 'quebras_' + _dataKey();
     PANTRY_URL = 'https://getpantry.cloud/apiv1/pantry/' + PANTRY_ID + '/basket/' + BASKET;
     try { localStorage.setItem(SK, '{}'); } catch(e) {}
     if(pullTimer) clearInterval(pullTimer);
@@ -7285,7 +7300,16 @@ function render(){
     dadosVis.push({item:it,idx:i});
   }
   if(dadosVis.length===0){
-    cont.innerHTML='<div class="no-res">Nenhum resultado para "<strong>'+(termo||'')+'</strong>"</div>';
+    if(dados.length===0){
+      cont.innerHTML='<div class="no-res" style="padding:60px 24px">'+
+        '<div style="font-size:42px;margin-bottom:14px">📦</div>'+
+        '<div style="font-size:15px;font-weight:800;color:#1C1C1E;margin-bottom:6px">Nenhuma quebra na nuvem</div>'+
+        '<div style="font-size:12px;color:#8E8E93;line-height:1.55;max-width:280px;margin:0 auto">A planilha de hoje ainda não foi importada pelo responsável, ou hoje não existem quebras.</div>'+
+        '<button onclick="location.reload()" style="margin-top:18px;background:#1A3770;color:#fff;border:none;border-radius:10px;padding:10px 22px;font-size:12px;font-weight:800;cursor:pointer">Tentar novamente</button>'+
+      '</div>';
+    } else {
+      cont.innerHTML='<div class="no-res">Nenhum resultado para "<strong>'+(termo||'')+'</strong>"</div>';
+    }
     prog();
     return;
   }
@@ -7547,13 +7571,15 @@ function gerarPDF(){
   doc.save('Quebras_Ausentes_Correcoes_'+dt+'.pdf');
 }
 
+// Renderiza E inicia sync IMEDIATAMENTE (não bloqueia esperando o nome)
+render();
+iniciarSync();
+setSyncStatus(navigator.onLine?'idle':'offline');
 if(ME){
   var bn=document.getElementById('btnNome');
   if(bn)bn.textContent='👤 '+ME;
-  render();
-  iniciarSync();
-  setSyncStatus(navigator.onLine?'idle':'offline');
 } else {
+  // Modal aparece por cima dos cards (não bloqueia a renderização)
   var m=document.getElementById('nomeModal');
   if(m)m.style.display='flex';
 }
