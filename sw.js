@@ -1,49 +1,65 @@
-// ── Versão do cache — atualize em CADA novo deploy ──────────────────────────
-// Formato: YYYYMMDD-N  (N = número se houver mais de um deploy no mesmo dia)
-const CACHE = 'panutrir-v20260527-1';
+// ═══════════════════════════════════════════════════════════════════════════
+//  SERVICE WORKER AGRESSIVO — força atualização do HTML em todos os aparelhos
+//  Atualize BUILD a cada deploy (ex: data + hora). É o que dispara a renovação.
+// ═══════════════════════════════════════════════════════════════════════════
+const BUILD = '20260528-1';
+const CACHE = 'panutrir-' + BUILD;
 
-// Instala imediatamente, sem aguardar tabs antigas fecharem
-self.addEventListener('install', () => self.skipWaiting());
+// Instala já, sem esperar abas antigas
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
 
-// Ativa, apaga caches antigos e assume controle de todas as abas
+// Ao ativar: apaga TODOS os caches antigos e assume controle imediato
 self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => (k !== CACHE ? caches.delete(k) : null)));
+    await self.clients.claim();
+    // Avisa todas as abas abertas que há versão nova → elas recarregam
+    const clientsList = await self.clients.matchAll({ type: 'window' });
+    for (const client of clientsList) {
+      client.postMessage({ type: 'SW_UPDATED', build: BUILD });
+    }
+  })());
 });
 
 self.addEventListener('fetch', event => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // HTML (navegação): rede sempre — se offline, cache como fallback
-  if (req.mode === 'navigate') {
+  // ── HTML / navegação: SEMPRE rede, nunca cache (impede versão velha) ──
+  if (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept') && req.headers.get('accept').includes('text/html'))) {
     event.respondWith(
-      fetch(req).catch(() => caches.match(req))
+      fetch(req, { cache: 'no-store' }).catch(() => caches.match(req))
     );
     return;
   }
 
-  // Recursos externos (CDNs): rede direta, sem cache local
-  if (url.origin !== location.origin) {
+  // ── Pantry / APIs externas: nunca cacheia (dados vivos) ──
+  if (url.hostname === 'getpantry.cloud' || url.origin !== location.origin) {
     event.respondWith(fetch(req));
     return;
   }
 
-  // Recursos próprios (logo, ícones): cache-first com atualização em background
+  // ── Recursos próprios (ícones, logo): cache-first, atualiza em background ──
   event.respondWith(
     caches.match(req).then(cached => {
-      const fromNetwork = fetch(req).then(response => {
-        if (response.ok) {
-          caches.open(CACHE).then(c => c.put(req, response.clone()));
+      const net = fetch(req).then(resp => {
+        if (resp && resp.ok) {
+          const copy = resp.clone();
+          caches.open(CACHE).then(c => c.put(req, copy));
         }
-        return response;
-      });
-      return cached || fromNetwork;
+        return resp;
+      }).catch(() => cached);
+      return cached || net;
     })
   );
+});
+
+// Permite que a página mande "pula a espera" para ativar a versão nova na hora
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
