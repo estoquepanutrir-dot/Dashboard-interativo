@@ -2,7 +2,7 @@
 //  SERVICE WORKER AGRESSIVO — força atualização do HTML em todos os aparelhos
 //  Atualize BUILD a cada deploy (ex: data + hora). É o que dispara a renovação.
 // ═══════════════════════════════════════════════════════════════════════════
-const BUILD = '20260528-1';
+const BUILD = '20260612-7';
 const CACHE = 'panutrir-' + BUILD;
 
 // Instala já, sem esperar abas antigas
