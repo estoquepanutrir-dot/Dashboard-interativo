@@ -30,139 +30,147 @@
     *, *::before, *::after { box-sizing: border-box; }
 
     :root {
-      /* MD3 Light Tokens */
-      --md-primary: #1A3770;
+      /* ── Fluent 2 — Light theme tokens ──
+         (token names kept as --md-* for backward compatibility; values
+          remapped to Microsoft Fluent 2 neutral + communication-blue ramp) */
+      --md-primary: #0078D4;                /* Communication blue (accent) */
       --md-on-primary: #FFFFFF;
-      --md-primary-container: #D6E4FF;
-      --md-on-primary-container: #0A1E45;
-      --md-secondary: #D81419;
-      --md-secondary-container: #FFE5E6;
-      --md-tertiary: #C9A800;
-      --md-tertiary-container: #FFF8CC;
-      --md-surface: #E8EAED;
-      --md-surface-variant: #D2D5D9;
-      --md-on-surface: #1A1C1E;
-      --md-on-surface-variant: #44474A;
-      --md-outline: #72777A;
-      --md-outline-variant: #C4C7CB;
-      --md-error: #B3261E;
-      --md-error-container: #F9DEDC;
-      --md-shadow: rgba(0,0,0,0.08);
-      --md-scrim: rgba(0,0,0,0.32);
+      --md-primary-hover: #106EBE;
+      --md-primary-pressed: #005A9E;
+      --md-primary-container: #EFF6FC;       /* Accent tint background */
+      --md-on-primary-container: #004578;
+      --md-secondary: #D13438;               /* Fluent danger red */
+      --md-secondary-container: #FDE7E9;
+      --md-tertiary: #C19C00;                /* Fluent yellow */
+      --md-tertiary-container: #FFF4CE;
+      --md-surface: #FFFFFF;                  /* Layer / card surface */
+      --md-surface-variant: #F5F5F5;          /* Neutral background-2 */
+      --md-on-surface: #242424;               /* Neutral foreground-1 */
+      --md-on-surface-variant: #616161;       /* Neutral foreground-2 */
+      --md-outline: #9E9E9E;                  /* Neutral stroke-2 */
+      --md-outline-variant: #D1D1D1;          /* Neutral stroke-1 */
+      --md-error: #D13438;
+      --md-error-container: #FDE7E9;
+      --md-shadow: rgba(0,0,0,0.12);
+      --md-scrim: rgba(0,0,0,0.40);
+      /* Fluent neutral canvas (app background-canvas) */
+      --fluent-canvas: #F0F0F0;
+      /* Fluent elevation shadows */
+      --fluent-shadow-2: 0 0 2px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+      --fluent-shadow-4: 0 0 2px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.14);
+      --fluent-shadow-8: 0 0 2px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.14);
+      --fluent-shadow-16: 0 0 8px rgba(0,0,0,0.10), 0 8px 16px rgba(0,0,0,0.14);
+      --fluent-shadow-64: 0 0 8px rgba(0,0,0,0.10), 0 32px 64px rgba(0,0,0,0.18);
+      /* Fluent corner radii */
+      --fluent-radius-sm: 4px;
+      --fluent-radius-md: 6px;
+      --fluent-radius-lg: 8px;
+      --fluent-radius-xl: 12px;
     }
 
     .dark {
-      --md-primary: #7DA6E8;
-      --md-on-primary: #0A1E45;
-      --md-primary-container: #1A3770;
-      --md-on-primary-container: #D6E4FF;
-      --md-secondary: #FF6B6D;
-      --md-secondary-container: #6B0A0C;
+      /* ── Fluent 2 — Dark theme tokens ── */
+      --md-primary: #2899F5;                  /* Accent in dark */
+      --md-on-primary: #FFFFFF;
+      --md-primary-hover: #3AA0F3;
+      --md-primary-pressed: #2886D8;
+      --md-primary-container: #082338;
+      --md-on-primary-container: #A9D3F2;
+      --md-secondary: #F1707B;
+      --md-secondary-container: #3B1A1C;
       --md-tertiary: #F5D800;
-      --md-tertiary-container: #5C4A00;
-      --md-surface: #1F1E25;
-      --md-surface-variant: #2E2C38;
-      --md-on-surface: #F3EEF9;
-      --md-on-surface-variant: #D0C9DF;
-      --md-outline: #938F99;
-      --md-outline-variant: #49454F;
-      --md-error: #F2B8B5;
-      --md-error-container: #8C1D18;
-      --md-shadow: rgba(0,0,0,0.3);
+      --md-tertiary-container: #4A3D00;
+      --md-surface: #292929;                  /* Card layer */
+      --md-surface-variant: #1F1F1F;          /* Background-2 */
+      --md-on-surface: #FFFFFF;               /* Foreground-1 */
+      --md-on-surface-variant: #ADADAD;       /* Foreground-2 */
+      --md-outline: #757575;                  /* Stroke-2 */
+      --md-outline-variant: #424242;          /* Stroke-1 */
+      --md-error: #F1707B;
+      --md-error-container: #3B1A1C;
+      --md-shadow: rgba(0,0,0,0.40);
+      --fluent-canvas: #141414;
+      --fluent-shadow-2: 0 0 2px rgba(0,0,0,0.36), 0 1px 2px rgba(0,0,0,0.40);
+      --fluent-shadow-4: 0 0 2px rgba(0,0,0,0.36), 0 2px 4px rgba(0,0,0,0.40);
+      --fluent-shadow-8: 0 0 2px rgba(0,0,0,0.36), 0 4px 8px rgba(0,0,0,0.40);
+      --fluent-shadow-16: 0 0 8px rgba(0,0,0,0.32), 0 8px 16px rgba(0,0,0,0.40);
+      --fluent-shadow-64: 0 0 8px rgba(0,0,0,0.32), 0 32px 64px rgba(0,0,0,0.50);
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: var(--md-surface);
+      font-family: 'Segoe UI', 'Segoe UI Web', -apple-system, BlinkMacSystemFont, 'Inter', system-ui, sans-serif;
+      background-color: var(--fluent-canvas);
       color: var(--md-on-surface);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       min-height: 100vh;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      font-feature-settings: "cv02","cv03","cv04","cv11";
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
-    /* Light mode body background */
+    /* Light mode body background — flat Fluent neutral canvas */
     body:not(.dark) {
-      background: #C8CACD;
-      background-image:
-        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(216,20,25,0.05) 0%, transparent 55%),
-        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(245,216,0,0.03) 0%, transparent 55%);
-      background-attachment: fixed;
+      background: var(--fluent-canvas);
     }
 
     /* Dark mode body */
     .dark body, html.dark {
-      background: #17161D;
+      background: #141414;
     }
 
-    /* ── NAVBAR MD3 ── */
+    /* ── NAVBAR (Fluent) ── */
     .md3-nav {
-      background: rgba(247, 242, 250, 0.85);
-      backdrop-filter: saturate(180%) blur(20px);
-      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      background: var(--md-surface);
       border-bottom: 1px solid var(--md-outline-variant);
-      transition: background 0.3s ease, border-color 0.3s ease;
+      transition: background 0.2s ease, border-color 0.2s ease;
     }
     .dark .md3-nav {
-      background: rgba(31, 30, 37, 0.94);
-      border-bottom: 1px solid rgba(80,76,92,0.5);
+      background: #1F1F1F;
+      border-bottom: 1px solid var(--md-outline-variant);
     }
 
-    /* ── MD3 SURFACE CARDS ── */
+    /* ── SURFACE CARDS (Fluent layer + elevation) ── */
     .md3-card {
-      background: rgba(232,234,237,0.92);
-      backdrop-filter: blur(24px) saturate(140%);
-      -webkit-backdrop-filter: blur(24px) saturate(140%);
-      border: 1px solid rgba(180,184,188,0.6);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
-      transition: box-shadow 0.25s ease, border-color 0.3s ease, background 0.3s ease;
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--fluent-radius-lg);
+      box-shadow: var(--fluent-shadow-2);
+      transition: box-shadow 0.15s ease, border-color 0.2s ease, background 0.2s ease;
     }
     .md3-card:hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+      box-shadow: var(--fluent-shadow-8);
     }
     .dark .md3-card {
-      background: rgba(36,33,42,0.88);
-      border: 1px solid rgba(73,69,79,0.5);
-      box-shadow: none;
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline-variant);
+      box-shadow: var(--fluent-shadow-2);
     }
     .dark .md3-card:hover {
-      border-color: rgba(73,69,79,0.9);
+      border-color: var(--md-outline);
     }
 
-    /* ── KPI CARDS MD3 ── */
+    /* ── KPI CARDS (Fluent) ── */
     .kpi-card {
-      background: rgba(255,255,255,0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(202,196,208,0.6);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
-      border-radius: 2rem;
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline-variant);
+      box-shadow: var(--fluent-shadow-2);
+      border-radius: var(--fluent-radius-lg);
       padding: 1.5rem;
       position: relative;
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.3s ease, background 0.3s ease;
+      transition: box-shadow 0.15s ease, border-color 0.2s ease, background 0.2s ease;
     }
     .kpi-card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 8px 20px rgba(0,0,0,0.06);
+      box-shadow: var(--fluent-shadow-8);
     }
-    .kpi-card::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
-    }
+    .kpi-card::after { display: none; }
     .dark .kpi-card {
-      background: rgba(36,33,42,0.88);
-      border: 1px solid rgba(73,69,79,0.5);
-      box-shadow: none;
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline-variant);
+      box-shadow: var(--fluent-shadow-2);
     }
     .dark .kpi-card::after { display: none; }
     .dark .kpi-card:hover {
-      border-color: rgba(26,55,112,0.4);
-      box-shadow: 0 0 0 1px rgba(26,55,112,0.2);
+      border-color: var(--md-primary);
     }
     .kpi-dot {
       position: absolute;
@@ -172,17 +180,15 @@
       opacity: 0.07;
     }
 
-    /* ── LOADING OVERLAY ── */
+    /* ── LOADING OVERLAY (Fluent) ── */
     .loading-overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(247, 242, 250, 0.75);
+      background: rgba(255, 255, 255, 0.6);
       z-index: 200;
-      backdrop-filter: blur(32px) saturate(150%);
-      -webkit-backdrop-filter: blur(32px) saturate(150%);
       align-items: center; justify-content: center; flex-direction: column;
     }
     .dark .loading-overlay {
-      background: rgba(20, 18, 24, 0.80);
+      background: rgba(20, 20, 20, 0.7);
     }
     .spinner {
       width: 40px; height: 40px;
@@ -209,30 +215,35 @@
 
     .dark .status-pilha   { background: rgba(46,125,50,0.25); color: #81C784; }
     .dark .status-quebra  { background: rgba(230,126,34,0.2); color: #FFAB40; }
-    .dark .status-doacao  { background: rgba(26,55,112,0.25); color: #D0BCFF; }
+    .dark .status-doacao  { background: rgba(0,120,212,0.25); color: #D0BCFF; }
     .dark .status-normal  { border-color: rgba(202,196,208,0.25); }
 
-    /* ── FILTER BUTTONS ── */
+    /* ── FILTER BUTTONS (Fluent) ── */
     .filter-btn {
-      transition: all 0.2s cubic-bezier(0.2,0,0,1);
+      transition: background 0.1s ease, border-color 0.1s ease, color 0.1s ease;
       font-weight: 600;
-      letter-spacing: 0.03em;
+      letter-spacing: 0;
       font-size: 0.68rem;
       border: 1px solid var(--md-outline-variant);
-      color: var(--md-on-surface-variant);
-      background: rgba(255,255,255,0.6);
+      color: var(--md-on-surface);
+      background: var(--md-surface);
+      border-radius: var(--fluent-radius-sm) !important;
+    }
+    .filter-btn:hover {
+      background: var(--md-surface-variant);
     }
     .dark .filter-btn {
-      background: rgba(73,69,79,0.3);
-      border-color: rgba(73,69,79,0.5);
-      color: var(--md-on-surface-variant);
+      background: #333333;
+      border-color: var(--md-outline-variant);
+      color: var(--md-on-surface);
     }
-    .filter-btn:active { transform: scale(0.96); }
+    .dark .filter-btn:hover { background: #3D3D3D; }
+    .filter-btn:active { transform: none; }
     .filter-btn.active {
-      background: #D81419 !important;
+      background: var(--md-primary) !important;
       color: #FFFFFF !important;
-      border-color: transparent !important;
-      box-shadow: 0 2px 8px rgba(26,55,112,0.25);
+      border-color: var(--md-primary) !important;
+      box-shadow: none;
     }
 
     /* ── ACTION BUTTONS ── */
@@ -244,126 +255,93 @@
     .dl-btn:hover { opacity: 0.88; transform: translateY(-1px); }
     .dl-btn:active { transform: scale(0.97) translateY(0); }
 
-    /* ── REPORT BUTTONS — Pill shape, dark-blue family ── */
+    /* ── REPORT BUTTONS (Fluent — rectangular, accent) ── */
     .rpt-btn {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 8px 20px;
-      border-radius: 9999px;
+      padding: 7px 16px;
+      border-radius: var(--fluent-radius-sm);
       border: none;
       font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
       cursor: pointer;
-      font-family: 'Inter', sans-serif;
+      font-family: inherit;
       color: #FFFFFF;
-      transition: all 0.2s cubic-bezier(0.2,0,0,1);
+      background: var(--md-primary);
+      transition: background 0.1s ease, box-shadow 0.1s ease;
       white-space: nowrap;
     }
-    .rpt-btn:hover { opacity: 0.88; transform: translateY(-1px); }
-    .rpt-btn:active { transform: scale(0.97) translateY(0); }
-    /* Tone 1 — Primary deep navy */
-    .rpt-btn-1 { background: #1A3770; }
-    /* Tone 2 — Ocean blue */
-    .rpt-btn-2 { background: #1565C0; }
-    /* Tone 3 — Steel blue */
-    .rpt-btn-3 { background: #1976D2; }
-    /* Tone 4 — Mid blue */
-    .rpt-btn-4 { background: #0D47A1; }
-    /* Tone 5 — Indigo navy */
-    .rpt-btn-5 { background: #283593; }
-    /* Tone 6 — Corporate navy */
-    .rpt-btn-6 { background: #1A237E; }
+    .rpt-btn:hover { background: var(--md-primary-hover); }
+    .rpt-btn:active { background: var(--md-primary-pressed); }
+    /* Tones kept as classes for compatibility; mapped to Fluent accent ramp */
+    .rpt-btn-1 { background: #0078D4; }
+    .rpt-btn-2 { background: #106EBE; }
+    .rpt-btn-3 { background: #2B88D8; }
+    .rpt-btn-4 { background: #005A9E; }
+    .rpt-btn-5 { background: #004578; }
+    .rpt-btn-6 { background: #003966; }
+    .rpt-btn-1:hover,.rpt-btn-2:hover,.rpt-btn-3:hover,.rpt-btn-4:hover,.rpt-btn-5:hover,.rpt-btn-6:hover { filter: brightness(1.08); }
 
-    /* ── MD3 INPUTS ── */
-    .md3-input {
+    /* ── INPUTS (Fluent) ── */
+    .md3-input, .ios-input {
       appearance: none;
-      background: rgba(231,224,236,0.4);
-      border: none;
-      border-radius: 9999px;
-      padding: 0.65rem 2.5rem 0.65rem 1.25rem;
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline-variant);
+      border-bottom: 1px solid var(--md-outline);
+      border-radius: var(--fluent-radius-sm);
+      padding: 0.55rem 2.5rem 0.55rem 0.85rem;
       font-size: 0.72rem;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      font-family: inherit;
       color: var(--md-on-surface);
       outline: none;
       width: 100%;
-      transition: background 0.2s ease, box-shadow 0.2s ease;
-      letter-spacing: -0.01em;
+      transition: border-color 0.1s ease, box-shadow 0.1s ease;
+      letter-spacing: 0;
     }
-    .dark .md3-input {
-      background: rgba(73,69,79,0.4);
+    .dark .md3-input, .dark .ios-input {
+      background: #1F1F1F;
+      border-color: var(--md-outline-variant);
+      border-bottom-color: var(--md-outline);
       color: var(--md-on-surface);
     }
-    select.md3-input {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239389A0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    .md3-input:hover, .ios-input:hover {
+      border-bottom-color: var(--md-on-surface);
+    }
+    select.md3-input, select.ios-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23616161'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 0.9rem center;
+      background-position: right 0.75rem center;
       background-size: 0.75rem;
     }
-    .md3-input:focus {
-      background-color: rgba(231,224,236,0.65);
-      box-shadow: 0 0 0 3px rgba(26,55,112,0.2);
+    /* Fluent focus: accent bottom border (thicker), no glow ring */
+    .md3-input:focus, .ios-input:focus {
+      border-color: var(--md-outline-variant);
+      border-bottom: 2px solid var(--md-primary);
+      padding-bottom: calc(0.55rem - 1px);
     }
-    .dark .md3-input:focus {
-      background-color: rgba(73,69,79,0.65);
-      box-shadow: 0 0 0 3px rgba(208,188,255,0.2);
+    .dark .md3-input:focus, .dark .ios-input:focus {
+      border-color: var(--md-outline-variant);
+      border-bottom: 2px solid var(--md-primary);
     }
-    .md3-input.highlight {
-      background: rgba(26,55,112,0.12);
-      font-weight: 800;
-      color: var(--md-primary);
+    .md3-input.highlight, .ios-input.highlight {
+      background: var(--md-primary-container);
+      font-weight: 600;
+      color: var(--md-on-primary-container);
+      border-bottom-color: var(--md-primary);
     }
-    .dark .md3-input.highlight {
-      background: rgba(208,188,255,0.15);
-    }
-
-    /* ── ios-input alias for backward compat ── */
-    .ios-input { 
-      appearance: none;
-      background: rgba(231,224,236,0.4);
-      border: none;
-      border-radius: 9999px;
-      padding: 0.65rem 2.5rem 0.65rem 1.25rem;
-      font-size: 0.72rem;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      color: var(--md-on-surface);
-      outline: none;
-      width: 100%;
-      transition: background 0.2s ease, box-shadow 0.2s ease;
-      letter-spacing: -0.01em;
-    }
-    .dark .ios-input {
-      background: rgba(73,69,79,0.4);
-      color: var(--md-on-surface);
-    }
-    select.ios-input {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239389A0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 0.9rem center;
-      background-size: 0.75rem;
-    }
-    .ios-input:focus {
-      background-color: rgba(231,224,236,0.65);
-      box-shadow: 0 0 0 3px rgba(26,55,112,0.2);
-    }
-    .dark .ios-input:focus {
-      background-color: rgba(73,69,79,0.65);
-      box-shadow: 0 0 0 3px rgba(208,188,255,0.2);
-    }
-    .ios-input.highlight {
-      background: rgba(26,55,112,0.12);
-      font-weight: 800;
-      color: var(--md-primary);
+    .dark .md3-input.highlight, .dark .ios-input.highlight {
+      background: var(--md-primary-container);
+      color: var(--md-on-primary-container);
     }
 
     /* ── TABLE ── */
     .table-row { transition: background 0.15s ease; }
-    .table-row:hover { background: rgba(245,216,0,0.03); }
-    .dark .table-row:hover { background: rgba(208,188,255,0.06); }
+    .table-row:hover { background: var(--md-surface-variant); }
+    .dark .table-row:hover { background: rgba(255,255,255,0.04); }
 
     /* Table typography refinements */
     thead th {
@@ -395,29 +373,29 @@
     /* ── SECTION SEPARATOR ── */
     .section-sep { height: 1px; background: linear-gradient(90deg, transparent, var(--md-outline-variant), transparent); margin: 0.5rem 0; }
 
-    /* ── UPLOAD BUTTON ── */
+    /* ── UPLOAD BUTTON (Fluent primary) ── */
     .upload-btn {
       background: var(--md-primary);
       color: var(--md-on-primary);
-      border-radius: 9999px;
-      padding: 1rem 2.5rem;
+      border-radius: var(--fluent-radius-sm);
+      padding: 0.7rem 1.5rem;
       font-size: 0.875rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      box-shadow: 0 4px 20px rgba(26,55,112,0.35);
-      transition: all 0.2s cubic-bezier(0.2,0,0,1);
+      font-weight: 600;
+      letter-spacing: 0;
+      box-shadow: none;
+      transition: background 0.1s ease;
       display: inline-block;
       cursor: pointer;
     }
-    .upload-btn:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 28px rgba(26,55,112,0.4); }
-    .upload-btn:active { transform: scale(0.98); }
+    .upload-btn:hover { background: var(--md-primary-hover); transform: none; box-shadow: none; }
+    .upload-btn:active { background: var(--md-primary-pressed); transform: none; }
     * { font-style: normal !important; text-decoration: none !important; }
 
     /* ── NOTIF BADGE ── */
     #notif-badge {
       position: absolute; top: -4px; right: -4px;
       background: var(--md-error); color: #fff;
-      font-size: 9px; font-weight: 900;
+      font-size: 9px; font-weight: 700;
       border-radius: 99px; min-width: 17px; height: 17px;
       display: flex; align-items: center; justify-content: center;
       padding: 0 4px; line-height: 1;
@@ -425,54 +403,60 @@
     }
     #notif-btn { position: relative; cursor: pointer; }
 
-    /* ── MD3 ICON BUTTON ── */
+    /* ── ICON BUTTON (Fluent subtle) ── */
     .md3-icon-btn {
-      background: rgba(26,55,112,0.08);
+      background: transparent;
       border: none;
-      border-radius: 50%;
-      width: 40px; height: 40px;
+      border-radius: var(--fluent-radius-sm);
+      width: 36px; height: 36px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s ease;
+      transition: background 0.1s ease;
       color: var(--md-on-surface-variant);
     }
-    .md3-icon-btn:hover { background: rgba(26,55,112,0.14); }
-    .dark .md3-icon-btn { background: rgba(208,188,255,0.08); color: var(--md-on-surface-variant); }
-    .dark .md3-icon-btn:hover { background: rgba(125,166,232,0.14); }
+    .md3-icon-btn:hover { background: var(--md-surface-variant); }
+    .dark .md3-icon-btn { background: transparent; color: var(--md-on-surface-variant); }
+    .dark .md3-icon-btn:hover { background: rgba(255,255,255,0.06); }
+
+    /* ── FLUENT RADIUS NORMALIZATION ──
+       Retarget the chunky macOS/MD3 corner radii (Tailwind rounded-2xl/3xl
+       and pill rounded-full on containers) to Fluent's flatter scale.
+       Pills on true chips/badges keep their shape via .keep-pill. */
+    .rounded-3xl { border-radius: var(--fluent-radius-lg) !important; }
+    .rounded-2xl { border-radius: var(--fluent-radius-md) !important; }
+    .rounded-xl  { border-radius: var(--fluent-radius-md) !important; }
 
     /* ── NOTIF DRAWER ── */
     #notif-drawer {
       position: fixed; top: 0; right: -430px; width: 410px; height: 100vh;
-      background: rgba(247,242,250,0.97);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      background: var(--md-surface);
       border-left: 1px solid var(--md-outline-variant);
-      box-shadow: -8px 0 40px rgba(0,0,0,0.10);
+      box-shadow: var(--fluent-shadow-64);
       z-index: 300; transition: right 0.32s cubic-bezier(0.2,0,0,1);
       display: flex; flex-direction: column;
     }
     .dark #notif-drawer {
-      background: rgba(28,27,31,0.97);
-      border-left-color: rgba(73,69,79,0.5);
+      background: #1F1F1F;
+      border-left-color: var(--md-outline-variant);
     }
     #notif-drawer.open { right: 0; }
     #notif-overlay {
       position: fixed; inset: 0; background: var(--md-scrim);
-      z-index: 299; display: none; backdrop-filter: blur(2px);
+      z-index: 299; display: none;
     }
     #notif-overlay.open { display: block; }
 
     .notif-item {
-      background: rgba(255,255,255,0.65);
-      border: 1px solid rgba(202,196,208,0.4);
-      border-radius: 1.25rem; padding: 0.9rem 1.1rem; margin-bottom: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      background: var(--md-surface);
+      border: 1px solid var(--md-outline-variant);
+      border-radius: var(--fluent-radius-md); padding: 0.9rem 1.1rem; margin-bottom: 0.5rem;
+      box-shadow: var(--fluent-shadow-2);
     }
     .dark .notif-item {
-      background: rgba(54,50,64,0.7);
-      border-color: rgba(73,69,79,0.4);
+      background: #2D2D2D;
+      border-color: var(--md-outline-variant);
     }
     .notif-item.vencido { border-left: 3px solid #1C1B1F; background: rgba(28,27,31,0.06); }
     .notif-item.urgente { border-left: 3px solid #D81419; background: rgba(216,20,25,0.07); }
@@ -486,17 +470,15 @@
     /* ── HISTÓRICO DRAWER ── */
     #historico-drawer {
       position: fixed; top: 0; left: -470px; width: 450px; height: 100vh;
-      background: rgba(247,242,250,0.97);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      background: var(--md-surface);
       border-right: 1px solid var(--md-outline-variant);
-      box-shadow: 8px 0 40px rgba(0,0,0,0.10);
+      box-shadow: var(--fluent-shadow-64);
       z-index: 300; transition: left 0.32s cubic-bezier(0.2,0,0,1);
       display: flex; flex-direction: column;
     }
     .dark #historico-drawer {
-      background: rgba(28,27,31,0.97);
-      border-right-color: rgba(73,69,79,0.5);
+      background: #1F1F1F;
+      border-right-color: var(--md-outline-variant);
     }
     #historico-drawer.open { left: 0; }
 
@@ -510,15 +492,25 @@
     #alerta-modal {
       position: fixed; inset: 0; z-index: 400;
       display: none; align-items: center; justify-content: center;
-      background: var(--md-scrim); backdrop-filter: blur(8px);
+      background: var(--md-scrim);
     }
     #alerta-modal.open { display: flex; }
     #alerta-box {
-      background: var(--md-surface); border-radius: 2rem; padding: 2rem;
+      background: var(--md-surface); border-radius: var(--fluent-radius-lg); padding: 2rem;
       max-width: 480px; width: 90%; max-height: 80vh;
-      overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.22);
+      display: flex; flex-direction: column;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.22);
       border-top: 4px solid var(--md-error);
       border: 1px solid var(--md-outline-variant);
+    }
+    /* Lista rolável dentro do box: a barra de rolagem fica na área de
+       conteúdo, com margem própria, sem encostar no canto arredondado. */
+    #alerta-lista {
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      padding-right: 6px;
+      margin-right: -6px;
     }
     .dark #alerta-box {
       background: #2B2930;
@@ -550,11 +542,9 @@
     /* ── AUTOCOMPLETE DROPDOWN ── */
     #autocomplete-dropdown {
       position: fixed;
-      background: rgba(252,249,255,0.98);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      background: var(--md-surface);
       border: 1px solid var(--md-outline-variant);
-      border-radius: 1.25rem;
+      border-radius: var(--fluent-radius-md);
       box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
       z-index: 99999;
       max-height: 320px;
@@ -571,33 +561,33 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 0.55rem 1rem; cursor: pointer; transition: background 0.1s; gap: 8px;
     }
-    .autocomplete-item:hover, .autocomplete-item.focused { background: rgba(26,55,112,0.08); }
-    .dark .autocomplete-item:hover, .dark .autocomplete-item.focused { background: rgba(208,188,255,0.1); }
+    .autocomplete-item:hover, .autocomplete-item.focused { background: rgba(0,120,212,0.08); }
+    .dark .autocomplete-item:hover, .dark .autocomplete-item.focused { background: rgba(40,153,245,0.1); }
     .autocomplete-item-name { font-size: 12px; font-weight: 800; color: var(--md-on-surface); }
     .autocomplete-item-cod  { font-size: 10px; font-weight: 700; color: var(--md-on-surface-variant); white-space: nowrap; }
 
     /* ── SKU FILTER PILL ── */
     #sku-filter-pill {
       display: none; align-items: center; gap: 6px;
-      background: rgba(26,55,112,0.12);
-      border: 1px solid rgba(26,55,112,0.3);
+      background: rgba(0,120,212,0.12);
+      border: 1px solid rgba(0,120,212,0.3);
       border-radius: 99px;
       padding: 4px 12px 4px 10px;
       font-size: 10px; font-weight: 900;
       color: var(--md-primary);
       cursor: pointer; transition: background 0.15s;
     }
-    #sku-filter-pill:hover { background: rgba(26,55,112,0.18); }
+    #sku-filter-pill:hover { background: rgba(0,120,212,0.18); }
     .dark #sku-filter-pill {
-      background: rgba(208,188,255,0.15);
-      border-color: rgba(208,188,255,0.3);
+      background: rgba(40,153,245,0.15);
+      border-color: rgba(40,153,245,0.3);
       color: var(--md-primary);
     }
 
     /* ── KPI COMPARE BUTTON ── */
     .kpi-compare-btn {
       position: absolute; top: 10px; right: 12px;
-      background: rgba(26,55,112,0.07);
+      background: rgba(0,120,212,0.07);
       border: none; border-radius: 99px;
       padding: 3px 8px 3px 6px;
       font-size: 8px; font-weight: 900;
@@ -607,20 +597,18 @@
       transition: background 0.15s, color 0.15s;
       letter-spacing: 0.03em; z-index: 2;
     }
-    .kpi-compare-btn:hover { background: rgba(26,55,112,0.14); color: var(--md-primary); }
-    .kpi-compare-btn.active-compare { background: rgba(26,55,112,0.14); color: var(--md-primary); }
-    .dark .kpi-compare-btn { background: rgba(26,55,112,0.12); }
-    .dark .kpi-compare-btn:hover, .dark .kpi-compare-btn.active-compare { background: rgba(125,166,232,0.15); }
+    .kpi-compare-btn:hover { background: rgba(0,120,212,0.14); color: var(--md-primary); }
+    .kpi-compare-btn.active-compare { background: rgba(0,120,212,0.14); color: var(--md-primary); }
+    .dark .kpi-compare-btn { background: rgba(0,120,212,0.12); }
+    .dark .kpi-compare-btn:hover, .dark .kpi-compare-btn.active-compare { background: rgba(40,153,245,0.15); }
 
     /* ── KPI COMPARE POPOVER ── */
     .kpi-compare-popover {
       position: fixed; z-index: 9999;
-      background: rgba(252,249,255,0.98);
+      background: var(--md-surface);
       border: 1px solid var(--md-outline-variant);
-      border-radius: 1.25rem;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-radius: var(--fluent-radius-md);
+      box-shadow: var(--fluent-shadow-16);
       padding: 0.6rem 0; min-width: 240px; max-width: 290px;
       display: none; animation: popoverIn 0.15s ease;
     }
@@ -639,10 +627,10 @@
       display: flex; align-items: center; justify-content: space-between;
       padding: 0.45rem 0.9rem; cursor: pointer; transition: background 0.1s; gap: 8px;
     }
-    .kpi-compare-item:hover { background: rgba(26,55,112,0.07); }
-    .kpi-compare-item.selected { background: rgba(26,55,112,0.1); }
-    .dark .kpi-compare-item:hover { background: rgba(208,188,255,0.08); }
-    .dark .kpi-compare-item.selected { background: rgba(208,188,255,0.12); }
+    .kpi-compare-item:hover { background: rgba(0,120,212,0.07); }
+    .kpi-compare-item.selected { background: rgba(0,120,212,0.1); }
+    .dark .kpi-compare-item:hover { background: rgba(40,153,245,0.08); }
+    .dark .kpi-compare-item.selected { background: rgba(40,153,245,0.12); }
     .kpi-compare-item-label { font-size: 11px; font-weight: 800; color: var(--md-on-surface); line-height: 1.2; }
     .kpi-compare-item-sub { font-size: 9px; color: var(--md-on-surface-variant); font-weight: 600; }
     .kpi-compare-item-check { color: var(--md-primary); font-size: 11px; font-weight: 900; flex-shrink: 0; }
@@ -657,21 +645,21 @@
     .dark .hist-item { background: rgba(54,50,64,0.6); border-color: rgba(73,69,79,0.4); }
     .hist-item:hover { background: rgba(255,255,255,0.9); }
     .dark .hist-item:hover { background: rgba(54,50,64,0.9); }
-    .hist-item.active-hist { border: 1.5px solid #1A3770; }
+    .hist-item.active-hist { border: 1.5px solid #0078D4; }
 
     /* ── FANTASMAS ── */
     #fantasmas-expand-btn {
-      background: rgba(26,55,112,0.08); border: none; border-radius: 99px;
+      background: rgba(0,120,212,0.08); border: none; border-radius: 99px;
       padding: 4px 10px; font-size: 9px; font-weight: 900;
       color: var(--md-on-surface-variant); cursor: pointer;
       transition: background 0.15s, color 0.15s; letter-spacing: 0.03em;
     }
-    #fantasmas-expand-btn:hover { background: rgba(26,55,112,0.14); color: var(--md-primary); }
+    #fantasmas-expand-btn:hover { background: rgba(0,120,212,0.14); color: var(--md-primary); }
     #fantasmas-detail { display: none; margin-top: 1rem; }
 
     /* ── THEME TOGGLE ── */
     #theme-toggle {
-      background: rgba(26,55,112,0.08);
+      background: rgba(0,120,212,0.08);
       border: 1px solid var(--md-outline-variant);
       border-radius: 99px;
       padding: 6px 14px 6px 10px;
@@ -683,16 +671,16 @@
       white-space: nowrap;
     }
     #theme-toggle:hover {
-      background: rgba(26,55,112,0.14);
+      background: rgba(0,120,212,0.14);
       color: var(--md-primary);
       border-color: var(--md-primary);
     }
     .dark #theme-toggle {
-      background: rgba(208,188,255,0.08);
+      background: rgba(40,153,245,0.08);
       border-color: rgba(73,69,79,0.5);
     }
     .dark #theme-toggle:hover {
-      background: rgba(208,188,255,0.15);
+      background: rgba(40,153,245,0.15);
       color: var(--md-primary);
     }
 
@@ -714,8 +702,8 @@
     /* ── NAV DATE BADGE ── */
     .nav-badge {
       display: flex; align-items: center; gap: 6px;
-      background: rgba(26,55,112,0.08);
-      border: 1px solid rgba(26,55,112,0.2);
+      background: rgba(0,120,212,0.08);
+      border: 1px solid rgba(0,120,212,0.2);
       border-radius: 99px;
       padding: 4px 12px;
       font-size: 9px; font-weight: 800;
@@ -724,8 +712,8 @@
       text-transform: uppercase;
     }
     .dark .nav-badge {
-      background: rgba(208,188,255,0.1);
-      border-color: rgba(208,188,255,0.2);
+      background: rgba(40,153,245,0.1);
+      border-color: rgba(40,153,245,0.2);
     }
 
     /* ══════════════════════════════════════════════════
@@ -736,21 +724,21 @@
     /* ── KPI cards: números e labels ── */
     .dark #kpiPilhas        { color: #81C784 !important; }
     .dark #kpiQuebras       { color: #FFAB40 !important; }
-    .dark #kpiGradesOcupadas { color: #7DA6E8 !important; }
+    .dark #kpiGradesOcupadas { color: #2899F5 !important; }
     .dark #kpiDataCurtaPerc { color: #FFB74D !important; }
-    .dark #kpiDoacao        { color: #7DA6E8 !important; }
+    .dark #kpiDoacao        { color: #2899F5 !important; }
 
     /* ── KPI cards: borda esquerda adaptada ── */
     .dark .kpi-card[style*="border-left:3px solid #2E7D32"] { border-left-color: #81C784 !important; }
     .dark .kpi-card[style*="border-left:3px solid #92480A"] { border-left-color: #FFAB40 !important; }
-    .dark .kpi-card[style*="border-left:3px solid #1A3770"] { border-left-color: #7DA6E8 !important; }
+    .dark .kpi-card[style*="border-left:3px solid #0078D4"] { border-left-color: #2899F5 !important; }
 
     /* ── Filter buttons com cor hardcoded ── */
     .dark .filter-btn[style*="color:#2E7D32"] { color: #81C784 !important; }
     .dark .filter-btn[style*="color:#92480A"] { color: #FFAB40 !important; }
 
     /* ── Botões de filtro comparação ── */
-    .dark #cfbtn-subiu { color: #7DA6E8 !important; border-color: rgba(125,166,232,0.3) !important; }
+    .dark #cfbtn-subiu { color: #2899F5 !important; border-color: rgba(40,153,245,0.3) !important; }
 
     /* ── Dropdowns (fundo branco vira escuro) ── */
     .dark #dirDropdown,
@@ -777,7 +765,7 @@
     .dark #s7C3n { color: #F2B8B5 !important; }
     .dark #s7C4n { color: var(--md-primary) !important; }
     .dark #s7DbWarning { background: rgba(231,125,26,0.15) !important; color: #FFAB40 !important; }
-    .dark #s7Preview   { background: rgba(26,55,112,0.15) !important; }
+    .dark #s7Preview   { background: rgba(0,120,212,0.15) !important; }
 
     /* ── Cards gerados por JS (renderComparacao, renderKpiUrgencia) ── */
     /* Padrão: cards com fundo branco translúcido e texto #1C1C1E */
@@ -925,12 +913,12 @@
     .dark [style*="background:rgba(46,125,50,0.06)"]   { background: rgba(46,125,50,0.12) !important; }
     .dark [style*="background:rgba(231,125,26,0.05)"]  { background: rgba(231,125,26,0.10) !important; }
     .dark [style*="background:rgba(179,38,30,0.04)"]   { background: rgba(179,38,30,0.10) !important; }
-    .dark [style*="background:rgba(245,216,0,0.03)"]  { background: rgba(26,55,112,0.10) !important; }
+    .dark [style*="background:rgba(245,216,0,0.03)"]  { background: rgba(0,120,212,0.10) !important; }
 
     /* ── Tabela principal: fundo do thead ── */
-    .dark thead tr { background: rgba(26,55,112,0.08) !important; }
+    .dark thead tr { background: rgba(0,120,212,0.08) !important; }
     .dark thead th[style*="background:rgba(245,216,0,0.03)"] {
-      background: rgba(26,55,112,0.10) !important;
+      background: rgba(0,120,212,0.10) !important;
     }
 
     /* ── Botões de ação: legibilidade no dark mode ── */
@@ -947,7 +935,7 @@
     .dark .filter-btn[data-quick="QUEBRA"] { color: #FFAB40 !important; }
     .dark .filter-btn[data-quick="DATA_CURTA"] { color: #FFB74D !important; }
     .md3-icon-btn {
-      background: rgba(26,55,112,0.08);
+      background: rgba(0,120,212,0.08);
       border: 1px solid var(--md-outline-variant);
       border-radius: 99px;
       padding: 7px 10px;
@@ -958,19 +946,19 @@
       position: relative;
     }
     .dark .md3-icon-btn {
-      background: rgba(208,188,255,0.08);
+      background: rgba(40,153,245,0.08);
       border-color: rgba(73,69,79,0.5);
     }
-    .md3-icon-btn:hover { background: rgba(26,55,112,0.14); color: var(--md-primary); }
+    .md3-icon-btn:hover { background: rgba(0,120,212,0.14); color: var(--md-primary); }
   </style>
 </head>
 <body>
   <!-- ── MODAL ATUALIZAÇÃO VENDAS SEMANAIS ────────────── -->
-  <div id="modal-vendas-semanais" style="display:none;position:fixed;inset:0;z-index:500;background:var(--md-scrim);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);flex-direction:column;align-items:center;justify-content:center;">
+  <div id="modal-vendas-semanais" style="display:none;position:fixed;inset:0;z-index:500;background:var(--md-scrim);flex-direction:column;align-items:center;justify-content:center;">
     <div style="background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:2rem;padding:2rem;max-width:540px;width:calc(100% - 2rem);box-shadow:0 8px 48px rgba(0,0,0,0.18);max-height:80vh;overflow-y:auto;">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.25rem;">
-        <div style="width:40px;height:40px;border-radius:50%;background:rgba(26,55,112,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A3770" stroke-width="2.5" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+        <div style="width:40px;height:40px;border-radius:50%;background:rgba(0,120,212,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0078D4" stroke-width="2.5" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
         </div>
         <div>
           <h2 style="font-size:14px;font-weight:900;color:var(--md-on-surface);margin:0;letter-spacing:-0.02em;">Atualizar Vendas Diárias por SKU</h2>
@@ -980,10 +968,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div style="background:rgba(26,55,112,0.06);border:1px solid rgba(26,55,112,0.15);border-radius:1rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:10px;font-weight:600;color:var(--md-on-surface-variant);line-height:1.6;">
-        <b style="color:#1A3770;">Formato esperado:</b> Cole direto do Excel — duas colunas:<br>
+      <div style="background:rgba(0,120,212,0.06);border:1px solid rgba(0,120,212,0.15);border-radius:1rem;padding:0.75rem 1rem;margin-bottom:1rem;font-size:10px;font-weight:600;color:var(--md-on-surface-variant);line-height:1.6;">
+        <b style="color:#0078D4;">Formato esperado:</b> Cole direto do Excel — duas colunas:<br>
         <code style="font-size:9px;opacity:0.9;">NOME DO PRODUTO[TAB]VENDA SEMANAL<br>Pao Forma Panutrir 450G[TAB]50234<br>PAO HOT DOG PANUTRIR 400G[TAB]20335</code><br>
-        <span style="font-size:8px;opacity:0.75;color:#1A3770;font-weight:700;">⟶ O sistema divide automaticamente por 5 para obter a venda diária.</span>
+        <span style="font-size:8px;opacity:0.75;color:#0078D4;font-weight:700;">⟶ O sistema divide automaticamente por 5 para obter a venda diária.</span>
       </div>
       <textarea id="inputVendasSemanais" placeholder="Cole aqui os dados copiados do Excel (NOME DO PRODUTO	 VALOR por linha)..." style="width:100%;min-height:180px;border:1.5px solid var(--md-outline-variant);border-radius:1rem;padding:0.85rem 1rem;font-size:11px;font-family:'Inter',monospace;font-weight:600;color:var(--md-on-surface);background:rgba(231,224,236,0.2);outline:none;resize:vertical;line-height:1.7;"></textarea>
       <p id="vendas-parse-preview" style="font-size:10px;font-weight:700;color:var(--md-on-surface-variant);margin:8px 4px 0;min-height:16px;"></p>
@@ -991,7 +979,7 @@
         <button onclick="aplicarVendasSemanais()" style="flex:1;padding:0.85rem;background:var(--md-primary);color:var(--md-on-primary);border:none;border-radius:99px;font-size:11px;font-weight:900;cursor:pointer;letter-spacing:0.06em;font-family:'Inter',sans-serif;">
           Aplicar Atualização
         </button>
-        <button onclick="fecharModalVendasSemanais()" style="padding:0.85rem 1.5rem;background:rgba(26,55,112,0.08);color:var(--md-on-surface-variant);border:1px solid var(--md-outline-variant);border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
+        <button onclick="fecharModalVendasSemanais()" style="padding:0.85rem 1.5rem;background:rgba(0,120,212,0.08);color:var(--md-on-surface-variant);border:1px solid var(--md-outline-variant);border-radius:99px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;">
           Cancelar
         </button>
       </div>
@@ -999,7 +987,7 @@
   </div>
 
   <!-- ── ALERTA SEMANAL (segunda-feira) ────────────────── -->
-  <div id="modal-alerta-semanal" style="display:none;position:fixed;inset:0;z-index:499;background:rgba(0,0,0,0.2);backdrop-filter:blur(3px);align-items:flex-end;justify-content:center;padding:1.5rem;">
+  <div id="modal-alerta-semanal" style="display:none;position:fixed;inset:0;z-index:499;background:var(--md-scrim);align-items:flex-end;justify-content:center;padding:1.5rem;">
     <div style="background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:1.75rem;padding:1.25rem 1.5rem;max-width:480px;width:100%;box-shadow:0 4px 32px rgba(0,0,0,0.14);display:flex;align-items:center;gap:12px;">
       <div style="width:36px;height:36px;border-radius:50%;background:rgba(231,125,26,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E77D1A" stroke-width="2.5" stroke-linecap="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
@@ -1052,7 +1040,7 @@
   </div>
 
   <!-- ── HISTÓRICO OVERLAY + DRAWER ─────────────────── -->
-  <div id="hist-overlay" style="position:fixed;inset:0;background:var(--md-scrim);z-index:299;display:none;backdrop-filter:blur(2px);" onclick="toggleHistorico()"></div>
+  <div id="hist-overlay" style="position:fixed;inset:0;background:var(--md-scrim);z-index:299;display:none;" onclick="toggleHistorico()"></div>
   <div id="historico-drawer">
     <div class="drawer-header">
       <div>
@@ -1074,7 +1062,7 @@
   <!-- ── MODAL: FALTANTES DA CARGA ─────────────────── -->
   <div id="modalFaltantesCarga"
     style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;
-           background:var(--md-scrim);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);">
+           background:var(--md-scrim);">
     <div style="background:var(--md-surface);border-radius:2rem;padding:2rem;max-width:600px;width:94%;
                 box-shadow:0 24px 80px rgba(0,0,0,0.22);border-top:4px solid #F59E0B;
                 border:1px solid var(--md-outline-variant);max-height:90vh;overflow-y:auto;">
@@ -1140,7 +1128,7 @@
                  border-radius:1.25rem;padding:0.9rem 1.1rem;font-size:11px;font-weight:600;
                  color:var(--md-on-surface);outline:none;width:100%;resize:vertical;line-height:1.5;
                  font-family:monospace;transition:border-color 0.15s ease,background 0.15s ease;"
-          onfocus="this.style.borderColor='rgba(26,55,112,0.5)';this.style.background='rgba(231,224,236,0.45)'"
+          onfocus="this.style.borderColor='rgba(0,120,212,0.5)';this.style.background='rgba(231,224,236,0.45)'"
           onblur="this.style.borderColor='var(--md-outline-variant)';this.style.background='rgba(231,224,236,0.3)'">
         </textarea>
       </div>
@@ -1156,7 +1144,7 @@
           style="padding:0.7rem 1.5rem;background:transparent;border:1.5px solid var(--md-outline-variant);
                  border-radius:9999px;font-size:11px;font-weight:900;cursor:pointer;color:var(--md-on-surface-variant);
                  letter-spacing:0.04em;font-family:'Inter',sans-serif;transition:background 0.15s;"
-          onmouseover="this.style.background='rgba(26,55,112,0.06)'"
+          onmouseover="this.style.background='rgba(0,120,212,0.06)'"
           onmouseout="this.style.background='transparent'">
           FECHAR
         </button>
@@ -1171,9 +1159,9 @@
           GERAR EXCEL
         </button>
         <button onclick="processarFaltantesCarga('pdf')"
-          style="padding:0.7rem 1.5rem;background:linear-gradient(135deg,#1A3770,#0F2A52);
+          style="padding:0.7rem 1.5rem;background:linear-gradient(135deg,#0078D4,#005A9E);
                  border:none;border-radius:9999px;font-size:11px;font-weight:900;cursor:pointer;
-                 color:#fff;letter-spacing:0.04em;box-shadow:0 4px 16px rgba(26,55,112,0.30);
+                 color:#fff;letter-spacing:0.04em;box-shadow:0 4px 16px rgba(0,120,212,0.30);
                  display:flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;transition:opacity 0.15s,transform 0.15s;"
           onmouseover="this.style.opacity='0.88';this.style.transform='translateY(-1px)'"
           onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
@@ -1272,94 +1260,6 @@
         BAIXAR QTD
       </button>
     </div>
-    <div class="md3-card rounded-3xl p-6 mb-4" style="border-left:3px solid #2E7D32;overflow:visible;position:relative;z-index:101;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;flex-wrap:wrap;">
-        <span class="chart-title-dot" style="background:#2E7D32;width:9px;height:9px;"></span>
-        <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);text-transform:uppercase;letter-spacing:0.14em;margin:0;">Estoques das Filiais</h3>
-        <span style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;background:rgba(46,125,50,0.09);padding:2px 10px;border-radius:99px;letter-spacing:0.05em;">Importar · Bauru · Curitiba · Londrina · Rancharia · São José do Rio Preto · Barueri</span>
-        <div id="filiaisBadgeArea" style="display:flex;flex-wrap:wrap;gap:4px;margin-left:auto;"></div>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-
-        <!-- BAURU (3) -->
-        <label id="btnFilialBauru" title="Importar estoque de Bauru" class="rpt-btn" style="background:#1A3770;cursor:pointer;">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          3 · BAURU
-          <input type="file" id="filialUpload_3" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFilialUpload(event,'3','BAURU')" />
-        </label>
-
-        <!-- CURITIBA (4) -->
-        <label id="btnFilialCuritiba" title="Importar estoque de Curitiba" class="rpt-btn" style="background:#1565C0;cursor:pointer;">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          4 · CURITIBA
-          <input type="file" id="filialUpload_4" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFilialUpload(event,'4','CURITIBA')" />
-        </label>
-
-        <!-- LONDRINA (5) -->
-        <label id="btnFilialLondrina" title="Importar estoque de Londrina" class="rpt-btn" style="background:#1976D2;cursor:pointer;">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          5 · LONDRINA
-          <input type="file" id="filialUpload_5" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFilialUpload(event,'5','LONDRINA')" />
-        </label>
-
-        <!-- RANCHARIA (8) -->
-        <label id="btnFilialRancharia" title="Importar estoque de Rancharia" class="rpt-btn" style="background:#0D47A1;cursor:pointer;">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          8 · RANCHARIA
-          <input type="file" id="filialUpload_8" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFilialUpload(event,'8','RANCHARIA')" />
-        </label>
-
-        <!-- SÃO JOSÉ DO RIO PRETO (6) -->
-        <label id="btnFilialSJRP" title="Importar estoque de São José do Rio Preto" class="rpt-btn" style="background:#283593;cursor:pointer;">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          6 · S. JOSÉ RIO PRETO
-          <input type="file" id="filialUpload_6" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFilialUpload(event,'6','SAO JOSE RIO PRETO')" />
-        </label>
-
-        <!-- BARUERI (12) -->
-        <label id="btnFilialBarueri" title="Importar estoque de Barueri" class="rpt-btn" style="background:#1A237E;cursor:pointer;">
-          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          12 · BARUERI
-          <input type="file" id="filialUpload_12" accept=".xlsx,.xls,.csv" class="hidden" onchange="handleFilialUpload(event,'12','BARUERI')" />
-        </label>
-
-        <!-- Limpar filiais -->
-        <button onclick="limparFiliaisDB()" title="Remover todos os estoques de filiais importados"
-          style="display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:9999px;border:1.5px solid var(--md-outline-variant);font-size:10px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;color:var(--md-on-surface-variant);background:transparent;transition:all 0.2s;"
-          onmouseover="this.style.background='rgba(179,38,30,0.07)';this.style.borderColor='rgba(179,38,30,0.4)';this.style.color='#B3261E'"
-          onmouseout="this.style.background='transparent';this.style.borderColor='var(--md-outline-variant)';this.style.color='var(--md-on-surface-variant)'">
-          <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-          LIMPAR FILIAIS
-        </button>
-
-        <!-- Cobertura Unificada dropdown -->
-        <div style="position:relative;display:inline-block;" id="cobUnifDropdownWrap">
-          <button onclick="toggleCobUnifDropdown(event)"
-            class="rpt-btn"
-            style="background:linear-gradient(135deg,#2E7D32,#1B5E20);"
-            title="Painel de Cobertura Unificada por SKU para todas as filiais — Excel detalhado + PDF narrativo">
-            <svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-            COBERTURA UNIFICADA
-            <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div id="cobUnifDropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:99999;min-width:210px;overflow:hidden;backdrop-filter:blur(16px);">
-            <div style="padding:8px 14px 6px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--md-on-surface-variant);border-bottom:1px solid var(--md-outline-variant);">Cobertura Unificada · Todas as Filiais</div>
-            <button onclick="exportarCoberturaUnificadaXLS(); closeCobUnifDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#2E7D32;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(46,125,50,0.07)'" onmouseout="this.style.background='none'">
-              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              Excel — Cobertura por Filial + Total
-            </button>
-            <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
-            <button onclick="exportarCoberturaUnificadaPDF(); closeCobUnifDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
-              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              PDF — Resumo Narrativo por Local
-            </button>
-
-          </div>
-        </div>
-
-      </div>
-    </div>
-
     <!-- CENTRAL DE RELATÓRIOS -->
     <div class="md3-card rounded-3xl p-6 mb-4" style="border-left:3px solid #E77D1A;overflow:visible;position:relative;z-index:100;padding-bottom:2.5rem;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;flex-wrap:wrap;">
@@ -1376,13 +1276,13 @@
             DATAS CURTAS
             <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div id="dcDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:99999;min-width:145px;overflow:hidden;backdrop-filter:blur(16px);">
-            <button onclick="exportarDataCurta(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+          <div id="dcDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:6px;box-shadow:var(--fluent-shadow-16);z-index:99999;min-width:145px;overflow:hidden;">
+            <button onclick="exportarDataCurta(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Excel (.xlsx)
             </button>
             <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
-            <button onclick="exportarDataCurtaPDF(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+            <button onclick="exportarDataCurtaPDF(); closeDcDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               PDF (imprimir)
             </button>
@@ -1396,13 +1296,13 @@
             PILHAS
             <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div id="pilhasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:99999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
-            <button onclick="exportarResumoPilhas(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+          <div id="pilhasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:6px;box-shadow:var(--fluent-shadow-16);z-index:99999;min-width:140px;overflow:hidden;">
+            <button onclick="exportarResumoPilhas(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Excel (.xlsx)
             </button>
             <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
-            <button onclick="exportarPilhasPDF(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+            <button onclick="exportarPilhasPDF(); closePilhasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               PDF (imprimir)
             </button>
@@ -1416,13 +1316,13 @@
             QUEBRAS
             <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div id="quebrasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:99999;min-width:140px;overflow:hidden;backdrop-filter:blur(16px);">
-            <button onclick="exportarListaQuebras(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+          <div id="quebrasDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:6px;box-shadow:var(--fluent-shadow-16);z-index:99999;min-width:140px;overflow:hidden;">
+            <button onclick="exportarListaQuebras(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Excel (.xlsx)
             </button>
             <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
-            <button onclick="exportarQuebrasPDF(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+            <button onclick="exportarQuebrasPDF(); closeQuebrasDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               PDF (imprimir)
             </button>
@@ -1440,13 +1340,13 @@
             ORG. FEFO
             <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div id="fefoDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:99999;min-width:155px;overflow:hidden;backdrop-filter:blur(16px);">
-            <button onclick="exportarOrganizacaoFEFO(); closeFefoDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+          <div id="fefoDropdown" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:6px;box-shadow:var(--fluent-shadow-16);z-index:99999;min-width:155px;overflow:hidden;">
+            <button onclick="exportarOrganizacaoFEFO(); closeFefoDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Excel (.xlsx)
             </button>
             <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
-            <button onclick="exportarOrganizacaoFEFO_PDF(); closeFefoDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+            <button onclick="exportarOrganizacaoFEFO_PDF(); closeFefoDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               PDF (imprimir)
             </button>
@@ -1462,11 +1362,11 @@
     
       </div>
     </div>
-    <div class="md3-card rounded-3xl p-6 mb-5" style="border-left:3px solid #1A3770;overflow:visible;position:relative;z-index:99;padding-bottom:2.5rem;">
+    <div class="md3-card rounded-3xl p-6 mb-5" style="border-left:3px solid #0078D4;overflow:visible;position:relative;z-index:99;padding-bottom:2.5rem;">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.1rem;flex-wrap:wrap;">
-        <span class="chart-title-dot" style="background:#1A3770;width:9px;height:9px;"></span>
+        <span class="chart-title-dot" style="background:#0078D4;width:9px;height:9px;"></span>
         <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);text-transform:uppercase;letter-spacing:0.14em;margin:0;">Direcionamento de Cargas</h3>
-        <span style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;background:rgba(26,55,112,0.09);padding:2px 10px;border-radius:99px;letter-spacing:0.05em;">Importar Pedidos · Cruzar FEFO · Exportar Direcionamento</span>
+        <span style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;background:rgba(0,120,212,0.09);padding:2px 10px;border-radius:99px;letter-spacing:0.05em;">Importar Pedidos · Cruzar FEFO · Exportar Direcionamento</span>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;overflow:visible;position:relative;">
         <!-- Importar Pedidos — 3 slots com prioridade de ordem -->
@@ -1498,12 +1398,12 @@
         </button>
         <!-- Pedidos badge -->
         <span id="pedidosBadge" class="hidden px-3 py-1 rounded-full text-[9px] font-black tracking-wide"
-          style="background:rgba(26,55,112,0.12);color:#1A3770;border:1px solid rgba(26,55,112,0.3);">
+          style="background:rgba(0,120,212,0.12);color:#0078D4;border:1px solid rgba(0,120,212,0.3);">
           <span id="pedidosBadgeText">0 pedidos</span>
           <button onclick="limparPedidos()" class="ml-1 opacity-60 hover:opacity-100" style="font-size:9px;">✕</button>
         </span>
         <!-- Slots badge individual -->
-        <span id="pedidoSlotsBadge" style="display:none;font-size:9px;font-weight:800;color:var(--md-on-surface-variant);background:rgba(26,55,112,0.06);border:1px solid var(--md-outline-variant);border-radius:99px;padding:3px 10px;"></span>
+        <span id="pedidoSlotsBadge" style="display:none;font-size:9px;font-weight:800;color:var(--md-on-surface-variant);background:rgba(0,120,212,0.06);border:1px solid var(--md-outline-variant);border-radius:99px;padding:3px 10px;"></span>
         <!-- Direcionamento dropdown -->
         <div id="btnDirecionamento" style="position:relative;display:none;" id="dirDropdownWrap">
           <button onclick="toggleDirDropdown(event)"
@@ -1512,13 +1412,13 @@
             DATAS CURTAS C/ DIRECIONAMENTO
             <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div id="dirDropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:rgba(252,249,255,0.98);border:1px solid var(--md-outline-variant);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:99999;min-width:200px;overflow:hidden;backdrop-filter:blur(16px);">
-            <button onclick="exportarDataCurtaComDirecionamento(); closeDirDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+          <div id="dirDropdown" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--md-surface);border:1px solid var(--md-outline-variant);border-radius:6px;box-shadow:var(--fluent-shadow-16);z-index:99999;min-width:200px;overflow:hidden;">
+            <button onclick="exportarDataCurtaComDirecionamento(); closeDirDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               Excel (.xlsx)
             </button>
             <div style="height:1px;background:var(--md-outline-variant);margin:0 10px;"></div>
-            <button onclick="exportarDirecionamentoPDF(); closeDirDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#1A3770;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(26,55,112,0.07)'" onmouseout="this.style.background='none'">
+            <button onclick="exportarDirecionamentoPDF(); closeDirDropdown()" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:10px;font-weight:800;color:#0078D4;background:none;border:none;cursor:pointer;letter-spacing:.04em;text-align:left;font-family:'Inter',sans-serif;" onmouseover="this.style.background='rgba(0,120,212,0.07)'" onmouseout="this.style.background='none'">
               <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               PDF (imprimir P&B)
             </button>
@@ -1530,7 +1430,7 @@
     <!-- KPI CARDS -->
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-4 mb-6">
 
-      <div class="kpi-card" style="border-left:3px solid #1A3770;">
+      <div class="kpi-card" style="border-left:3px solid #0078D4;">
         <div class="kpi-dot" style="background:var(--md-primary);"></div>
         <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Estoque Total</p>
         <h2 id="kpiTotal" style="font-size:2.5rem;font-weight:900;color:var(--md-on-surface);letter-spacing:-0.04em;line-height:1;">0</h2>
@@ -1545,7 +1445,7 @@
       </div>
 
       <div class="kpi-card" style="border-left:3px solid #2E7D32;">
-        <div class="kpi-dot" style="background:#1A3770;"></div>
+        <div class="kpi-dot" style="background:#0078D4;"></div>
         <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Pilhas</p>
         <h2 id="kpiPilhas" style="font-size:2.5rem;font-weight:900;color:#2E7D32;letter-spacing:-0.04em;line-height:1;">0</h2>
         <span style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Quantidade de pilhas</span>
@@ -1568,7 +1468,7 @@
       <div class="kpi-card" style="border-left:3px solid #1565C0;">
         <div class="kpi-dot" style="background:#1565C0;"></div>
         <p style="font-size:10px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">Grades Ocupadas</p>
-        <h2 id="kpiGradesOcupadas" style="font-size:2.5rem;font-weight:900;color:#1A3770;letter-spacing:-0.04em;line-height:1;">0</h2>
+        <h2 id="kpiGradesOcupadas" style="font-size:2.5rem;font-weight:900;color:#0078D4;letter-spacing:-0.04em;line-height:1;">0</h2>
         <span style="font-size:10px;color:var(--md-on-surface-variant);font-weight:700;margin-top:6px;display:block;letter-spacing:0.04em;">Total grades ocupadas</span>
       </div>
     </div>
@@ -1589,13 +1489,13 @@
             <span id="fantasmas-expand-icon">▼</span> VER DETALHES
           </button>
           <button onclick="downloadXlsFantasmas()"
-            style="background:linear-gradient(135deg,#1D4FA3,#1A3770);color:#fff;border:none;border-radius:99px;padding:5px 14px;font-size:9px;font-weight:900;cursor:pointer;letter-spacing:0.04em;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px;"
+            style="background:linear-gradient(135deg,#2B88D8,#0078D4);color:#fff;border:none;border-radius:99px;padding:5px 14px;font-size:9px;font-weight:900;cursor:pointer;letter-spacing:0.04em;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px;"
             onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">
             <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Excel
           </button>
           <button onclick="downloadRelatorioFantasmas()"
-            style="background:transparent;color:#1A3770;border:1.5px solid rgba(26,55,112,0.4);border-radius:99px;padding:5px 14px;font-size:9px;font-weight:900;cursor:pointer;letter-spacing:0.04em;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px;"
+            style="background:transparent;color:#0078D4;border:1.5px solid rgba(0,120,212,0.4);border-radius:99px;padding:5px 14px;font-size:9px;font-weight:900;cursor:pointer;letter-spacing:0.04em;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:5px;"
             onmouseover="this.style.background='rgba(216,20,25,0.07)'" onmouseout="this.style.background='transparent'">
             <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             HTML/PDF
@@ -1619,8 +1519,8 @@
       </div>
       <p style="font-size:10px;font-weight:500;color:var(--md-on-surface-variant);margin-bottom:1.5rem;line-height:1.6;">
         Preencha o <b>Localizador</b> e o <b>Destino</b> de cada carga, cole os dados abaixo. O relatório cruza pelo <b>COD</b> e aplica a lógica correta:
-        <b>Cargas 1–3</b> (na doca) <code style="background:rgba(26,55,112,0.08);padding:1px 6px;border-radius:5px;color:#1A3770;">somam</code> ao estoque do sistema —
-        <b>Transferência</b> (vinda da fábrica) <code style="background:rgba(26,55,112,0.08);padding:1px 6px;border-radius:5px;color:var(--md-primary);">subtrai</code> —
+        <b>Cargas 1–3</b> (na doca) <code style="background:rgba(0,120,212,0.08);padding:1px 6px;border-radius:5px;color:#0078D4;">somam</code> ao estoque do sistema —
+        <b>Transferência</b> (vinda da fábrica) <code style="background:rgba(0,120,212,0.08);padding:1px 6px;border-radius:5px;color:var(--md-primary);">subtrai</code> —
         gerando o <b>Total S7</b> consistente para PROCV.
       </p>
 
@@ -1628,22 +1528,22 @@
       <div class="grid gap-5 mb-4" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
 
         <!-- Carga 1 -->
-        <div style="background:rgba(26,55,112,0.06);border:1px solid rgba(26,55,112,0.2);border-radius:1.5rem;padding:1rem;">
+        <div style="background:rgba(0,120,212,0.06);border:1px solid rgba(0,120,212,0.2);border-radius:1.5rem;padding:1rem;">
           <label style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:#2E7D32;display:flex;align-items:center;gap:6px;margin-bottom:10px;">
             <span style="width:8px;height:8px;border-radius:50%;background:#2E7D32;display:inline-block;"></span>Carga 1
           </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
             <div>
               <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
-              <input id="s7C1loc" type="text" placeholder="Ex: 4771" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(26,55,112,0.25);" />
+              <input id="s7C1loc" type="text" placeholder="Ex: 4771" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,120,212,0.25);" />
             </div>
             <div>
               <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
-              <input id="s7C1dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(26,55,112,0.25);" />
+              <input id="s7C1dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,120,212,0.25);" />
             </div>
           </div>
           <textarea id="s7C1" placeholder="Cole os dados da Carga 1 aqui... (6 campos por produto: Cod, Produto, Carga, Carregada, Faltante, %)" class="ios-input w-full"
-            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(26,55,112,0.20);"></textarea>
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(0,120,212,0.20);"></textarea>
           <p id="s7C1n" style="font-size:9px;font-weight:700;margin-top:6px;margin-left:4px;color:#2E7D32;min-height:14px;"></p>
         </div>
 
@@ -1688,23 +1588,23 @@
         </div>
 
         <!-- Transferência -->
-        <div style="background:rgba(245,216,0,0.03);border:1px solid rgba(26,55,112,0.18);border-radius:1.5rem;padding:1rem;">
+        <div style="background:rgba(245,216,0,0.03);border:1px solid rgba(0,120,212,0.18);border-radius:1.5rem;padding:1rem;">
           <label style="font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:var(--md-primary);display:flex;align-items:center;gap:6px;margin-bottom:10px;">
             <span style="width:8px;height:8px;border-radius:50%;background:var(--md-primary);display:inline-block;"></span>Transferência
-            <span style="font-size:8px;font-weight:700;background:rgba(26,55,112,0.12);color:var(--md-primary);border-radius:99px;padding:1px 8px;letter-spacing:0.04em;">SUBTRAI do estoque</span>
+            <span style="font-size:8px;font-weight:700;background:rgba(0,120,212,0.12);color:var(--md-primary);border-radius:99px;padding:1px 8px;letter-spacing:0.04em;">SUBTRAI do estoque</span>
           </label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
             <div>
               <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Localizador</p>
-              <input id="s7C4loc" type="text" placeholder="Ex: 4774" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(26,55,112,0.25);" />
+              <input id="s7C4loc" type="text" placeholder="Ex: 4774" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,120,212,0.25);" />
             </div>
             <div>
               <p style="font-size:8px;font-weight:900;color:var(--md-on-surface-variant);text-transform:uppercase;letter-spacing:.1em;margin:0 0 3px;">Destino</p>
-              <input id="s7C4dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(26,55,112,0.25);" />
+              <input id="s7C4dest" type="text" placeholder="Ex: CD BARUERI" class="ios-input w-full" style="border-radius:.75rem;padding:.5rem .75rem;font-size:.72rem;font-weight:700;background:rgba(255,255,255,0.7);border:1px solid rgba(0,120,212,0.25);" />
             </div>
           </div>
           <textarea id="s7C4" placeholder="Cole os dados da Transferência aqui... (será SUBTRAÍDA do estoque)" class="ios-input w-full"
-            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(26,55,112,0.18);"></textarea>
+            style="border-radius:1rem;padding:.85rem 1rem;min-height:110px;resize:vertical;font-size:.68rem;font-weight:500;line-height:1.55;font-family:inherit;background:rgba(255,255,255,0.6);border:1px solid rgba(0,120,212,0.18);"></textarea>
           <p id="s7C4n" style="font-size:9px;font-weight:700;margin-top:6px;margin-left:4px;color:var(--md-primary);min-height:14px;"></p>
         </div>
       </div>
@@ -1714,7 +1614,7 @@
         ⚠ Nenhuma base de estoque carregada. Importe a planilha principal primeiro.
       </div>
       <div id="s7Preview" class="hidden mb-4 px-4 py-2.5 rounded-2xl text-[10px] font-bold"
-           style="background:rgba(26,55,112,0.08);color:var(--md-primary);">
+           style="background:rgba(0,120,212,0.08);color:var(--md-primary);">
         <span id="s7PreviewTxt"></span>
       </div>
 
@@ -1755,7 +1655,7 @@
     <div id="sku-historico-section" class="md3-card p-7 rounded-3xl mb-5">
       <h3 style="font-size:11px;font-weight:900;color:var(--md-on-surface);margin-bottom:8px;display:flex;align-items:center;gap:10px;text-transform:uppercase;letter-spacing:0.14em;">
         <span class="chart-title-dot" style="background:var(--md-primary);"></span>Curva Histórica de Data Curta
-        <span id="sku-historico-label" style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;margin-left:auto;letter-spacing:0.04em;font-weight:bold;text-transform:none;padding:4px 12px;border-radius:99px;background:rgba(26,55,112,0.08);"></span>
+        <span id="sku-historico-label" style="font-size:9px;color:var(--md-on-surface-variant);font-weight:700;margin-left:auto;letter-spacing:0.04em;font-weight:bold;text-transform:none;padding:4px 12px;border-radius:99px;background:rgba(0,120,212,0.08);"></span>
       </h3>
       <p style="font-size:10px;color:var(--md-on-surface-variant);font-weight:600;margin-bottom:1.25rem;">Histórico de entradas deste SKU em estado de data curta ao longo das importações — indicador de tendência de risco.</p>
       <div class="h-52"><canvas id="chartSkuHistorico"></canvas></div>
@@ -1805,7 +1705,7 @@
         <div class="md3-card p-6 rounded-3xl flex flex-col gap-3">
           <div>
             <h3 style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:0.12em;color:var(--md-on-surface);display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-              <span style="width:8px;height:8px;border-radius:50%;background:#1A3770;flex-shrink:0;display:inline-block;"></span>
+              <span style="width:8px;height:8px;border-radius:50%;background:#0078D4;flex-shrink:0;display:inline-block;"></span>
               Burn Rate — Volume em Risco
             </h3>
             <p style="font-size:9px;color:var(--md-on-surface-variant);font-weight:600;line-height:1.4;">Evolução do volume data-curta entre importações. Tendência crescente = alerta de gestão.</p>
@@ -2814,8 +2714,8 @@
         const _etqHtml = (item.etiqueta && String(item.etiqueta).trim() && item.etiqueta !== item.cod)
           ? '<a href="https://inflow.tec.br/view_etiqueta?e=' + String(item.etiqueta).trim() + '" target="_blank" rel="noopener"'
             + ' title="Ver etiqueta ' + String(item.etiqueta).trim() + ' no InFlow"'
-            + ' style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:9px;font-weight:900;letter-spacing:.04em;color:#1A3770;background:rgba(26,55,112,0.08);border:1px solid rgba(26,55,112,0.18);text-decoration:none;white-space:nowrap;"'
-            + ' onmouseover="this.style.background=\'rgba(26,55,112,0.18)\'" onmouseout="this.style.background=\'rgba(26,55,112,0.08)\'"'
+            + ' style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:9px;font-weight:900;letter-spacing:.04em;color:#0078D4;background:rgba(0,120,212,0.08);border:1px solid rgba(0,120,212,0.18);text-decoration:none;white-space:nowrap;"'
+            + ' onmouseover="this.style.background=\'rgba(0,120,212,0.18)\'" onmouseout="this.style.background=\'rgba(0,120,212,0.08)\'"'
             + '><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>'
             + String(item.etiqueta).trim() + '</a>'
           : '<span style="font-size:9px;color:var(--md-outline);font-weight:600;">\u2014</span>';
@@ -5758,8 +5658,8 @@
         const inFlowLinkU = etqNum !== '-'
           ? `<a href="https://inflow.tec.br/view_etiqueta?e=${etqNum}" target="_blank" rel="noopener"
                 title="Abrir etiqueta no InFlow"
-                style="font-weight:900;color:#1A3770;text-decoration:none;display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;background:rgba(26,55,112,0.08);border:1px solid rgba(26,55,112,0.20);white-space:nowrap;font-size:10px;transition:background .15s;"
-                onmouseover="this.style.background='rgba(26,55,112,0.18)'" onmouseout="this.style.background='rgba(26,55,112,0.08)'">
+                style="font-weight:900;color:#0078D4;text-decoration:none;display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;background:rgba(0,120,212,0.08);border:1px solid rgba(0,120,212,0.20);white-space:nowrap;font-size:10px;transition:background .15s;"
+                onmouseover="this.style.background='rgba(0,120,212,0.18)'" onmouseout="this.style.background='rgba(0,120,212,0.08)'">
                 <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 ${etqNum}</a>`
           : `<span style="color:#ccc;font-weight:600;">—</span>`;
@@ -5838,7 +5738,7 @@
               label: 'Volume Data Curta (un)',
               data: volumeDC,
               backgroundColor: volumeDC.map((_, i) =>
-                i === volumeDC.length - 1 ? 'rgba(255,59,48,0.85)' : 'rgba(26,55,112,0.55)'
+                i === volumeDC.length - 1 ? 'rgba(255,59,48,0.85)' : 'rgba(0,120,212,0.55)'
               ),
               borderRadius: 6,
               order: 2
@@ -6005,7 +5905,7 @@
           const r = v.count / total;
           if (r >= 0.7) return 'rgba(255,59,48,0.88)';
           if (r >= 0.4) return 'rgba(255,149,0,0.85)';
-          return 'rgba(26,55,112,0.65)';
+          return 'rgba(0,120,212,0.65)';
         });
 
         _renderSkuBarras(
@@ -6041,7 +5941,7 @@
         }
       });
       const colorMap = { VENCIDO:'rgba(28,28,30,0.9)', PRAZO_LIMITE:'rgba(139,69,19,0.9)', URGENTE:'rgba(255,59,48,0.85)', CRITICO:'rgba(255,149,0,0.85)', ATENCAO:'rgba(255,204,0,0.85)' };
-      const barColors = sorted.map(([cod]) => colorMap[statusPorCod[cod]] || 'rgba(26,55,112,0.65)');
+      const barColors = sorted.map(([cod]) => colorMap[statusPorCod[cod]] || 'rgba(0,120,212,0.65)');
 
       _renderSkuBarras(ctx,
         sorted.map(([, v]) => v.nome.substring(0, 28)),
@@ -6611,7 +6511,7 @@ self.addEventListener('fetch', e => {
         { label: 'COD', w: 20, key: 'cod' },
         { label: 'PRODUTO', w: 132, key: 'produto' },
         { label: 'PILHAS', w: 28, key: 'qtdPilhas' },
-        { label: '✓', w: chkW, key: 'chk' }
+        { label: 'OK', w: chkW, key: 'chk' }
       ];
 
       const drawHead = (yy) => {
@@ -6636,28 +6536,42 @@ self.addEventListener('fetch', e => {
       const chkSize = Math.min(rowH * 0.62, 3.8);
 
       rows.forEach((row, idx) => {
-        doc.setFillColor(idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251, idx % 2 === 0 ? 255 : 251);
+        // Zebra de alto contraste: linhas ímpares recebem fundo azul-escuro
+        // (cor da marca) com fonte branca, alternando com linhas brancas de
+        // fonte escura. Impossível confundir uma linha com a vizinha.
+        const dark = idx % 2 !== 0;
+        if (dark) {
+          doc.setFillColor(26, 55, 112); // azul-escuro Panutrir
+        } else {
+          doc.setFillColor(255, 255, 255);
+        }
         doc.rect(10, y, pgW - 20, rowH, 'F');
+        // linha separadora horizontal sutil entre as linhas
+        doc.setDrawColor(208, 214, 224);
+        doc.setLineWidth(0.15);
+        doc.line(10, y + rowH, pgW - 10, y + rowH);
 
         const cellY = y + rowH * 0.68;
         let cx = 10;
         cols.forEach(col => {
           if (col.key === 'chk') {
-            // quadrado oco centralizado na célula
+            // quadrado branco preenchido + borda — garante área clara para
+            // marcar a caneta mesmo nas linhas de fundo escuro.
             const boxX = cx + (col.w - chkSize) / 2;
             const boxY = y + (rowH - chkSize) / 2;
-            doc.setDrawColor(160, 160, 170);
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(120, 120, 130);
             doc.setLineWidth(0.35);
-            doc.rect(boxX, boxY, chkSize, chkSize);
+            doc.rect(boxX, boxY, chkSize, chkSize, 'FD');
           } else if (col.key === 'cod') {
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(6.2);
-            doc.setTextColor(95, 95, 105);
+            if (dark) { doc.setTextColor(220, 228, 240); } else { doc.setTextColor(95, 95, 105); }
             doc.text(String(row.cod), cx + col.w / 2, cellY, { align: 'center' });
           } else if (col.key === 'produto') {
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(6.4);
-            doc.setTextColor(28, 28, 30);
+            if (dark) { doc.setTextColor(255, 255, 255); } else { doc.setTextColor(28, 28, 30); }
             let nome = row.produto;
             while (doc.getTextWidth(nome) > col.w - 3 && nome.length > 10) nome = nome.slice(0, -1);
             if (nome !== row.produto) nome = nome.slice(0, -1) + '...';
@@ -6665,7 +6579,7 @@ self.addEventListener('fetch', e => {
           } else if (col.key === 'qtdPilhas') {
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(6.5);
-            doc.setTextColor(28, 28, 30);
+            if (dark) { doc.setTextColor(255, 255, 255); } else { doc.setTextColor(28, 28, 30); }
             doc.text(String(row.qtdPilhas), cx + col.w / 2, cellY, { align: 'center' });
           }
           cx += col.w;
@@ -8462,7 +8376,7 @@ self.addEventListener('fetch', e => {
   </script>
 
     <style>
-      #modal-relatorio-sku { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; }
+      #modal-relatorio-sku { display: none; position: fixed; inset: 0; background: var(--md-scrim); z-index: 9999; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; }
       .modal-box-sku { background: var(--md-surface, #fff); color: var(--md-on-surface, #1C1B1F); border-radius: 24px; padding: 24px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; max-height: 90vh; }
       .dark .modal-box-sku { background: #1F1E25; color: #F3EEF9; }
       #sku-modal-lista { overflow-y: auto; flex-grow: 1; margin: 16px 0; border: 1px solid var(--md-outline-variant, #CAC4D0); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
@@ -8538,935 +8452,10 @@ self.addEventListener('fetch', e => {
       if (filtrados.length === 0) { container.innerHTML = '<p style="text-align:center;font-size:11px;opacity:0.6;padding:2rem 0;">Nenhum SKU encontrado.</p>'; return; }
       container.innerHTML = filtrados.map(function(sku) {
         const idx = _skuModalSkus.indexOf(sku); const chk = sku.checked ? 'checked' : '';
-        const codLabel = sku.cod ? '<span style="font-size:10px;font-weight:700;color:var(--md-on-surface-variant);background:rgba(26,55,112,0.10);border-radius:6px;padding:1px 7px;margin-left:4px;white-space:nowrap;">' + sku.cod + '</span>' : '';
+        const codLabel = sku.cod ? '<span style="font-size:10px;font-weight:700;color:var(--md-on-surface-variant);background:rgba(0,120,212,0.10);border-radius:6px;padding:1px 7px;margin-left:4px;white-space:nowrap;">' + sku.cod + '</span>' : '';
         return '<label style="display:flex;align-items:center;gap:10px;padding:7px 6px;border-radius:10px;cursor:pointer;transition:0.1s;"><input type="checkbox" '+chk+' data-gidx="'+idx+'" onchange="_toggleSkuModal(this)" style="width:16px;height:16px;accent-color:#D81419;cursor:pointer;"/><span style="font-size:12px;font-weight:600;flex:1;">'+sku.nome+'</span>'+codLabel+'</label>';
       }).join('');
     }
-
-    // ══════════════════════════════════════════════════════════════════
-    // MÓDULO: ESTOQUES DE FILIAIS
-    // Filiais: 3=BAURU, 4=CURITIBA, 5=LONDRINA, 8=RANCHARIA,
-    //          6=SAO JOSE RIO PRETO, 12=BARUERI
-    // 1=CD MATRIZ é a própria base (db) — não importar
-    // ══════════════════════════════════════════════════════════════════
-
-    // Banco de dados das filiais: { cod_filial: [{ cod, produto, qtd, validade, diff, lote }] }
-    window.filiaisDB = {};
-
-    const FILIAIS_CONFIG = [
-      { cod: '3',  nome: 'BAURU',                cor: '#1A3770' },
-      { cod: '4',  nome: 'CURITIBA',             cor: '#1565C0' },
-      { cod: '5',  nome: 'LONDRINA',             cor: '#1976D2' },
-      { cod: '8',  nome: 'RANCHARIA',            cor: '#0D47A1' },
-      { cod: '6',  nome: 'SJRP',                 cor: '#283593' },
-      { cod: '12', nome: 'BARUERI',              cor: '#1A237E' },
-    ];
-
-    function handleFilialUpload(e, codFilial, nomeFilial) {
-      const file = e.target.files[0];
-      if (!file) return;
-      showLoader(true);
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const wb = XLSX.read(new Uint8Array(evt.target.result), { type: 'array', cellDates: true });
-
-          // BARUERI (cod 12): planilha com multiplas abas por data
-          // Usa a ultima aba (data mais recente) e le como array de arrays (header:1)
-          // pois os dados comecam na linha 4 (linhas 1-3 sao titulo/cabecalho)
-          let sheet;
-          if (codFilial === '12') {
-            sheet = wb.Sheets[wb.SheetNames[wb.SheetNames.length - 1]];
-          } else {
-            sheet = wb.Sheets[wb.SheetNames[0]];
-          }
-
-          const opts = codFilial === '12'
-            ? { defval: '', header: 1 }
-            : { defval: '' };
-
-          const rows = XLSX.utils.sheet_to_json(sheet, opts);
-          processFilialData(rows, codFilial, nomeFilial);
-        } catch(err) {
-          alert('Erro ao ler arquivo da filial ' + nomeFilial + ': ' + err.message);
-        }
-        showLoader(false);
-        // reset input
-        e.target.value = '';
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function processFilialData(rows, codFilial, nomeFilial) {
-      const today = new Date(); today.setHours(0,0,0,0);
-      const lotes = [];
-
-      // ── Padrão especial: BARUERI (cod 12) ──
-      // handleFilialUpload usa { header: 1 } → rows é array de arrays
-      // Estrutura da planilha:
-      //   Linha 1: título (ignorar)
-      //   Linha 2: título (ignorar)
-      //   Linha 3: cabeçalho CODIGO | PRODUTO | DATA | VENCIMENTO | ... | QNT UND
-      //   Linha 4+: dados
-      // Índices (0-based): [0]=CODIGO  [1]=PRODUTO  [3]=VENCIMENTO  [9]=QNT UND (total)
-      if (codFilial === '12') {
-        rows.forEach((arr, idx) => {
-          if (!Array.isArray(arr)) return;
-          // Pula as 3 primeiras linhas (título + cabeçalho) e linhas sem código numérico
-          if (idx < 3) return;
-          const cod    = String(arr[0] || '').trim().replace(/\.0+$/, '').replace(/\s/g, '');
-          const produto= String(arr[1] || '').trim();
-          const qtdRaw = arr[9];
-          const validadeRaw = arr[3]; // VENCIMENTO (col D)
-          if (!cod || !produto || isNaN(Number(cod)) || Number(cod) <= 0) return;
-          const qtd = Math.round(parseNumber(qtdRaw));
-          const validadeParsed = parseFlexibleDate(validadeRaw);
-          if (!validadeParsed || !qtd) return;
-          const diff = Math.ceil((validadeParsed - today) / 86400000);
-          lotes.push({ cod, produto, qtd, validade: validadeParsed, diff, lote: '' });
-        });
-        window.filiaisDB[codFilial] = lotes;
-        _atualizarBadgesFiliais();
-        return;
-      }
-
-      // ── Padrão padrão para demais filiais ──
-      rows.forEach((row) => {
-        const n = {};
-        Object.keys(row || {}).forEach(k => n[normalizeKey(k)] = row[k]);
-        const cod     = String(getField(n, ['COD','COD_','CODIGO','SKU','CODSKU'])).trim().replace(/\.0+$/, '').replace(/[\s.]/g, '');
-        const produto = String(getField(n, ['PRODUTO','DESCRICAO','ITEM'])).trim();
-        const qtd     = Math.round(parseNumber(getField(n, ['ESTOQUE_UN_','ESTOQUE','QTD_TOTAL','QTD','QUANTIDADE','SALDO'])));
-        const validade= parseFlexibleDate(getField(n, ['VALIDADE','DT_VALIDADE','VENCIMENTO']));
-        const lote    = String(getField(n, ['LOTE'])).trim();
-        if (!produto || !cod || isNaN(Number(cod)) || Number(cod) <= 0 || !qtd) return;
-        const validadeFinal = validade || new Date(today.getTime() + 365*86400000); // sem validade → 1 ano
-        const diff = Math.ceil((validadeFinal - today) / 86400000);
-        lotes.push({ cod, produto, qtd, validade: validadeFinal, diff, lote });
-      });
-      window.filiaisDB[codFilial] = lotes;
-      _atualizarBadgesFiliais();
-    }
-
-    function _atualizarBadgesFiliais() {
-      const area = document.getElementById('filiaisBadgeArea');
-      if (!area) return;
-      area.innerHTML = FILIAIS_CONFIG.map(f => {
-        const dados = window.filiaisDB[f.cod];
-        if (!dados || dados.length === 0) return '';
-        const totalQtd = dados.reduce((s, i) => s + i.qtd, 0);
-        return `<span style="display:inline-flex;align-items:center;gap:4px;background:${f.cor};color:#fff;border-radius:99px;padding:3px 10px;font-size:8px;font-weight:900;letter-spacing:0.04em;text-transform:uppercase;">
-          ✓ ${f.cod}·${f.nome.split(' ')[0]} <span style="opacity:0.8;">${totalQtd.toLocaleString('pt-BR')} un</span>
-        </span>`;
-      }).join('');
-    }
-
-    function limparFiliaisDB() {
-      if (!confirm('Remover todos os estoques de filiais importados?')) return;
-      window.filiaisDB = {};
-      _atualizarBadgesFiliais();
-    }
-
-    // ── Helper: obtém todos os SKUs únicos combinando db (CD MATRIZ) + filiais ──
-    function _getAllSkusCombinados() {
-      const mapa = {}; // cod → { cod, produto }
-      (window.estoqueGlobal || window.db || []).forEach(i => {
-        const c = String(i.cod).trim();
-        if (!mapa[c]) mapa[c] = { cod: c, produto: String(i.produto).trim() };
-      });
-      FILIAIS_CONFIG.forEach(f => {
-        (window.filiaisDB[f.cod] || []).forEach(i => {
-          const c = String(i.cod).trim();
-          if (!mapa[c]) mapa[c] = { cod: c, produto: String(i.produto).trim() };
-        });
-      });
-      return Object.values(mapa);
-    }
-
-    // ── Helper: qtd total de um SKU em uma fonte de dados ──
-    function _qtdSkuEmFonte(fonte, codSku) {
-      return (fonte || []).filter(i => String(i.cod).trim() === codSku)
-        .reduce((s, i) => s + (i.qtd || 0), 0);
-    }
-
-    // ── Helper: lotes de um SKU em uma fonte, agrupados por validade ──
-    function _lotesSkuEmFonte(fonte, codSku) {
-      const agrupado = {};
-      (fonte || []).filter(i => String(i.cod).trim() === codSku).forEach(i => {
-        const dtStr = i.validade instanceof Date
-          ? `${String(i.validade.getDate()).padStart(2,'0')}/${String(i.validade.getMonth()+1).padStart(2,'0')}/${i.validade.getFullYear()}`
-          : String(i.validade || '').trim();
-        if (!dtStr) return;
-        agrupado[dtStr] = (agrupado[dtStr] || 0) + i.qtd;
-      });
-      return Object.entries(agrupado).sort((a,b) => {
-        // ordena por data dd/mm/yyyy
-        const pa = a[0].split('/'), pb = b[0].split('/');
-        const da = new Date(Number(pa[2]),Number(pa[1])-1,Number(pa[0]));
-        const db2 = new Date(Number(pb[2]),Number(pb[1])-1,Number(pb[0]));
-        return da - db2;
-      }).map(([dt, qtd]) => ({ dt, qtd }));
-    }
-
-    // ── Helper: diff em dias a partir de string dd/mm/yyyy ──
-    function _diffFromDtStr(dtStr) {
-      if (!dtStr) return null;
-      const p = dtStr.split('/');
-      if (p.length !== 3) return null;
-      const d = new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
-      const today = new Date(); today.setHours(0,0,0,0);
-      return Math.ceil((d - today) / 86400000);
-    }
-
-    // ══════════════════════════════════════════════════════════════════
-    // ══════════════════════════════════════════════════════════════════
-    // VENDAS DIÁRIAS POR SKU POR CD
-    // Fonte: Estoque_Total_CIA — aba "Venda Dia"
-    // Estrutura: { "cod_sku": { "cod_cd": vd_dia, ... }, ... }
-    // CDs: "1"=MATRIZ · "3"=BAURU · "4"=CURITIBA · "5"=LONDRINA
-    //      "6"=SJRP · "8"=RANCHARIA · "12"=BARUERI
-    // ══════════════════════════════════════════════════════════════════
-    const vendasDiariasPorSKUporCD = {"2":{"12":2027.0,"3":573.6364,"4":1944.0,"5":1075.1364,"1":3133.5,"8":537.8636,"6":546.0909},"5":{"12":1793.4091,"3":255.8636,"4":640.0909,"5":1032.8636,"1":3351.3182,"8":367.9091,"6":316.0455},"6":{"12":898.1364,"3":94.3182,"4":101.7727,"5":180.1818,"1":551.2273,"8":54.1364,"6":58.7273},"11":{"12":119.7727,"3":25.1364,"4":239.3182,"5":148.6818,"1":254.0,"8":45.8182,"6":76.9545},"16":{"12":100.8636,"3":27.5455,"4":160.9091,"5":93.0,"1":160.4545,"8":16.0,"6":44.3182},"655":{"12":652.9091,"3":34.3182,"4":290.5,"5":263.5,"1":543.0455,"8":74.4545,"6":83.6818},"669":{"12":58.3636,"3":108.9091,"4":92.1364,"5":125.1818,"1":936.8636,"8":45.2727,"6":53.4545},"1224":{"12":1142.3182,"3":59.9091,"4":620.4545,"5":315.1818,"1":760.1364,"8":103.6364,"6":99.6364},"2279":{"1":224.5455},"69251":{"12":1952.7727,"3":193.7273,"4":222.2727,"5":337.0,"1":913.4091,"8":155.4545,"6":131.7273},"81571":{"12":206.4091,"3":27.3182,"4":120.4545,"5":62.4545,"1":170.1364,"8":13.6364,"6":23.1818},"81581":{"12":737.9545,"3":34.6364,"4":374.0455,"5":309.9545,"1":452.4091,"8":88.8636,"6":76.9091},"81591":{"12":194.2273,"3":30.6818,"4":40.1364,"5":21.7273,"1":159.2273,"8":8.6818,"6":31.5455},"81661":{"12":7006.1364,"3":699.9545,"4":1428.4091,"5":970.7273,"1":4440.7727,"8":273.2727,"6":435.5},"82051":{"12":5655.6364,"3":303.1364,"4":553.4545,"5":351.0455,"1":1074.4545,"8":172.3636,"6":166.5},"85181":{"12":95.4091,"3":13.8182,"4":122.7727,"5":3.3636,"1":198.2727,"8":156.6364,"6":144.0455},"85841":{"12":291.8182,"3":25.4545,"4":100.2273,"5":1.8182,"1":151.5455,"8":210.5,"6":192.8182},"86151":{"12":2325.2727,"3":169.8636,"4":1637.7273,"5":736.9545,"1":1378.5455,"8":249.1364,"6":312.7273},"121581":{"12":34.0455,"3":151.4545,"1":7.7727,"8":0.3636,"6":16.7727},"121801":{"12":36.4091,"3":193.8636,"1":9.1818,"8":0.3636,"6":24.3636},"121811":{"12":24.7727,"3":173.9545,"1":8.8182,"6":0.9091},"121871":{"12":82.1818,"3":330.3636,"1":19.7273,"8":0.5455,"6":68.5455},"121821":{"12":10.3182,"3":46.8182,"1":0.8636,"6":17.1364},"121831":{"12":11.5,"3":39.3182,"1":1.0,"6":0.5455},"121841":{"12":15.1364,"3":65.8182,"1":1.1364,"6":0.7273},"121861":{"12":110.1818,"3":1141.7273,"1":30.4545,"8":2.7273,"6":167.0909},"135211":{"3":10.4545,"4":1.4545,"5":2.8182,"1":17.5455,"8":8.7273,"6":440.1818},"135221":{"3":49.1364,"4":4.5,"5":2.0909,"1":100.2727,"8":317.4091,"6":449.5455},"135231":{"3":48.5455,"4":15.9545,"5":4.8182,"1":87.7273,"8":329.0909,"6":537.5},"135241":{"3":36.6818,"4":3.8182,"5":14.7273,"1":75.1364,"8":280.7727,"6":527.4545},"141441":{"12":22.0909,"4":225.1364,"5":135.3636,"1":29.0909,"8":4.0909},"141951":{"1":30.1818},"145511":{"12":120.6364,"3":27.7273,"4":105.0455,"5":186.0455,"1":240.3636,"8":76.5455,"6":67.7727},"145521":{"12":722.0455,"3":74.6818,"4":734.6364,"5":742.4091,"1":775.5909,"8":184.2727,"6":165.3636},"162272":{"3":10.4545,"4":6.5455,"5":5.0,"1":11.3636,"8":77.4091,"6":80.9091},"162275":{"3":37.7273,"4":14.3182,"5":2.8182,"1":50.0,"8":191.0},"162276":{"3":10.0455,"4":3.1818,"5":1.1364,"1":11.8182,"8":65.8182,"6":58.3182},"162358":{"12":59.4545,"3":249.8182,"1":7.0909,"8":0.9091,"6":39.0909},"162396":{"12":480.4091,"3":70.0455,"4":334.9545,"5":328.7727,"1":428.0455,"8":65.3182,"6":93.3182},"162767":{"12":133.7273,"3":35.4545,"4":180.4545,"5":2.2727,"1":352.4545,"8":114.0909,"6":120.8182},"162775":{"4":12.0909,"5":3.6364,"1":106.4545,"8":12.5455,"6":7.4545},"162783":{"12":12.9545,"3":120.0909,"1":3.9545,"8":0.4091,"6":22.0455},"162784":{"12":15.2273,"3":138.5,"1":5.4545,"8":0.8182,"6":30.9545},"162800":{"12":240.4545,"3":36.0,"4":618.7273,"1":1413.8182,"8":246.3636,"6":371.9545},"162801":{"12":170.0,"3":31.0909,"4":345.4091,"5":35.4545,"1":790.4545,"8":128.7273,"6":96.7273},"162802":{"12":180.1364,"3":25.0909,"4":107.2727,"5":3.1818,"1":189.7727,"8":87.0,"6":148.6364},"162920":{"12":253.3182,"3":99.3182,"4":28.3636,"5":42.3182,"1":84.0,"8":9.4091,"6":26.8182},"162921":{"12":351.1818,"3":163.8182,"4":368.1364,"5":266.3636,"1":657.2273,"8":95.9091,"6":55.2273},"162922":{"12":100.7727,"3":13.3182,"4":15.4545,"5":25.8636,"1":48.3182,"8":2.2273,"6":7.7273},"162923":{"12":157.4091,"3":46.3636,"4":133.9545,"5":168.7727,"1":403.9091,"8":52.4091,"6":55.7273}};
-
-    // ══════════════════════════════════════════════════════════════════
-    // ══════════════════════════════════════════════════════════════════
-    // VENDA DIÁRIA TOTAL CIA (fonte oficial — venda semanal CIA ÷ 5)
-    // Usado na aba TOTAL EMPRESA e na aba CD MATRIZ
-    // ══════════════════════════════════════════════════════════════════
-    const vendaDiariasCIA = {"2": 10046.8, "5": 7013.4, "6": 1962.6, "11": 865.4, "16": 520.4, "655": 1962.8, "669": 1420.4, "1224": 3038.0, "2279": 190.0, "69251": 4067.0, "81571": 669.4, "81581": 1970.8, "81591": 490.0, "81661": 14647.2, "82051": 7338.4, "85181": 753.6, "85841": 863.8, "86151": 6678.2, "121581": 184.4, "121801": 261.4, "121811": 162.4, "121821": 64.2, "121831": 48.4, "121841": 89.0, "121861": 1298.8, "121871": 436.4, "135211": 1737.6, "135221": 1821.0, "135231": 2139.2, "135241": 1435.0, "141441": 380.8, "141951": 30.2, "145511": 869.6, "145521": 3356.2, "162272": 191.6, "162275": 536.6, "162276": 261.6, "162358": 306.6, "162396": 1647.4, "162767": 953.2, "162775": 127.6, "162783": 144.6, "162784": 170.2, "162800": 2960.4, "162801": 1689.0, "162802": 762.8, "162920": 528.6, "162921": 2045.0, "162922": 262.4, "162923": 1148.4};
-
-        // HELPER: Status de cobertura para relatório de diretoria
-    // Lógica baseada em dias de cobertura (estoque / venda diária do CD)
-    // SEM o fator de validade — aqui é análise de ruptura de abastecimento
-    //
-    // CRÍTICO  : cobertura < 1 dia  → risco iminente de ruptura
-    // URGENTE  : 1 ≤ cob < 2 dias  → reposição urgente necessária
-    // ATENÇÃO  : 2 ≤ cob < 3 dias  → monitorar, pedir em breve
-    // NORMAL   : 3 ≤ cob < 7 dias  → saudável
-    // EXCESSO  : cob ≥ 7 dias      → estoque alto, avaliar retorno
-    // SEM_GIRO : sem venda mapeada → sinalizar
-    // ZERADO   : estoque = 0       → ruptura confirmada
-    // ══════════════════════════════════════════════════════════════════
-    function _statusCobertura(qtd, vd) {
-      if (qtd === 0)             return 'ZERADO';
-      if (!vd || vd <= 0)        return 'SEM_GIRO';
-      const cob = qtd / vd;
-      if (cob >= 8)              return 'URGENTE';
-      if (cob >= 6)              return 'CRITICO';
-      if (cob >= 4)              return 'ATENCAO';
-      return 'NORMAL';
-    }
-
-    // Paleta ARGB para cada status (fundo / texto)
-    const _STATUS_CORES = {
-      ZERADO:   { bg:'FF212121', fg:'FFFFFFFF', label:'⛔ ZERADO'    },
-      CRITICO:  { bg:'FFB71C1C', fg:'FFFFFFFF', label:'🔴 CRÍTICO'   },
-      URGENTE:  { bg:'FFE53935', fg:'FFFFFFFF', label:'🟠 URGENTE'   },
-      ATENCAO:  { bg:'FFF9A825', fg:'FF212121', label:'🟡 ATENÇÃO'   },
-      NORMAL:   { bg:'FF2E7D32', fg:'FFFFFFFF', label:'🟢 NORMAL'    },
-      EXCESSO:  { bg:'FF1565C0', fg:'FFFFFFFF', label:'🔵 EXCESSO'   },
-      SEM_GIRO: { bg:'FF757575', fg:'FFFFFFFF', label:'⚪ SEM GIRO'  },
-    };
-
-    // ══════════════════════════════════════════════════════════════════
-    // COBERTURA UNIFICADA — EXCEL MULTI-ABA (DIRETORIA)
-    // Uma aba por CD  +  aba TOTAL EMPRESA
-    // Colunas por aba: COD | PRODUTO | FAMÍLIA | ESTOQUE | VENDA/DIA | COBERTURA | STATUS
-    // Aba TOTAL: + colunas individuais de cada CD
-    // ══════════════════════════════════════════════════════════════════
-
-    async function exportarCoberturaUnificadaXLS() {
-      const dbBase = window.estoqueGlobal || window.db || [];
-      if (dbBase.length === 0) {
-        alert('Importe a base de estoque (CD MATRIZ) antes de gerar a Cobertura Unificada.');
-        return;
-      }
-
-      const skus = _getAllSkusCombinados();
-      if (skus.length === 0) { alert('Nenhum SKU encontrado.'); return; }
-
-      // Ordem corporativa dos SKUs
-      const _ordem = [81571,81591,162396,16,81581,11,145521,145511,655,1224,6,69251,82051,2,81661,85841,162800,162767,85181,162802,135231,135221,135211,162275,135241,162276,162923,162920,162921,162922,121801,121581,121811,121831,121821,121861,121871,162358,121841,162783,162784,669,162775,162272,141951,141441];
-      skus.sort((a, b) => {
-        const ia = _ordem.indexOf(Number(a.cod)), ib = _ordem.indexOf(Number(b.cod));
-        return (ia === -1 ? Infinity : ia) - (ib === -1 ? Infinity : ib);
-      });
-
-      // Configuração de todos os CDs (MATRIZ + filiais)
-      const TODOS_CDS = [
-        { cod: '1',  nome: 'CD MATRIZ',  corHex:'FF1B5E20', fonte: dbBase },
-        ...FILIAIS_CONFIG.map(f => ({
-          cod: f.cod, nome: f.nome, corHex: f.cor.replace('#','FF'), fonte: window.filiaisDB[f.cod] || []
-        }))
-      ];
-
-      const wb = new ExcelJS.Workbook();
-      wb.creator = 'Panutrir — Relatório Diretoria';
-      wb.created = new Date();
-
-      const hoje = new Date();
-      const _ds = `${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
-      const _dsFile = `${String(hoje.getDate()).padStart(2,'0')}-${String(hoje.getMonth()+1).padStart(2,'0')}-${hoje.getFullYear()}`;
-
-      // ── Função auxiliar: cria aba de CD individual ──
-      function _criarAbaCD(cd) {
-        const wsCD = wb.addWorksheet(cd.cod + ' · ' + cd.nome.split(' ').slice(-1)[0]);
-
-        // Cor de tema do CD
-        const bgHex = cd.corHex.startsWith('FF') ? cd.corHex : 'FF' + cd.corHex.replace('#','');
-
-        // Linha 1: título
-        wsCD.mergeCells('A1:G1');
-        const titleCell = wsCD.getCell('A1');
-        titleCell.value = `PANUTRIR — COBERTURA DE ESTOQUE  ·  ${cd.nome.toUpperCase()}  ·  ${_ds}`;
-        titleCell.font  = { bold:true, color:{argb:'FFFFFFFF'}, size:11, name:'Calibri' };
-        titleCell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb: bgHex} };
-        titleCell.alignment = { horizontal:'center', vertical:'middle' };
-        wsCD.getRow(1).height = 26;
-
-        // Linha 2: legenda de status
-        wsCD.mergeCells('A2:G2');
-        const legCell = wsCD.getCell('A2');
-        legCell.value = '🟢 NORMAL < 4 dias  │  🟡 ATENÇÃO ≥ 4 dias  │  🟠 CRÍTICO ≥ 6 dias  │  🔴 URGENTE ≥ 8 dias  │  ⛔ ZERADO = sem estoque  │  ⚪ SEM GIRO = sem venda';
-        legCell.font  = { italic:true, color:{argb:'FF424242'}, size:8, name:'Calibri' };
-        legCell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:'FFECEFF1'} };
-        legCell.alignment = { horizontal:'center', vertical:'middle' };
-        wsCD.getRow(2).height = 16;
-
-        // Linha 3: cabeçalhos
-        wsCD.columns = [
-          { key:'cod',      width:12 },
-          { key:'produto',  width:50 },
-          { key:'familia',  width:22 },
-          { key:'estoque',  width:14 },
-          { key:'vd',       width:14 },
-          { key:'cobertura',width:16 },
-          { key:'status',   width:18 },
-        ];
-        const HDR_LABELS = ['CÓD.','PRODUTO','FAMÍLIA','ESTOQUE (un)','VENDA/DIA (un)','COBERTURA (dias)','STATUS'];
-        const hdrRow = wsCD.getRow(3);
-        HDR_LABELS.forEach((lbl, i) => {
-          const cell = hdrRow.getCell(i+1);
-          cell.value = lbl;
-          cell.font  = { bold:true, color:{argb:'FFFFFFFF'}, size:9, name:'Calibri' };
-          cell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb: bgHex} };
-          cell.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
-          cell.border = { bottom:{style:'medium', color:{argb:'FFFFFFFF'}}, right:{style:'thin', color:{argb:'FFFFFFFF'}} };
-        });
-        hdrRow.height = 32;
-
-        // Linhas de dados
-        let totalEstoque = 0, totalVD = 0;
-        const statusCount = { ZERADO:0, CRITICO:0, URGENTE:0, ATENCAO:0, NORMAL:0, EXCESSO:0, SEM_GIRO:0 };
-
-        // Sort by coverage descending (highest = most urgent = first)
-        const skusOrdenados = [...skus].sort((a, b) => {
-          const qtdA = _qtdSkuEmFonte(cd.fonte, a.cod);
-          const vdA  = cd.cod === '1' ? (vendaDiariasCIA[a.cod] || 0) : (vendasDiariasPorSKUporCD[a.cod] || {})[cd.cod] || 0;
-          const cobA = vdA > 0 ? qtdA / vdA : -1;
-          const qtdB = _qtdSkuEmFonte(cd.fonte, b.cod);
-          const vdB  = cd.cod === '1' ? (vendaDiariasCIA[b.cod] || 0) : (vendasDiariasPorSKUporCD[b.cod] || {})[cd.cod] || 0;
-          const cobB = vdB > 0 ? qtdB / vdB : -1;
-          return cobB - cobA; // descending
-        });
-
-        skusOrdenados.forEach((sku, idx) => {
-          const qtd = _qtdSkuEmFonte(cd.fonte, sku.cod);
-          const vdCD = cd.cod === '1' ? (vendaDiariasCIA[sku.cod] || 0) : (vendasDiariasPorSKUporCD[sku.cod] || {})[cd.cod] || 0;
-          const cob  = vdCD > 0 ? +(qtd / vdCD).toFixed(2) : null;
-          const st   = _statusCobertura(qtd, vdCD);
-          const sc   = _STATUS_CORES[st];
-          const familia = _getFamilia(sku.cod, sku.produto);
-
-          totalEstoque += qtd;
-          if (vdCD > 0) totalVD += vdCD;
-          statusCount[st] = (statusCount[st] || 0) + 1;
-
-          const zebraArgb = idx % 2 === 0 ? 'FFFAFAFA' : 'FFFFFFFF';
-          const dataRow = wsCD.addRow([
-            getCodigoExcelValue(sku.cod),
-            sku.produto,
-            familia,
-            qtd || 0,
-            vdCD > 0 ? +vdCD.toFixed(1) : '—',
-            cob !== null ? cob : '—',
-            sc.label,
-          ]);
-          dataRow.height = 18;
-
-          dataRow.eachCell((cell, col) => {
-            cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb: zebraArgb} };
-            cell.font = { size:9, name:'Calibri', bold: col === 1 };
-            cell.alignment = { horizontal: col === 2 || col === 3 ? 'left' : 'center', vertical:'middle' };
-            cell.border = { bottom:{style:'thin', color:{argb:'FFEEEEEE'}}, right:{style:'thin', color:{argb:'FFEEEEEE'}} };
-          });
-
-          // Cor do status
-          const stCell = dataRow.getCell(7);
-          stCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb: sc.bg} };
-          stCell.font = { bold:true, size:9, name:'Calibri', color:{argb: sc.fg} };
-
-          // Cobertura: gradiente sutil por risco
-          if (cob !== null) {
-            const cobCell = dataRow.getCell(6);
-            cobCell.font = { bold: cob >= 4, size:9, name:'Calibri',
-              color:{argb: cob >= 8 ? 'FFB71C1C' : cob >= 6 ? 'FFE53935' : cob >= 4 ? 'FFF57F00' : 'FF2E7D32'} };
-          }
-
-          // Estoque zerado → cinza
-          if (qtd === 0) {
-            dataRow.getCell(4).font = { size:9, name:'Calibri', color:{argb:'FF9E9E9E'}, italic:true };
-          }
-        });
-
-        // Linha totais
-        const totRow = wsCD.addRow(['', 'TOTAL GERAL', '', totalEstoque, +totalVD.toFixed(1),
-          totalVD > 0 ? +(totalEstoque / totalVD).toFixed(2) : '—', '']);
-        totRow.height = 22;
-        totRow.eachCell((cell, col) => {
-          cell.font  = { bold:true, color:{argb:'FFFFFFFF'}, size:9, name:'Calibri' };
-          cell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb: bgHex} };
-          cell.alignment = { horizontal: col === 2 ? 'left' : 'center', vertical:'middle' };
-        });
-
-        // Linha em branco + painel de resumo de status
-        wsCD.addRow([]);
-        const sumTitleRow = wsCD.addRow(['RESUMO DE STATUS', '', '', '', '', '', '']);
-        wsCD.mergeCells(`A${sumTitleRow.number}:G${sumTitleRow.number}`);
-        sumTitleRow.getCell(1).font  = { bold:true, color:{argb:'FFFFFFFF'}, size:9, name:'Calibri' };
-        sumTitleRow.getCell(1).fill  = { type:'pattern', pattern:'solid', fgColor:{argb:'FF37474F'} };
-        sumTitleRow.getCell(1).alignment = { horizontal:'center' };
-        sumTitleRow.height = 18;
-
-        Object.entries(statusCount).forEach(([st, cnt]) => {
-          if (cnt === 0) return;
-          const sc = _STATUS_CORES[st];
-          const sRow = wsCD.addRow([sc.label, cnt + ' SKU(s)', '', '', '', '', '']);
-          sRow.getCell(1).fill = { type:'pattern', pattern:'solid', fgColor:{argb: sc.bg} };
-          sRow.getCell(1).font = { bold:true, size:9, name:'Calibri', color:{argb: sc.fg} };
-          sRow.getCell(2).font = { bold:true, size:9, name:'Calibri' };
-          sRow.height = 16;
-        });
-
-        // Congelar painel (linhas de título e cabeçalho)
-        wsCD.views = [{ state:'frozen', ySplit:3, activeCell:'A4' }];
-        return wsCD;
-      }
-
-      // ── Cria uma aba por CD ──
-      TODOS_CDS.forEach(cd => _criarAbaCD(cd));
-
-      // ── Aba TOTAL EMPRESA ──
-      // Lógica de status EXCLUSIVA desta aba (dias de cobertura total da CIA):
-      //   ZERADO  : estoque = 0
-      //   URGENTE : cobertura > 8 dias  → excesso preocupante, risco de vencimento
-      //   CRÍTICO : cobertura > 6 dias
-      //   ATENÇÃO : cobertura > 4 dias
-      //   NORMAL  : cobertura ≤ 4 dias  → saudável para o total empresa
-      //   SEM_GIRO: sem venda mapeada
-      function _statusTotalCIA(qtd, vdTotal) {
-        if (qtd === 0)                 return { bg:'FF212121', fg:'FFFFFFFF', label:'⛔ ZERADO'   };
-        if (!vdTotal || vdTotal <= 0)  return { bg:'FF757575', fg:'FFFFFFFF', label:'⚪ SEM GIRO' };
-        const cob = qtd / vdTotal;
-        if (cob >= 8) return { bg:'FFB71C1C', fg:'FFFFFFFF', label:'🔴 URGENTE'  };
-        if (cob >= 6) return { bg:'FFE53935', fg:'FFFFFFFF', label:'🟠 CRÍTICO'  };
-        if (cob >= 4) return { bg:'FFF9A825', fg:'FF212121', label:'🟡 ATENÇÃO'  };
-        return                { bg:'FF2E7D32', fg:'FFFFFFFF', label:'🟢 NORMAL'   };
-      }
-
-      const wsTotal = wb.addWorksheet('TOTAL EMPRESA');
-
-      // 5 colunas: COD | PRODUTO | QTDE TOTAL | COBERTURA | STATUS
-      wsTotal.columns = [
-        { key:'cod',  width:12 },
-        { key:'prod', width:52 },
-        { key:'qtd',  width:18 },
-        { key:'vd',   width:16 },
-        { key:'cob',  width:20 },
-        { key:'st',   width:20 },
-      ];
-
-      // Linha 1: título
-      wsTotal.mergeCells('A1:F1');
-      const tTitle = wsTotal.getCell('A1');
-      tTitle.value = `PANUTRIR — COBERTURA TOTAL EMPRESA  ·  ${_ds}`;
-      tTitle.font  = { bold:true, color:{argb:'FFFFFFFF'}, size:12, name:'Calibri' };
-      tTitle.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:'FF0D47A1'} };
-      tTitle.alignment = { horizontal:'center', vertical:'middle' };
-      wsTotal.getRow(1).height = 30;
-
-      // Linha 2: legenda de status
-      wsTotal.mergeCells('A2:F2');
-      const tLeg = wsTotal.getCell('A2');
-      tLeg.value = '🟢 NORMAL < 4 dias  │  🟡 ATENÇÃO ≥ 4 dias  │  🟠 CRÍTICO ≥ 6 dias  │  🔴 URGENTE ≥ 8 dias  │  ⛔ ZERADO = sem estoque';
-      tLeg.font  = { italic:true, color:{argb:'FF424242'}, size:8.5, name:'Calibri' };
-      tLeg.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:'FFECEFF1'} };
-      tLeg.alignment = { horizontal:'center', vertical:'middle' };
-      wsTotal.getRow(2).height = 18;
-
-      // Linha 3: cabeçalhos
-      const hdrT = wsTotal.getRow(3);
-      [
-        {v:'CÓD.',            bg:'FF0D47A1'},
-        {v:'PRODUTO',         bg:'FF0D47A1'},
-        {v:'QTDE TOTAL (un)', bg:'FF1565C0'},
-        {v:'VENDA/DIA (un)',  bg:'FF1565C0'},
-        {v:'COBERTURA (dias)',bg:'FF1565C0'},
-        {v:'STATUS',          bg:'FF0D47A1'},
-      ].forEach(({v, bg}, i) => {
-        const c = hdrT.getCell(i+1);
-        c.value = v;
-        c.fill  = { type:'pattern', pattern:'solid', fgColor:{argb: bg} };
-        c.font  = { bold:true, color:{argb:'FFFFFFFF'}, size:10, name:'Calibri' };
-        c.alignment = { horizontal:'center', vertical:'middle', wrapText:true };
-        c.border = { bottom:{style:'medium',color:{argb:'FFFFFFFF'}}, right:{style:'thin',color:{argb:'FFFFFFFF'}} };
-      });
-      hdrT.height = 36;
-
-      // Linhas de dados — uma por SKU
-      // Sort TOTAL EMPRESA by coverage descending (most urgent first)
-      const skusTotalSorted = [...skus].sort((a, b) => {
-        const qtdA = TODOS_CDS.reduce((s, cd) => s + _qtdSkuEmFonte(cd.fonte, a.cod), 0);
-        const vdA  = vendaDiariasCIA[a.cod] || 0;
-        const cobA = vdA > 0 ? qtdA / vdA : -1;
-        const qtdB = TODOS_CDS.reduce((s, cd) => s + _qtdSkuEmFonte(cd.fonte, b.cod), 0);
-        const vdB  = vendaDiariasCIA[b.cod] || 0;
-        const cobB = vdB > 0 ? qtdB / vdB : -1;
-        return cobB - cobA;
-      });
-
-      skusTotalSorted.forEach((sku, idx) => {
-        const zebraArgb = idx % 2 === 0 ? 'FFFAFAFA' : 'FFFFFFFF';
-
-        const totalQtd = TODOS_CDS.reduce((s, cd) => s + _qtdSkuEmFonte(cd.fonte, sku.cod), 0);
-        const totalVD  = vendaDiariasCIA[sku.cod] || 0;
-
-        const cobTot = totalVD > 0 ? +(totalQtd / totalVD).toFixed(1) : null;
-        const sc = _statusTotalCIA(totalQtd, totalVD);
-
-        const dataRow = wsTotal.addRow([
-          getCodigoExcelValue(sku.cod),
-          sku.produto,
-          totalQtd,
-          totalVD > 0 ? +totalVD.toFixed(1) : '—',
-          cobTot !== null ? cobTot : '—',
-          sc.label,
-        ]);
-        dataRow.height = 20;
-
-        dataRow.eachCell((cell, col) => {
-          cell.fill      = { type:'pattern', pattern:'solid', fgColor:{argb: zebraArgb} };
-          cell.font      = { size:10, name:'Calibri', bold: col === 1 };
-          cell.alignment = { horizontal: col === 2 ? 'left' : 'center', vertical:'middle' };
-          cell.border    = { bottom:{style:'thin',color:{argb:'FFEEEEEE'}}, right:{style:'thin',color:{argb:'FFEEEEEE'}} };
-        });
-
-        // Cor da cobertura: escala gradiente
-        const cobCell = dataRow.getCell(5);
-        if (cobTot !== null) {
-          cobCell.font = { size:10, name:'Calibri', bold: cobTot >= 4,
-            color:{argb: cobTot >= 8 ? 'FFB71C1C' : cobTot >= 6 ? 'FFE53935' : cobTot >= 4 ? 'FFF57F00' : 'FF2E7D32'} };
-        }
-
-        // Célula STATUS com cor cheia
-        const stCell = dataRow.getCell(6);
-        stCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb: sc.bg} };
-        stCell.font = { bold:true, size:10, name:'Calibri', color:{argb: sc.fg} };
-
-        // Produto zerado: atenua texto
-        if (totalQtd === 0) {
-          dataRow.getCell(2).font = { size:10, name:'Calibri', color:{argb:'FFBDBDBD'}, italic:true };
-          dataRow.getCell(3).font = { size:10, name:'Calibri', color:{argb:'FFBDBDBD'} };
-        }
-      });
-
-      // Linha de totais finais
-      const totEstEmp = skus.reduce((s,sk) => s + TODOS_CDS.reduce((ss,cd) => ss + _qtdSkuEmFonte(cd.fonte, sk.cod), 0), 0);
-      const totVDEmp  = skus.reduce((s,sk) => s + (vendaDiariasCIA[sk.cod] || 0), 0);
-      const cobEmp    = totVDEmp > 0 ? +(totEstEmp / totVDEmp).toFixed(1) : '—';
-      const scEmp     = _statusTotalCIA(totEstEmp, totVDEmp);
-
-      const totRowT = wsTotal.addRow(['', 'TOTAL GERAL', totEstEmp, totVDEmp > 0 ? +totVDEmp.toFixed(1) : '—', cobEmp, scEmp.label]);
-      totRowT.height = 26;
-      [1,2,3,4,5].forEach(col => {
-        const c = totRowT.getCell(col);
-        c.font  = { bold:true, size:10, name:'Calibri', color:{argb:'FFFFFFFF'} };
-        c.fill  = { type:'pattern', pattern:'solid', fgColor:{argb:'FF0D47A1'} };
-        c.alignment = { horizontal: col === 2 ? 'left' : 'center', vertical:'middle' };
-      });
-      const totStCell = totRowT.getCell(6);
-      totStCell.value = scEmp.label;
-      totStCell.font  = { bold:true, size:10, name:'Calibri', color:{argb: scEmp.fg} };
-      totStCell.fill  = { type:'pattern', pattern:'solid', fgColor:{argb: scEmp.bg} };
-      totStCell.alignment = { horizontal:'center', vertical:'middle' };
-
-      // Congelar linha de cabeçalho
-      wsTotal.views = [{ state:'frozen', ySplit:3, activeCell:'A4' }];
-
-      const buf = await wb.xlsx.writeBuffer();
-      saveAs(new Blob([buf]), `Cobertura_Unificada_Panutrir_${_dsFile}.xlsx`);
-    }
-
-    // Helper: retorna família do SKU (baseado em vendasDiariasPorSKUporCD que tem a família da planilha)
-    function _getFamilia(cod, nome) {
-      const _familias = {"2":"Forma","5":"Forma","6":"Paezinhos de Leite","11":"Especiais","16":"Especiais","655":"Broa","669":"Bisnaguinhas","1224":"Broa","2279":"Del Grano 500g","69251":"Hot Dog","81571":"Broa","81581":"Especiais","81591":"Especiais","81661":"Forma","82051":"Hamburguer com 6","85181":"Hot Dog","85841":"Paezinhos de Leite","86151":"Forma","121581":"Hot Dog","121801":"Hamburguer com 6","121811":"Paezinhos de Leite","121821":"Especiais","121831":"Broa","121841":"Broa","121861":"Forma","121871":"Forma","135211":"Hamburguer com 6","135221":"Hot Dog","135231":"Paezinhos de Leite","135241":"Forma","141441":"Sirio","141951":"Sirio","145511":"Del Grano 500g","145521":"Del Grano 500g","162272":"Bisnaguinhas","162275":"Hamburguer com 4","162276":"Forma","162358":"Forma","162396":"Del Grano 500g","162767":"Forma","162775":"Bisnaguinhas","162783":"Del Grano 500g","162784":"Del Grano 500g","162800":"Forma","162801":"Forma","162802":"Hamburguer com 6","162920":"Hamburguer com 4","162921":"Hamburguer com 4","162922":"Hamburguer com 4","162923":"Hamburguer com 4"};
-      return _familias[String(cod)] || '—';
-    }
-
-    // ══════════════════════════════════════════════════════════════════
-    // COBERTURA UNIFICADA — PDF POR CD (LANDSCAPE)
-    // Separado por CD, cada um com cor própria de cabeçalho.
-    // Dentro de cada CD, SKUs ordenados pelo mais crítico (menor cobertura primeiro).
-    // ══════════════════════════════════════════════════════════════════
-    function exportarCoberturaUnificadaPDF() {
-      const dbBase = window.estoqueGlobal || window.db || [];
-      if (dbBase.length === 0) {
-        alert('Importe a base de estoque (CD MATRIZ) antes de gerar o PDF.');
-        return;
-      }
-      if (!window.jspdf || !window.jspdf.jsPDF) { alert('jsPDF não carregado.'); return; }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const pgW = doc.internal.pageSize.getWidth(); // 297mm
-      const pgH = doc.internal.pageSize.getHeight(); // 210mm
-      const hoje = new Date().toLocaleDateString('pt-BR');
-      const MARGIN = 12;
-      const COL_W = pgW - MARGIN * 2;
-
-      // ── Paleta de cores por CD ──
-      const CD_CORES = {
-        '1':  { r:26,  g:55,  b:112 },  // CD MATRIZ   — azul escuro
-        '3':  { r:1,   g:87,  b:155 },  // BAURU        — azul médio
-        '4':  { r:2,   g:119, b:189 },  // CURITIBA     — azul claro
-        '5':  { r:0,   g:131, b:143 },  // LONDRINA     — teal
-        '8':  { r:46,  g:125, b:50  },  // RANCHARIA    — verde
-        '6':  { r:40,  g:53,  b:147 },  // SJRP         — índigo
-        '12': { r:106, g:27,  b:154 },  // BARUERI      — roxo
-      };
-
-      // Função hex de cor
-      function hexCor(cod) {
-        const c = CD_CORES[cod] || { r:60, g:60, b:60 };
-        return c;
-      }
-
-      // ── Fontes de dados: CD MATRIZ + filiais ──
-      const LOCAIS = [
-        { cod: '1',  nome: 'CD MATRIZ',  fonte: dbBase },
-        ...FILIAIS_CONFIG.map(f => ({ cod: f.cod, nome: f.nome, fonte: window.filiaisDB[f.cod] || [] }))
-      ];
-
-      // ── Obtém todos os SKUs ──
-      const todosSkus = _getAllSkusCombinados();
-
-      // ── Função: criticidade de um SKU em um CD ──
-      // Retorna menor cobertura (dias) dentre os lotes; null se sem estoque
-      function _criticidade(fonte, codSku, vd) {
-        const lotes = _lotesSkuEmFonte(fonte, codSku);
-        if (lotes.length === 0) return null;
-        if (vd <= 0) {
-          // Sem venda: usa menor diff de validade como critério
-          let minDiff = Infinity;
-          lotes.forEach(l => { const d = _diffFromDtStr(l.dt); if (d !== null && d < minDiff) minDiff = d; });
-          return minDiff === Infinity ? null : minDiff;
-        }
-        // Com venda: cobertura total do CD = soma qtd / vd
-        const totalQtd = lotes.reduce((s,l) => s + l.qtd, 0);
-        return +(totalQtd / vd).toFixed(1);
-      }
-
-      // ── Cabeçalho de capa (1ª página) ──
-      doc.setFillColor(26, 55, 112);
-      doc.rect(0, 0, pgW, 32, 'F');
-      // Degradê decorativo
-      doc.setFillColor(216, 20, 25);
-      doc.rect(pgW - 60, 0, 60, 32, 'F');
-      doc.setFillColor(26, 55, 112);
-      doc.rect(pgW - 80, 0, 30, 32, 'F');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(16);
-      doc.setTextColor(255, 255, 255);
-      doc.text('PANUTRIR — COBERTURA DE ESTOQUE UNIFICADA', MARGIN, 14);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor(190, 220, 255);
-      doc.text('Relatório por CD  ·  Pães mais críticos primeiro  ·  Gerado em: ' + hoje, MARGIN, 21);
-      doc.setFontSize(7.5);
-      doc.setTextColor(160, 200, 245);
-      doc.text('CDs: 1-CD MATRIZ  |  3-BAURU  |  4-CURITIBA  |  5-LONDRINA  |  8-RANCHARIA  |  6-SJRP  |  12-BARUERI', MARGIN, 28);
-
-      // Índice rápido de CDs
-      let ixX = pgW - 14;
-      [...LOCAIS].reverse().forEach(local => {
-        const c = hexCor(local.cod);
-        const temDados = local.fonte && local.fonte.length > 0;
-        if (!temDados) return;
-        doc.setFillColor(c.r, c.g, c.b);
-        const label = local.cod + '·' + local.nome.split(' ')[0];
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(6.5);
-        const lw = doc.getTextWidth(label) + 6;
-        doc.roundedRect(ixX - lw, 5, lw, 8, 1.5, 1.5, 'F');
-        doc.setTextColor(255,255,255);
-        doc.text(label, ixX - lw/2, 10.5, { align:'center' });
-        ixX -= lw + 3;
-      });
-
-      let y = 40;
-      let paginaAtual = 1;
-      let corCDAtual = { r:26, g:55, b:112 };
-
-      function novaPagina(local) {
-        doc.addPage();
-        paginaAtual++;
-        const c = local ? hexCor(local.cod) : { r:26, g:55, b:112 };
-        doc.setFillColor(c.r, c.g, c.b);
-        doc.rect(0, 0, pgW, 11, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7);
-        doc.setTextColor(255, 255, 255);
-        const nomeCD = local ? (local.cod + ' · ' + local.nome) : 'PANUTRIR';
-        doc.text('PANUTRIR — COBERTURA UNIFICADA  ·  ' + nomeCD + '  ·  ' + hoje, MARGIN, 7.5);
-        y = 18;
-      }
-
-      // ══════════════════════════════════════════════
-      // ITERA POR CD
-      // ══════════════════════════════════════════════
-      LOCAIS.forEach((local, localIdx) => {
-        const temDados = local.fonte && local.fonte.length > 0;
-        if (!temDados) return; // pula CDs sem dados importados
-
-        corCDAtual = hexCor(local.cod);
-        const c = corCDAtual;
-
-        // ── SKUs com estoque neste CD, ordenados por criticidade ──
-        const skusDoCD = todosSkus
-          .map(sku => {
-            const lotes = _lotesSkuEmFonte(local.fonte, sku.cod);
-            const vd = (vendasDiariasPorSKUporCD[sku.cod] || {})[local.cod] || 0;
-            const crit = _criticidade(local.fonte, sku.cod, vd);
-            return { ...sku, lotes, vd, crit };
-          })
-          .filter(sku => sku.lotes.length > 0)
-          .sort((a, b) => {
-            // nulos (sem estoque) vão pro fim; menor cobertura = mais crítico = primeiro
-            if (a.crit === null && b.crit === null) return 0;
-            if (a.crit === null) return 1;
-            if (b.crit === null) return -1;
-            return a.crit - b.crit;
-          });
-
-        if (skusDoCD.length === 0) return;
-
-        // ── Cabeçalho de seção do CD (sempre nova página, exceto se for o primeiro e y=40) ──
-        if (localIdx > 0 || y > 50) {
-          doc.addPage();
-          paginaAtual++;
-          y = 0;
-        }
-
-        // Faixa colorida do CD
-        doc.setFillColor(c.r, c.g, c.b);
-        doc.rect(0, y, pgW, 22, 'F');
-        // Detalhes decorativos
-        doc.setFillColor(Math.min(c.r+30,255), Math.min(c.g+30,255), Math.min(c.b+30,255));
-        doc.rect(0, y + 18, pgW, 2, 'F');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(15);
-        doc.setTextColor(255, 255, 255);
-        doc.text(local.cod + ' · ' + local.nome, MARGIN, y + 12);
-
-        // Badge de criticidade
-        const totalSkusCrit = skusDoCD.filter(s => s.crit !== null && s.crit <= 7).length;
-        if (totalSkusCrit > 0) {
-          doc.setFillColor(216, 20, 25);
-          doc.roundedRect(pgW - 60, y + 4, 48, 13, 2, 2, 'F');
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(7.5);
-          doc.setTextColor(255, 255, 255);
-          doc.text('⚠ ' + totalSkusCrit + ' SKU(s) CRÍTICOS', pgW - 36, y + 12, { align:'center' });
-        }
-
-        // Subtítulo
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(220, 235, 255);
-        doc.text(skusDoCD.length + ' SKUs com estoque  ·  Ordenado: mais crítico primeiro', MARGIN, y + 19);
-
-        y += 26;
-
-        // ── SKUs deste CD ──
-        skusDoCD.forEach((sku, skuIdx) => {
-          // Verifica espaço — 28mm mínimo por SKU
-          if (y > pgH - 28) novaPagina(local);
-
-          // Calcula alertas de criticidade
-          const cobCD = sku.crit;
-          let nivelCor = { r:26, g:55, b:112 }; // padrão azul
-          let nivelLabel = '';
-          if (cobCD !== null) {
-            if (cobCD <= 3)       { nivelCor = { r:183, g:28, b:28  }; nivelLabel = '🔴 CRÍTICO'; }
-            else if (cobCD <= 5)  { nivelCor = { r:230, g:81, b:0   }; nivelLabel = '🟠 URGENTE'; }
-            else if (cobCD <= 7)  { nivelCor = { r:249, g:168, b:37 }; nivelLabel = '🟡 ATENÇÃO'; }
-            else                  { nivelCor = { r:27,  g:94, b:32  }; nivelLabel = '🟢 OK'; }
-          }
-
-          // Barra de título do SKU
-          const skuBgR = skuIdx % 2 === 0 ? 248 : 242;
-          doc.setFillColor(skuBgR, skuBgR + 2, skuBgR + 8);
-          doc.rect(MARGIN, y, COL_W, 9, 'F');
-
-          // Tarja lateral colorida indicando criticidade
-          doc.setFillColor(nivelCor.r, nivelCor.g, nivelCor.b);
-          doc.rect(MARGIN, y, 3, 9, 'F');
-
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(8.5);
-          doc.setTextColor(20, 20, 60);
-          const nomeSkuTrunc = doc.splitTextToSize('[' + sku.cod + ']  ' + sku.produto, COL_W - 90)[0];
-          doc.text(nomeSkuTrunc, MARGIN + 6, y + 6);
-
-          // Info direita: VD + cobertura
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(7);
-          doc.setTextColor(nivelCor.r, nivelCor.g, nivelCor.b);
-          const cobStr = cobCD !== null
-            ? 'Cob: ' + cobCD + ' dias  ' + nivelLabel
-            : 'VD não mapeada  ' + nivelLabel;
-          doc.text(cobStr, pgW - MARGIN, y + 6, { align:'right' });
-
-          y += 10;
-
-          // Lotes deste SKU
-          sku.lotes.forEach((lote, loteIdx) => {
-            if (y > pgH - 12) novaPagina(local);
-
-            const diff = _diffFromDtStr(lote.dt);
-            let veStr = '';
-            if (diff !== null && sku.vd > 0) {
-              const cobLote = +(lote.qtd / sku.vd).toFixed(1);
-              const ve = +(diff - cobLote).toFixed(1);
-              veStr = ve + ' dias val. efetiva';
-            } else if (diff !== null) {
-              veStr = diff + ' dias p/ vencto';
-            }
-
-            // Cor de urgência do lote baseada no diff
-            let loteFg = [60, 60, 60];
-            let loteBg = null;
-            if (diff !== null) {
-              if (diff <= 0)        { loteBg = [255, 205, 210]; loteFg = [183, 28, 28]; }
-              else if (diff <= 7)   { loteBg = [255, 224, 178]; loteFg = [230, 81, 0]; }
-              else if (diff <= 15)  { loteBg = [255, 249, 196]; loteFg = [130, 100, 0]; }
-            }
-
-            if (loteBg) {
-              doc.setFillColor(loteBg[0], loteBg[1], loteBg[2]);
-              doc.rect(MARGIN + 4, y - 3.5, COL_W - 4, 6.5, 'F');
-            }
-
-            // Bullet
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7);
-            doc.setTextColor(nivelCor.r, nivelCor.g, nivelCor.b);
-            doc.text('▸', MARGIN + 6, y);
-
-            // Qtd + validade
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(7.5);
-            doc.setTextColor(loteFg[0], loteFg[1], loteFg[2]);
-            doc.text(lote.qtd.toLocaleString('pt-BR') + ' un', MARGIN + 11, y);
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(7);
-            doc.setTextColor(80, 80, 80);
-            doc.text('Validade: ' + lote.dt, MARGIN + 30, y);
-
-            if (veStr) {
-              doc.setFont('helvetica', 'bold');
-              doc.setFontSize(7);
-              doc.setTextColor(loteFg[0], loteFg[1], loteFg[2]);
-              doc.text('→ ' + veStr, MARGIN + 80, y);
-            }
-
-            // VD do SKU
-            if (sku.vd > 0) {
-              doc.setFont('helvetica', 'normal');
-              doc.setFontSize(6.5);
-              doc.setTextColor(130, 130, 130);
-              doc.text('VD ' + sku.vd.toLocaleString('pt-BR') + '/dia', pgW - MARGIN, y, { align:'right' });
-            }
-
-            y += 6;
-          });
-
-          // Subtotal do SKU neste CD
-          if (y > pgH - 8) novaPagina(local);
-          const totalSkuCD = sku.lotes.reduce((s, l) => s + l.qtd, 0);
-          doc.setFillColor(c.r, c.g, c.b);
-          doc.setFillColor(c.r, c.g, c.b);
-          // linha fina de resumo
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(7);
-          doc.setTextColor(c.r, c.g, c.b);
-          doc.text('Total neste CD: ' + totalSkuCD.toLocaleString('pt-BR') + ' un', MARGIN + 6, y);
-          y += 5;
-
-          // Separador leve
-          if (skuIdx < skusDoCD.length - 1) {
-            doc.setDrawColor(200, 210, 230);
-            doc.setLineWidth(0.2);
-            doc.line(MARGIN + 3, y, pgW - MARGIN - 3, y);
-            y += 4;
-          } else {
-            y += 3;
-          }
-        });
-      });
-
-      // ── Rodapé em todas as páginas ──
-      const totalPgs = doc.internal.getNumberOfPages();
-      for (let p = 1; p <= totalPgs; p++) {
-        doc.setPage(p);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(6);
-        doc.setTextColor(160, 160, 160);
-        doc.text('Panutrir  ·  Cobertura Unificada por CD  ·  ' + hoje, pgW / 2, pgH - 4, { align:'center' });
-        doc.text('Pág. ' + p + ' / ' + totalPgs, pgW - MARGIN, pgH - 4, { align:'right' });
-        // Linha decorativa rodapé
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.3);
-        doc.line(MARGIN, pgH - 7, pgW - MARGIN, pgH - 7);
-      }
-
-      const _hoje = new Date();
-      const _ds = `${String(_hoje.getDate()).padStart(2,'0')}-${String(_hoje.getMonth()+1).padStart(2,'0')}-${_hoje.getFullYear()}`;
-      doc.save('Cobertura_Unificada_PorCD_' + _ds + '.pdf');
-    }
-
-    // ── Dropdown toggle Cobertura Unificada ──
-    function toggleCobUnifDropdown(e) {
-      e.stopPropagation();
-      const dd = document.getElementById('cobUnifDropdown');
-      const isOpen = dd.style.display === 'block';
-      // fecha todos
-      ['dcDropdown','pilhasDropdown','quebrasDropdown','fefoDropdown','dirDropdown'].forEach(id => {
-        const el = document.getElementById(id); if (el) el.style.display = 'none';
-      });
-      dd.style.display = isOpen ? 'none' : 'block';
-    }
-    function closeCobUnifDropdown() {
-      const dd = document.getElementById('cobUnifDropdown');
-      if (dd) dd.style.display = 'none';
-    }
-    document.addEventListener('click', function(e) {
-      const wrap = document.getElementById('cobUnifDropdownWrap');
-      if (wrap && !wrap.contains(e.target)) closeCobUnifDropdown();
-    });
 
     function _toggleSkuModal(cb) {
       const idx = parseInt(cb.getAttribute('data-gidx'));
